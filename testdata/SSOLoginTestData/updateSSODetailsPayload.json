@@ -1,0 +1,21 @@
+{
+  "id": 2,
+  "name": "googleDeepak",
+  "url": "https://staging.devtron.info/orchestrator/deepak",
+  "config": {
+    "id": "googleDeepak",
+    "label": "GoogleDeepak",
+    "type": "oidcDeepak",
+    "name": "GoogleDeepak",
+    "config": {
+      "issuer": "https://accounts.google.com/deepak",
+      "clientID": "767341395723-lqeu03bu78agpospctjt81t28egjc706.apps.googleusercontent.com/deepak",
+      "clientSecret": "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Deepak",
+      "redirectURI": "https://staging.devtron.info/orchestrator/api/dex/callback/deepak",
+      "hostedDomains": [
+        "devtron.ai"
+      ]
+    }
+  },
+  "active": false
+}
