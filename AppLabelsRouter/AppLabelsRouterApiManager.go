@@ -14,6 +14,7 @@ type AppMetaInfoResponseDto struct {
 	Code   int            `json:"code"`
 	Status string         `json:"status"`
 	Result AppMetaInfoDto `json:"result"`
+	Errors []Error        `json:"errors"`
 }
 
 type Label struct {
@@ -31,6 +32,11 @@ type AppMetaInfoDto struct {
 	Active      bool      `json:"active,notnull"`
 	Labels      []*Label  `json:"labels"`
 	UserId      int32     `json:"-"`
+}
+type Error struct {
+	Code            string `json:"code"`
+	InternalMessage string `json:"internalMessage"`
+	UserMessage     string `json:"userMessage"`
 }
 
 type StructAppLabelsRouter struct {
@@ -54,10 +60,10 @@ func (structAppLabelsRouter StructAppLabelsRouter) UnmarshalGivenResponseBody(re
 }
 
 type EnvironmentConfigAppLabelsRouter struct {
-	ValueAttribute string `env:"VALUE_ATTRIBUTE" envDefault:"https://staging.devtron.info"`
+	AppIdForAppLabelRouter string `env:"APP_ID_APP_LABELS_ROUTER" envDefault:"193"`
 }
 
-func GetEnvironmentConfigForHelmApp() (*EnvironmentConfigAppLabelsRouter, error) {
+func GetEnvironmentConfigForAppLabelsRouter() (*EnvironmentConfigAppLabelsRouter, error) {
 	cfg := &EnvironmentConfigAppLabelsRouter{}
 	err := env.Parse(cfg)
 	if err != nil {
@@ -66,11 +72,11 @@ func GetEnvironmentConfigForHelmApp() (*EnvironmentConfigAppLabelsRouter, error)
 	return cfg, err
 }
 
-type AppLabelRouterTestSuite struct {
+type AppLabelsSuite struct {
 	suite.Suite
 	authToken string
 }
 
-func (suite *AppLabelRouterTestSuite) SetupSuite() {
+func (suite *AppLabelsSuite) SetupSuite() {
 	suite.authToken = Base.GetAuthToken()
 }

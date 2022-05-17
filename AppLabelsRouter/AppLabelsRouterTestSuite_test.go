@@ -5,6 +5,6 @@ import (
 	"testing"
 )
 
-func TestAttributeRouterSuite(t *testing.T) {
-	suite.Run(t, new(AppLabelRouterTestSuite))
+func TestAppLabelsRouterSuite(t *testing.T) {
+	suite.Run(t, new(AppLabelsSuite))
 }
