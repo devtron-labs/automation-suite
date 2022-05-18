@@ -4,7 +4,6 @@ import (
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/caarlos0/env"
 	"github.com/stretchr/testify/suite"
 	"net/http"
@@ -17,7 +16,6 @@ type GitopsConfigRouter struct {
 
 func (suite *GitopsConfigRouter) SetupSuite() {
 	suite.authToken = Base.GetAuthToken()
-	fmt.Println(suite.authToken)
 }
 
 type FetchAllGitopsConfigResponseDto struct {
@@ -31,7 +29,7 @@ type DeleteResponseDto struct {
 	Status string `json:"status"`
 	Result string `json:"result"`
 }
-type InstallationScriptStruct struct {
+type StructGitopsConfigRouter struct {
 	createGitopsConfigResponseDto   CreateGitopsConfigResponseDto
 	fetchAllGitopsConfigResponseDto FetchAllGitopsConfigResponseDto
 	deleteResponseDto               DeleteResponseDto
@@ -62,43 +60,23 @@ type CreateGitopsConfigResponseDto struct {
 	} `json:"result"`
 }
 
-func (installationScriptStruct InstallationScriptStruct) UnmarshalGivenResponseBody(response []byte, apiName string) InstallationScriptStruct {
+func (structGitopsConfigRouter StructGitopsConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructGitopsConfigRouter {
 	switch apiName {
 	case FetchAllGitopsConfigApi:
-		json.Unmarshal(response, &installationScriptStruct.fetchAllGitopsConfigResponseDto)
+		json.Unmarshal(response, &structGitopsConfigRouter.fetchAllGitopsConfigResponseDto)
 	case CreateGitopsConfigApi:
-		json.Unmarshal(response, &installationScriptStruct.createGitopsConfigResponseDto)
+		json.Unmarshal(response, &structGitopsConfigRouter.createGitopsConfigResponseDto)
 	}
-	return installationScriptStruct
+	return structGitopsConfigRouter
 }
 
 func HitFetchAllGitopsConfigApi(authToken string) FetchAllGitopsConfigResponseDto {
 	resp, err := Base.MakeApiCall(SaveGitopsConfigApiUrl, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, FetchAllGitopsConfigApi)
 
-	installationScriptStruct := InstallationScriptStruct{}
-	installationScriptRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), FetchAllGitopsConfigApi)
-	return installationScriptRouter.fetchAllGitopsConfigResponseDto
-}
-
-func GetPayLoadForDeleteGitopsConfigAPI(id int, provider string, username string, host string, token string) []byte {
-	var deleteGitopsConfigRequestDto CreateGitopsConfigRequestDto
-	deleteGitopsConfigRequestDto.Id = id
-	deleteGitopsConfigRequestDto.Provider = provider
-	deleteGitopsConfigRequestDto.Username = username
-	deleteGitopsConfigRequestDto.Host = host
-	deleteGitopsConfigRequestDto.Token = token
-	byteValueOfStruct, _ := json.Marshal(deleteGitopsConfigRequestDto)
-	return byteValueOfStruct
-}
-
-func HitDeleteLinkApi(byteValueOfStruct []byte, authToken string) DeleteResponseDto {
-	resp, err := Base.MakeApiCall(SaveGitopsConfigApiUrl, http.MethodDelete, string(byteValueOfStruct), nil, authToken)
-	Base.HandleError(err, "DeleteLinkApi")
-
-	installationScriptStruct := InstallationScriptStruct{}
-	apiRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), "DeleteLink")
-	return apiRouter.deleteResponseDto
+	structGitopsConfigRouter := StructGitopsConfigRouter{}
+	gitopsConfigRouter := structGitopsConfigRouter.UnmarshalGivenResponseBody(resp.Body(), FetchAllGitopsConfigApi)
+	return gitopsConfigRouter.fetchAllGitopsConfigResponseDto
 }
 
 func GetGitopsConfigRequestDto(provider string, username string, host string, token string, githuborgid string) CreateGitopsConfigRequestDto {
@@ -130,9 +108,9 @@ func HitCreateGitopsConfigApi(payload []byte, provider string, username string, 
 	resp, err := Base.MakeApiCall(SaveGitopsConfigApiUrl, http.MethodPost, payloadOfApi, nil, authToken)
 	Base.HandleError(err, CreateGitopsConfigApi)
 
-	installationScriptStruct := InstallationScriptStruct{}
-	installationScriptRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), CreateGitopsConfigApi)
-	return installationScriptRouter.createGitopsConfigResponseDto
+	structGitopsConfigRouter := StructGitopsConfigRouter{}
+	gitopsConfigRouter := structGitopsConfigRouter.UnmarshalGivenResponseBody(resp.Body(), CreateGitopsConfigApi)
+	return gitopsConfigRouter.createGitopsConfigResponseDto
 }
 
 type GitopsConfig struct {

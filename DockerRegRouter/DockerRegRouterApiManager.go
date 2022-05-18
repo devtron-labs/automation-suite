@@ -4,7 +4,6 @@ import (
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/caarlos0/env"
 	"github.com/stretchr/testify/suite"
 	"net/http"
@@ -17,32 +16,34 @@ type DockerRegRouter struct {
 
 func (suite *DockerRegRouter) SetupSuite() {
 	suite.authToken = Base.GetAuthToken()
-	fmt.Println(suite.authToken)
 }
 
-type InstallationScriptStruct struct {
+type StructDockerRegRouter struct {
 	saveDockerRegistryResponseDto SaveDockerRegistryResponseDto
 	deleteDockerRegistryResponse  DeleteDockerRegistryResponse
 }
 
-func (installationScriptStruct InstallationScriptStruct) UnmarshalGivenResponseBody(response []byte, apiName string) InstallationScriptStruct {
+func (structDockerRegRouter StructDockerRegRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructDockerRegRouter {
 	switch apiName {
 	case DeleteDockerRegistry:
-		json.Unmarshal(response, &installationScriptStruct.deleteDockerRegistryResponse)
+		json.Unmarshal(response, &structDockerRegRouter.deleteDockerRegistryResponse)
 	case SaveDockerRegistryApi:
-		json.Unmarshal(response, &installationScriptStruct.saveDockerRegistryResponseDto)
+		json.Unmarshal(response, &structDockerRegRouter.saveDockerRegistryResponseDto)
 	}
-	return installationScriptStruct
+	return structDockerRegRouter
 }
 
 type SaveDockerRegistryRequestDto struct {
 	Id           string `json:"id"`
 	PluginId     string `json:"pluginId"`
-	RegistryType string `json:"registryType"`
-	IsDefault    bool   `json:"isDefault"`
 	RegistryUrl  string `json:"registryUrl"`
+	RegistryType string `json:"registryType"`
 	Username     string `json:"username"`
 	Password     string `json:"password"`
+	IsDefault    bool   `json:"isDefault"`
+	Connection   string `json:"connection"`
+	Cert         string `json:"cert"`
+	Active       bool   `json:"active"`
 }
 
 type DeleteDockerRegistryResponse struct {
@@ -51,27 +52,12 @@ type DeleteDockerRegistryResponse struct {
 	Result string `json:"result"`
 }
 type SaveDockerRegistryResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result struct {
-		Id           string `json:"id"`
-		PluginId     string `json:"pluginId"`
-		RegistryUrl  string `json:"registryUrl"`
-		RegistryType string `json:"registryType"`
-		Username     string `json:"username"`
-		Password     string `json:"password"`
-		IsDefault    bool   `json:"isDefault"`
-		Connection   string `json:"connection"`
-		Cert         string `json:"cert"`
-		Active       bool   `json:"active"`
-	} `json:"result"`
-
-	Errors []struct {
-		Code            string `json:"code"`
-		InternalMessage string `json:"internalMessage"`
-		UserMessage     string `json:"userMessage"`
-	} `json:"errors"`
+	Code   int                          `json:"code"`
+	Status string                       `json:"status"`
+	Result SaveDockerRegistryRequestDto `json:"result"`
+	Errors []Base.Errors                `json:"errors"`
 }
+
 type DockerRegistry struct {
 	Id           string `env:"ID" envDefault:""`
 	PluginId     string `env:"PLUGINID" envDefault:""`
@@ -98,7 +84,7 @@ func GetDockerRegistryRequestDto(isRepeat bool, id string, pluginId string, regT
 		saveDockerRegistryRequestDto.PluginId = dockerRegistry.PluginId
 		saveDockerRegistryRequestDto.RegistryType = dockerRegistry.RegistryType
 		saveDockerRegistryRequestDto.RegistryUrl = dockerRegistry.RegistryUrl
-		saveDockerRegistryRequestDto.IsDefault = false
+		saveDockerRegistryRequestDto.IsDefault = isDefault
 		saveDockerRegistryRequestDto.Username = dockerRegistry.Username
 		saveDockerRegistryRequestDto.Password = dockerRegistry.Password
 		return saveDockerRegistryRequestDto
@@ -127,7 +113,7 @@ func HitSaveDockerRegistryApi(isRepeat bool, payload []byte, id string, pluginId
 			saveDockerRegistryRequestDto.PluginId = dockerRegistry.PluginId
 			saveDockerRegistryRequestDto.RegistryType = dockerRegistry.RegistryType
 			saveDockerRegistryRequestDto.RegistryUrl = dockerRegistry.RegistryUrl
-			saveDockerRegistryRequestDto.IsDefault = false
+			saveDockerRegistryRequestDto.IsDefault = isDefault
 			saveDockerRegistryRequestDto.Username = dockerRegistry.Username
 			saveDockerRegistryRequestDto.Password = dockerRegistry.Password
 			byteValueOfStruct, _ := json.Marshal(saveDockerRegistryRequestDto)
@@ -149,9 +135,9 @@ func HitSaveDockerRegistryApi(isRepeat bool, payload []byte, id string, pluginId
 	resp, err := Base.MakeApiCall(SaveDockerRegistryApiUrl, http.MethodPost, payloadOfApi, nil, authToken)
 	Base.HandleError(err, SaveDockerRegistryApi)
 
-	installationScriptStruct := InstallationScriptStruct{}
-	installationScriptRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), SaveDockerRegistryApi)
-	return installationScriptRouter.saveDockerRegistryResponseDto
+	structDockerRegRouter := StructDockerRegRouter{}
+	dockerRegRouter := structDockerRegRouter.UnmarshalGivenResponseBody(resp.Body(), SaveDockerRegistryApi)
+	return dockerRegRouter.saveDockerRegistryResponseDto
 }
 func GetPayLoadForDeleteDockerRegistryAPI(id string, pluginId string, regUrl string, regType string, username string, password string, isDefault bool) []byte {
 	var saveDockerRegistryRequestDto SaveDockerRegistryRequestDto
@@ -170,7 +156,7 @@ func HitDeleteDockerRegistryApi(byteValueOfStruct []byte, authToken string) Dele
 	resp, err := Base.MakeApiCall(SaveDockerRegistryApiUrl, http.MethodDelete, string(byteValueOfStruct), nil, authToken)
 	Base.HandleError(err, DeleteDockerRegistry)
 
-	installationScriptStruct := InstallationScriptStruct{}
-	apiRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), DeleteDockerRegistry)
-	return apiRouter.deleteDockerRegistryResponse
+	structDockerRegRouter := StructDockerRegRouter{}
+	dockerRegRouter := structDockerRegRouter.UnmarshalGivenResponseBody(resp.Body(), DeleteDockerRegistry)
+	return dockerRegRouter.deleteDockerRegistryResponse
 }

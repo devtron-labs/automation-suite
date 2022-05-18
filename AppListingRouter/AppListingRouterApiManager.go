@@ -3,7 +3,6 @@ package AppListingRouter
 import (
 	Base "automation-suite/testUtils"
 	"encoding/json"
-	"fmt"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 )
@@ -15,10 +14,9 @@ type AppListingRouter struct {
 
 func (suite *AppListingRouter) SetupSuite() {
 	suite.authToken = Base.GetAuthToken()
-	fmt.Println(suite.authToken)
 }
 
-type InstallationScriptStruct struct {
+type StructAppListingRouter struct {
 	fetchAllStageStatusResponseDto FetchAllStageStatusResponseDto
 }
 type FetchAllStageStatusResponseDto struct {
@@ -30,21 +28,25 @@ type FetchAllStageStatusResponseDto struct {
 		Status    bool   `json:"status"`
 		Required  bool   `json:"required"`
 	} `json:"result"`
+	Errors []Base.Errors `json:"errors"`
 }
 
-func (installationScriptStruct InstallationScriptStruct) UnmarshalGivenResponseBody(response []byte, apiName string) InstallationScriptStruct {
+func (structAppListingRouter StructAppListingRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructAppListingRouter {
 	switch apiName {
 	case FetchAllStageStatusApi:
-		json.Unmarshal(response, &installationScriptStruct.fetchAllStageStatusResponseDto)
+		json.Unmarshal(response, &structAppListingRouter.fetchAllStageStatusResponseDto)
 	}
-	return installationScriptStruct
+	return structAppListingRouter
 }
 
-func FetchAllStageStatus(id map[string]string, authToken string) FetchAllStageStatusResponseDto {
-	resp, err := Base.MakeApiCall(GetStageStatusApiUrl, http.MethodGet, "", id, authToken)
+func FetchAllStageStatus(id string, authToken string) FetchAllStageStatusResponseDto {
+	AppId := map[string]string{
+		"id": id,
+	}
+	resp, err := Base.MakeApiCall(GetStageStatusApiUrl, http.MethodGet, "", AppId, authToken)
 	Base.HandleError(err, FetchAllStageStatusApi)
 
-	installationScriptStruct := InstallationScriptStruct{}
-	apiRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), "FetchAllStageStatus")
+	structAppListingRouter := StructAppListingRouter{}
+	apiRouter := structAppListingRouter.UnmarshalGivenResponseBody(resp.Body(), FetchAllStageStatusApi)
 	return apiRouter.fetchAllStageStatusResponseDto
 }
