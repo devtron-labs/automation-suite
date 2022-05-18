@@ -8,6 +8,7 @@ import (
 	"github.com/caarlos0/env"
 	"github.com/stretchr/testify/suite"
 	"net/http"
+	"strconv"
 )
 
 type FetchAllGitopsConfigResponseDto struct {
@@ -33,6 +34,8 @@ type InstallationScriptStruct struct {
 	fetchAllAppWorkflowResponseDto  FetchAllAppWorkflowResponseDto
 	fetchAppGetResponseDto          FetchAppGetResponseDto
 	createAppMaterialResponseDto    CreateAppMaterialResponseDto
+	saveDockerRegistryResponseDto   SaveDockerRegistryResponseDto
+	deleteDockerRegistryResponse    DeleteDockerRegistryResponse
 }
 type CreateGitopsConfigRequestDto struct {
 	Id                   int    `json:"id"`
@@ -56,7 +59,10 @@ type CreateGitopsConfigResponseDto struct {
 
 type Result struct {
 	SuccessfulStages []string "successfulStages"
-	DeleteRepoFailed bool     `json:"deleteRepoFailed"`
+	StageErrorMap    struct {
+		ErrorInConnectingWithGITHUB string `json:"error in connecting with GITHUB"`
+	} `json:"stageErrorMap"`
+	DeleteRepoFailed bool `json:"deleteRepoFailed"`
 }
 
 type CreateTeamRequestDto struct {
@@ -65,9 +71,17 @@ type CreateTeamRequestDto struct {
 	Active bool   `json:"active"`
 }
 type CreateTeamResponseDto struct {
-	Code   int                  `json:"code"`
-	Status string               `json:"status"`
-	Result CreateTeamRequestDto `json:"result"`
+	Code   int    `json:"code"`
+	Status string `json:"status"`
+	Errors []struct {
+		InternalMessage string `json:"internalMessage"`
+		UserMessage     string `json:"userMessage"`
+	} `json:"errors"`
+	Result struct {
+		Id     int    `json:"id"`
+		Name   string `json:"name"`
+		Active bool   `json:"active"`
+	} `json:"result"`
 }
 type CreateAppRequestDto struct {
 	Id         int    `json:"id"`
@@ -193,6 +207,16 @@ func (suite *regressionTestSuite) SetupSuite() {
 func (installationScriptStruct InstallationScriptStruct) UnmarshalGivenResponseBody(response []byte, apiName string) InstallationScriptStruct {
 	switch apiName {
 
+	case DeleteAppApi:
+		json.Unmarshal(response, &installationScriptStruct.deleteResponseDto)
+	case FetchAllAutocompleteApi:
+		json.Unmarshal(response, &installationScriptStruct.getAutocompleteResponseDto)
+	case DeleteDockerRegistry:
+		json.Unmarshal(response, &installationScriptStruct.deleteDockerRegistryResponse)
+	case SaveDockerRegistryApi:
+		json.Unmarshal(response, &installationScriptStruct.saveDockerRegistryResponseDto)
+	case FetchAllGitopsConfigApi:
+		json.Unmarshal(response, &installationScriptStruct.fetchAllGitopsConfigResponseDto)
 	case CreateAppApi:
 		json.Unmarshal(response, &installationScriptStruct.createAppResponseDto)
 	case CreateGitopsConfigApi:
@@ -203,12 +227,20 @@ func (installationScriptStruct InstallationScriptStruct) UnmarshalGivenResponseB
 		json.Unmarshal(response, &installationScriptStruct.createAppMaterialResponseDto)
 	case FetchAllStageStatusApi:
 		json.Unmarshal(response, &installationScriptStruct.fetchAllStageStatusResponseDto)
+	case DeleteAppMaterialApi:
+		json.Unmarshal(response, &installationScriptStruct.deleteResponseDto)
+
+	case FetchAllAppWorkflowApi:
+		json.Unmarshal(response, &installationScriptStruct.fetchAllAppWorkflowResponseDto)
+	case FetchOtherEnvApi:
+		json.Unmarshal(response, &installationScriptStruct.fetchOtherEnvResponseDto)
 	}
+
 	return installationScriptStruct
 }
 
-func HitFetchAllGitopsConfigApi() FetchAllGitopsConfigResponseDto {
-	resp, err := Base.MakeApiCall(SaveGitopsConfigApiUrl, http.MethodGet, "", nil, "")
+func HitFetchAllGitopsConfigApi(authToken string) FetchAllGitopsConfigResponseDto {
+	resp, err := Base.MakeApiCall(SaveGitopsConfigApiUrl, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, FetchAllGitopsConfigApi)
 
 	installationScriptStruct := InstallationScriptStruct{}
@@ -225,15 +257,6 @@ func GetPayLoadForDeleteGitopsConfigAPI(id int, provider string, username string
 	deleteGitopsConfigRequestDto.Token = token
 	byteValueOfStruct, _ := json.Marshal(deleteGitopsConfigRequestDto)
 	return byteValueOfStruct
-}
-
-func HitDeleteLinkApi(byteValueOfStruct []byte, authToken string) DeleteResponseDto {
-	resp, err := Base.MakeApiCall(SaveGitopsConfigApiUrl, http.MethodDelete, string(byteValueOfStruct), nil, authToken)
-	Base.HandleError(err, "DeleteLinkApi")
-
-	installationScriptStruct := InstallationScriptStruct{}
-	apiRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), "DeleteLink")
-	return apiRouter.deleteResponseDto
 }
 
 func GetGitopsConfigRequestDto(provider string, username string, host string, token string, githuborgid string) CreateGitopsConfigRequestDto {
@@ -263,18 +286,31 @@ func HitCreateGitopsConfigApi(payload []byte, provider string, username string, 
 	}
 
 	resp, err := Base.MakeApiCall(SaveGitopsConfigApiUrl, http.MethodPost, payloadOfApi, nil, authToken)
-	Base.HandleError(err, "CreateGitopsConfigApi")
+	Base.HandleError(err, CreateGitopsConfigApi)
 
 	installationScriptStruct := InstallationScriptStruct{}
-	installationScriptRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), "CreateGitopsConfig")
+	installationScriptRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), CreateGitopsConfigApi)
 	return installationScriptRouter.createGitopsConfigResponseDto
 }
 
-func GetTeamRequestDto(name string, active bool) CreateTeamRequestDto {
-	var createTeamRequestDto CreateTeamRequestDto
-	createTeamRequestDto.Name = name
-	createTeamRequestDto.Active = active
-	return createTeamRequestDto
+type SaveTeamRequestDto struct {
+	Id     int    `json:"id"`
+	Name   string `json:"name"`
+	Active bool   `json:"active"`
+}
+
+type DeleteTeamResponseDto struct {
+	Code   int    `json:"code"`
+	Status string `json:"status"`
+	Result string `json:"result"`
+}
+
+func GetSaveTeamRequestDto() SaveTeamRequestDto {
+	var saveTeamRequestDto SaveTeamRequestDto
+	teamName := Base.GetRandomStringOfGivenLength(10)
+	saveTeamRequestDto.Name = teamName
+	saveTeamRequestDto.Active = true
+	return saveTeamRequestDto
 }
 func HitCreateTeamApi(payload []byte, name string, active bool, authToken string) CreateTeamResponseDto {
 	var payloadOfApi string
@@ -289,27 +325,19 @@ func HitCreateTeamApi(payload []byte, name string, active bool, authToken string
 	}
 
 	resp, err := Base.MakeApiCall(SaveTeamApiUrl, http.MethodPost, payloadOfApi, nil, authToken)
-	Base.HandleError(err, "CreateTeamApi")
+	Base.HandleError(err, CreateTeamApi)
 
 	installationScriptStruct := InstallationScriptStruct{}
-	installationScriptRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), "CreateTeam")
+	installationScriptRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), CreateTeamApi)
 	return installationScriptRouter.createTeamResponseDto
 }
-func GetPayLoadForDeleteTeamAPI(name string, active bool) []byte {
+func GetPayLoadForDeleteTeamAPI(id int, name string, active bool) []byte {
 	var createTeamRequestDto CreateTeamRequestDto
+	createTeamRequestDto.Id = id
 	createTeamRequestDto.Name = name
 	createTeamRequestDto.Active = active
 	byteValueOfStruct, _ := json.Marshal(createTeamRequestDto)
 	return byteValueOfStruct
-}
-
-func HitDeleteTeamApi(byteValueOfStruct []byte, authToken string) DeleteResponseDto {
-	resp, err := Base.MakeApiCall(SaveTeamApiUrl, http.MethodDelete, string(byteValueOfStruct), nil, authToken)
-	Base.HandleError(err, "DeleteLinkApi")
-
-	installationScriptStruct := InstallationScriptStruct{}
-	apiRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), "DeleteLink")
-	return apiRouter.deleteResponseDto
 }
 
 func HitFetchAllTeamApi(authToken string) GetAutocompleteResponseDto {
@@ -348,20 +376,21 @@ func HitCreateAppApi(payload []byte, appName string, teamId int, templateId int,
 	installationScriptRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), CreateAppApi)
 	return installationScriptRouter.createAppResponseDto
 }
-func GetPayLoadForDeleteAppAPI(appName string, teamId int, templateId int) []byte {
+func GetPayLoadForDeleteAppAPI(id int, appName string, teamId int, templateId int) []byte {
 	var createAppRequestDto CreateAppRequestDto
+	createAppRequestDto.Id = id
 	createAppRequestDto.AppName = appName
 	createAppRequestDto.TeamId = teamId
 	createAppRequestDto.TemplateId = templateId
 	byteValueOfStruct, _ := json.Marshal(createAppRequestDto)
 	return byteValueOfStruct
 }
-func HitDeleteAppApi(byteValueOfStruct []byte, authToken string) DeleteResponseDto {
-	resp, err := Base.MakeApiCall(SaveAppApiUrl, http.MethodDelete, string(byteValueOfStruct), nil, authToken)
-	Base.HandleError(err, "DeleteAppApi")
+func HitDeleteAppApi(byteValueOfStruct []byte, id int, authToken string) DeleteResponseDto {
+	resp, err := Base.MakeApiCall(SaveAppApiUrl+"/"+strconv.Itoa(id), http.MethodDelete, string(byteValueOfStruct), nil, authToken)
+	Base.HandleError(err, DeleteAppApi)
 
 	installationScriptStruct := InstallationScriptStruct{}
-	apiRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), "DeleteApp")
+	apiRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), DeleteAppApi)
 	return apiRouter.deleteResponseDto
 }
 
@@ -370,7 +399,7 @@ func FetchAllStageStatus(id map[string]string, authToken string) FetchAllStageSt
 	Base.HandleError(err, FetchAllStageStatusApi)
 
 	installationScriptStruct := InstallationScriptStruct{}
-	apiRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), "FetchAllStageStatus")
+	apiRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), FetchAllStageStatusApi)
 	return apiRouter.fetchAllStageStatusResponseDto
 }
 
@@ -379,7 +408,7 @@ func FetchAllAppWorkflow(id map[string]string, authToken string) FetchAllAppWork
 	Base.HandleError(err, FetchAllAppWorkflowApi)
 
 	installationScriptStruct := InstallationScriptStruct{}
-	apiRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), "FetchAllAppWorkflow")
+	apiRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), FetchAllAppWorkflowApi)
 	return apiRouter.fetchAllAppWorkflowResponseDto
 }
 
@@ -419,10 +448,10 @@ func HitCreateAppMaterialApi(payload []byte, appId int, url string, gitProviderI
 	}
 
 	resp, err := Base.MakeApiCall(SaveAppMaterialApiUrl, http.MethodPost, payloadOfApi, nil, authToken)
-	Base.HandleError(err, "CreateAppMaterialApi")
+	Base.HandleError(err, CreateAppMaterialApi)
 
 	installationScriptStruct := InstallationScriptStruct{}
-	installationScriptRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), "CreateAppMaterial")
+	installationScriptRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), CreateAppMaterialApi)
 	return installationScriptRouter.createAppMaterialResponseDto
 }
 func GetPayLoadForDeleteAppMaterialAPI(appId int, slice2 AppMaterials) []byte {
@@ -438,10 +467,10 @@ func GetPayLoadForDeleteAppMaterialAPI(appId int, slice2 AppMaterials) []byte {
 }
 func HitDeleteAppMaterialApi(byteValueOfStruct []byte, authToken string) DeleteResponseDto {
 	resp, err := Base.MakeApiCall(SaveAppMaterialApiUrl, http.MethodDelete, string(byteValueOfStruct), nil, authToken)
-	Base.HandleError(err, "DeleteAppMaterialApi")
+	Base.HandleError(err, DeleteAppMaterialApi)
 
 	installationScriptStruct := InstallationScriptStruct{}
-	apiRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), "DeleteAppMaterial")
+	apiRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), DeleteAppMaterialApi)
 	return apiRouter.deleteResponseDto
 }
 
@@ -450,14 +479,14 @@ func FetchOtherEnv(id map[string]string, authToken string) FetchOtherEnvResponse
 	Base.HandleError(err, FetchOtherEnvApi)
 
 	installationScriptStruct := InstallationScriptStruct{}
-	apiRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), "FetchOtherEnv")
+	apiRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), FetchOtherEnvApi)
 	return apiRouter.fetchOtherEnvResponseDto
 }
 
 type GitopsConfig struct {
 	Provider    string `env:"PROVIDER" envDefault:""`
 	Username    string `env:"USERNAME" envDefault:""`
-	Host        string `env:"HOST" envDefault:"https://github.com/"`
+	Host        string `env:"HOST" envDefault:""`
 	Token       string `env:"TOKEN" envDefault:""`
 	GitHubOrgId string `env:"GITHUB_ORG_ID" envDefault:""`
 	Url         string `env:"URL" envDefault:""`
@@ -471,3 +500,169 @@ func GetGitopsConfig() (*GitopsConfig, error) {
 	}
 	return cfg, err
 }
+
+type DockerRegistry struct {
+	Id           string `env:"ID" envDefault:""`
+	PluginId     string `env:"PLUGINID" envDefault:""`
+	RegistryType string `env:"REGISTRYTYPE" envDefault:""`
+	RegistryUrl  string `env:"REGISTRYURL" envDefault:""`
+	Username     string `env:"USERNAME" envDefault:""`
+	Password     string `env:"PASSWORD" envDefault:""`
+}
+
+func GetDockerRegistry() (*DockerRegistry, error) {
+	cfg := &DockerRegistry{}
+	err := env.Parse(cfg)
+	if err != nil {
+		return nil, errors.New("could not get config from ChartRepoRouterConfig")
+	}
+	return cfg, err
+}
+
+type SaveDockerRegistryRequestDto struct {
+	Id           string `json:"id"`
+	PluginId     string `json:"pluginId"`
+	RegistryType string `json:"registryType"`
+	IsDefault    bool   `json:"isDefault"`
+	RegistryUrl  string `json:"registryUrl"`
+	Username     string `json:"username"`
+	Password     string `json:"password"`
+}
+
+func GetDockerRegistryRequestDto(isRepeat bool, id string, pluginId string, regType string, regUrl string, isDefault bool, username string, password string) SaveDockerRegistryRequestDto {
+	if isRepeat == false {
+		dockerRegistry, _ := GetDockerRegistry()
+		var saveDockerRegistryRequestDto SaveDockerRegistryRequestDto
+		saveDockerRegistryRequestDto.Id = Base.GetRandomStringOfGivenLength(10)
+		saveDockerRegistryRequestDto.PluginId = dockerRegistry.PluginId
+		saveDockerRegistryRequestDto.RegistryType = dockerRegistry.RegistryType
+		saveDockerRegistryRequestDto.RegistryUrl = dockerRegistry.RegistryUrl
+		saveDockerRegistryRequestDto.IsDefault = false
+		saveDockerRegistryRequestDto.Username = dockerRegistry.Username
+		saveDockerRegistryRequestDto.Password = dockerRegistry.Password
+		return saveDockerRegistryRequestDto
+	}
+
+	var saveDockerRegistryRequestDto SaveDockerRegistryRequestDto
+	saveDockerRegistryRequestDto.Id = id
+	saveDockerRegistryRequestDto.PluginId = pluginId
+	saveDockerRegistryRequestDto.RegistryType = regType
+	saveDockerRegistryRequestDto.RegistryUrl = regUrl
+	saveDockerRegistryRequestDto.IsDefault = isDefault
+	saveDockerRegistryRequestDto.Username = username
+	saveDockerRegistryRequestDto.Password = password
+	return saveDockerRegistryRequestDto
+}
+
+type SaveDockerRegistryResponseDto struct {
+	Code   int    `json:"code"`
+	Status string `json:"status"`
+	Result struct {
+		Id           string `json:"id"`
+		PluginId     string `json:"pluginId"`
+		RegistryUrl  string `json:"registryUrl"`
+		RegistryType string `json:"registryType"`
+		Username     string `json:"username"`
+		Password     string `json:"password"`
+		IsDefault    bool   `json:"isDefault"`
+		Connection   string `json:"connection"`
+		Cert         string `json:"cert"`
+		Active       bool   `json:"active"`
+	} `json:"result"`
+
+	Errors []struct {
+		Code            string `json:"code"`
+		InternalMessage string `json:"internalMessage"`
+		UserMessage     string `json:"userMessage"`
+	} `json:"errors"`
+}
+
+func HitSaveDockerRegistryApi(isRepeat bool, payload []byte, id string, pluginId string, regUrl string, regType string, username string, password string, isDefault bool, authToken string) SaveDockerRegistryResponseDto {
+	var payloadOfApi string
+	if payload != nil {
+		payloadOfApi = string(payload)
+	} else {
+		if isRepeat == false {
+			dockerRegistry, _ := GetDockerRegistry()
+			var saveDockerRegistryRequestDto SaveDockerRegistryRequestDto
+			saveDockerRegistryRequestDto.Id = dockerRegistry.Id
+			saveDockerRegistryRequestDto.PluginId = dockerRegistry.PluginId
+			saveDockerRegistryRequestDto.RegistryType = dockerRegistry.RegistryType
+			saveDockerRegistryRequestDto.RegistryUrl = dockerRegistry.RegistryUrl
+			saveDockerRegistryRequestDto.IsDefault = false
+			saveDockerRegistryRequestDto.Username = dockerRegistry.Username
+			saveDockerRegistryRequestDto.Password = dockerRegistry.Password
+			byteValueOfStruct, _ := json.Marshal(saveDockerRegistryRequestDto)
+			payloadOfApi = string(byteValueOfStruct)
+		} else {
+			var saveDockerRegistryRequestDto SaveDockerRegistryRequestDto
+			saveDockerRegistryRequestDto.Id = id
+			saveDockerRegistryRequestDto.PluginId = pluginId
+			saveDockerRegistryRequestDto.RegistryType = regType
+			saveDockerRegistryRequestDto.RegistryUrl = regUrl
+			saveDockerRegistryRequestDto.IsDefault = isDefault
+			saveDockerRegistryRequestDto.Username = username
+			saveDockerRegistryRequestDto.Password = password
+			byteValueOfStruct, _ := json.Marshal(saveDockerRegistryRequestDto)
+			payloadOfApi = string(byteValueOfStruct)
+		}
+	}
+
+	resp, err := Base.MakeApiCall(SaveDockerRegistryApiUrl, http.MethodPost, payloadOfApi, nil, authToken)
+	Base.HandleError(err, SaveDockerRegistryApi)
+
+	installationScriptStruct := InstallationScriptStruct{}
+	installationScriptRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), SaveDockerRegistryApi)
+	return installationScriptRouter.saveDockerRegistryResponseDto
+}
+func GetPayLoadForDeleteDockerRegistryAPI(id string, pluginId string, regUrl string, regType string, username string, password string, isDefault bool) []byte {
+	var saveDockerRegistryRequestDto SaveDockerRegistryRequestDto
+	saveDockerRegistryRequestDto.Id = id
+	saveDockerRegistryRequestDto.PluginId = pluginId
+	saveDockerRegistryRequestDto.RegistryUrl = regUrl
+	saveDockerRegistryRequestDto.RegistryType = regType
+	saveDockerRegistryRequestDto.Username = username
+	saveDockerRegistryRequestDto.Password = password
+	saveDockerRegistryRequestDto.IsDefault = isDefault
+	byteValueOfStruct, _ := json.Marshal(saveDockerRegistryRequestDto)
+	return byteValueOfStruct
+}
+
+type DeleteDockerRegistryResponse struct {
+	Code   int    `json:"code"`
+	Status string `json:"status"`
+	Result string `json:"result"`
+}
+
+func HitDeleteDockerRegistryApi(byteValueOfStruct []byte, authToken string) DeleteDockerRegistryResponse {
+	resp, err := Base.MakeApiCall(SaveDockerRegistryApiUrl, http.MethodDelete, string(byteValueOfStruct), nil, authToken)
+	Base.HandleError(err, DeleteDockerRegistry)
+
+	installationScriptStruct := InstallationScriptStruct{}
+	apiRouter := installationScriptStruct.UnmarshalGivenResponseBody(resp.Body(), DeleteDockerRegistry)
+	return apiRouter.deleteDockerRegistryResponse
+}
+
+/*{
+    "id": "erdipak",
+    "pluginId": "cd.go.artifact.docker.registry",
+    "registryType": "docker-hub",
+    "isDefault": true,
+    "registryUrl": "docker.io",
+    "username": "erdipak",
+    "password": "Deeepak@1234"
+}
+
+{
+    "code": 500,
+    "status": "Internal Server Error",
+    "errors": [
+        {
+            "code": "3001",
+            "internalMessage": "docker registry failed to create in db",
+            "userMessage": "requested by 231"
+        }
+    ]
+}
+
+*/
