@@ -1,6 +1,7 @@
 package testUtils
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -125,4 +127,71 @@ func GetRandomStringOfGivenLength(length int) string {
 
 func GetRandomNumberOf9Digit() int {
 	return 100000000 + rand.Intn(999999999-100000000)
+}
+
+func WritingFile(key string, value string) {
+	f, err := os.Create("data.txt")
+	if err != nil {
+		panic(err)
+	}
+	file, err := os.Open("data.txt")
+	if err != nil {
+		panic(err)
+	}
+	scanner := bufio.NewScanner(file)
+	var temp string
+	for scanner.Scan() {
+		line := scanner.Text()
+		temp = temp + line
+	}
+	temp = TrimSuffix(temp)
+	split := strings.Split(temp, ",")
+	var result string
+	for _, j := range split {
+		if len(j) != 0 {
+			if j[1:2] != key {
+				result = result + "," + j
+			}
+		}
+
+	}
+	result = result + ",\"" + key + "\":" + "\"" + value + "\"}"
+	if result[0:1] == "," {
+		result = TrimFirstChar(result)
+	}
+	result = "{" + result
+	f.WriteString(result)
+	defer f.Close()
+}
+
+func ReadFile() string {
+	file, err := os.Open("data.txt")
+	if err != nil {
+		panic(err)
+	}
+	scanner := bufio.NewScanner(file)
+	var temp string
+	for scanner.Scan() {
+		line := scanner.Text()
+		temp = temp + line
+	}
+	if temp[0:1] == "," {
+		temp = TrimFirstChar(temp)
+	}
+	return temp
+}
+func TrimSuffix(s string) string {
+	if strings.HasSuffix(s, "}") {
+		s = s[:len(s)-len("}")]
+	}
+	s = TrimFirstChar(s)
+	return s
+}
+func TrimFirstChar(s string) string {
+	for i := range s {
+		if i > 0 {
+			return s[i:]
+		}
+	}
+	return ""
 }
