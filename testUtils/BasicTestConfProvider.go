@@ -1,6 +1,7 @@
 package testUtils
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,11 +12,17 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
 const createSessionApiUrl string = "/orchestrator/api/v1/session"
 
+type Errors struct {
+	Code            string `json:"code"`
+	InternalMessage string `json:"internalMessage"`
+	UserMessage     string `json:"userMessage"`
+}
 type LogInResult struct {
 	Token string `json:"token"`
 }
@@ -125,4 +132,98 @@ func GetRandomStringOfGivenLength(length int) string {
 
 func GetRandomNumberOf9Digit() int {
 	return 100000000 + rand.Intn(999999999-100000000)
+}
+func CreateFile(fileName string) {
+	f, err := os.Create(fileName)
+	defer f.Close()
+	if err != nil {
+		panic(err)
+	}
+}
+func CreateFileAndEnterData(filename string, key string, value string) {
+	filename = "../" + filename + ".txt"
+	file, err := os.Open(filename)
+	if err != nil {
+		//panic(err)
+		CreateFile(filename)
+	}
+	scanner := bufio.NewScanner(file)
+	var temp string
+	for scanner.Scan() {
+		line := scanner.Text()
+		temp = temp + line
+	}
+	temp = TrimSuffix(temp)
+	split := strings.Split(temp, ",")
+	var result string
+	for _, j := range split {
+		if len(j) != 0 {
+			split2 := strings.Split(j, ":")
+			temp2 := "\"" + key + "\""
+			if split2[0] != temp2 {
+				result = result + "," + j
+			}
+		}
+
+	}
+	result = result + ",\"" + key + "\":" + "\"" + value + "\"}"
+	if result[0:1] == "," {
+		result = TrimFirstChar(result)
+	}
+	result = "{" + result
+	f, err := os.Create(filename)
+	if err != nil {
+		panic(err)
+	}
+	f.WriteString(result)
+	defer f.Close()
+}
+
+func ReadDataByFilenameAndKey(filename string, key string) string {
+	filename = "../" + filename + ".txt"
+	file, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+	scanner := bufio.NewScanner(file)
+	var temp string
+	for scanner.Scan() {
+		line := scanner.Text()
+		temp = temp + line
+	}
+	temp = TrimSuffix(temp)
+	split := strings.Split(temp, ",")
+	var output string
+	flag := 1
+	for _, j := range split {
+		if len(j) != 0 {
+			split2 := strings.Split(j, ":")
+			temp2 := "\"" + key + "\""
+			if split2[0] == temp2 {
+				output = split2[1]
+				flag = 0
+				break
+			}
+		}
+	}
+	defer file.Close()
+	if flag == 1 {
+		panic("key NOT found")
+	}
+	return output
+}
+func TrimSuffix(s string) string {
+	if strings.HasSuffix(s, "}") {
+		s = s[:len(s)-len("}")]
+	}
+	s = TrimFirstChar(s)
+	return s
+}
+func TrimFirstChar(s string) string {
+	for i := range s {
+		if i > 0 {
+			return s[i:]
+		}
+	}
+	return ""
 }
