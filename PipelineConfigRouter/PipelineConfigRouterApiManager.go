@@ -31,22 +31,23 @@ type CreateAppResponseDto struct {
 	Errors []Base.Errors       `json:"errors"`
 }
 
+type DockerBuildConfig struct {
+	DockerfilePath string `json:"dockerfilePath"`
+	Args           struct {
+	} `json:"args"`
+	DockerfileRepository   string `json:"dockerfileRepository"`
+	DockerfileRelativePath string `json:"dockerfileRelativePath"`
+	GitMaterialId          int    `json:"gitMaterialId"`
+}
 type SaveAppCiPipelineRequestDTO struct {
-	Id                interface{}   `json:"id"`
-	AppId             int           `json:"appId"`
-	DockerRegistry    string        `json:"dockerRegistry"`
-	DockerRepository  string        `json:"dockerRepository"`
-	BeforeDockerBuild []interface{} `json:"beforeDockerBuild"`
-	DockerBuildConfig struct {
-		DockerfilePath string `json:"dockerfilePath"`
-		Args           struct {
-		} `json:"args"`
-		DockerfileRepository   string `json:"dockerfileRepository"`
-		DockerfileRelativePath string `json:"dockerfileRelativePath"`
-		GitMaterialId          int    `json:"gitMaterialId"`
-	} `json:"dockerBuildConfig"`
-	AfterDockerBuild []interface{} `json:"afterDockerBuild"`
-	AppName          string        `json:"appName"`
+	Id                interface{}       `json:"id"`
+	AppId             int               `json:"appId"`
+	DockerRegistry    string            `json:"dockerRegistry"`
+	DockerRepository  string            `json:"dockerRepository"`
+	BeforeDockerBuild []interface{}     `json:"beforeDockerBuild"`
+	DockerBuildConfig DockerBuildConfig `json:"dockerBuildConfig"`
+	AfterDockerBuild  []interface{}     `json:"afterDockerBuild"`
+	AppName           string            `json:"appName"`
 }
 
 type CreateAppMaterialRequestDto struct {
@@ -82,13 +83,30 @@ type SaveAppCiPipelineResponseDTO struct {
 	Errors []Base.Errors `json:"errors"`
 }
 
+type GetCiPipelineViaIdResponseDTO struct {
+	Code   int           `json:"code"`
+	Status string        `json:"status"`
+	Errors []Base.Errors `json:"errors"`
+	Result struct {
+		Id                int               `json:"id"`
+		AppId             int               `json:"appId"`
+		DockerRegistry    string            `json:"dockerRegistry"`
+		DockerRepository  string            `json:"dockerRepository"`
+		DockerBuildConfig DockerBuildConfig `json:"dockerBuildConfig"`
+		AppName           string            `json:"appName"`
+		Materials         interface{}       `json:"materials"`
+		ScanEnabled       bool              `json:"scanEnabled"`
+	} `json:"result"`
+}
+
 type StructPipelineConfigRouter struct {
-	saveAppCiPipelineRequestDTO  SaveAppCiPipelineRequestDTO
-	createAppResponseDto         CreateAppResponseDto
-	deleteResponseDto            DeleteResponseDto
-	createAppMaterialRequestDto  CreateAppMaterialRequestDto
-	createAppMaterialResponseDto CreateAppMaterialResponseDto
-	saveAppCiPipelineResponseDTO SaveAppCiPipelineResponseDTO
+	saveAppCiPipelineRequestDTO   SaveAppCiPipelineRequestDTO
+	createAppResponseDto          CreateAppResponseDto
+	deleteResponseDto             DeleteResponseDto
+	createAppMaterialRequestDto   CreateAppMaterialRequestDto
+	createAppMaterialResponseDto  CreateAppMaterialResponseDto
+	saveAppCiPipelineResponseDTO  SaveAppCiPipelineResponseDTO
+	getCiPipelineViaIdResponseDTO GetCiPipelineViaIdResponseDTO
 }
 
 type EnvironmentConfigPipelineConfigRouter struct {
@@ -152,8 +170,8 @@ func HitCreateAppApi(payload []byte, appName string, teamId int, templateId int,
 	Base.HandleError(err, CreateAppApi)
 
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
-	installationScriptRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), CreateAppApi)
-	return installationScriptRouter.createAppResponseDto
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), CreateAppApi)
+	return pipelineConfigRouter.createAppResponseDto
 }
 
 func GetAppMaterialRequestDto(appId int, url string, gitProviderId int, fetchSubmodules bool) CreateAppMaterialRequestDto {
@@ -210,6 +228,14 @@ func HitSaveAppCiPipeline(payload []byte, authToken string) SaveAppCiPipelineRes
 	return pipelineConfigRouter.saveAppCiPipelineResponseDTO
 }
 
+func HitGetCiPipelineViaId(appId string, authToken string) GetCiPipelineViaIdResponseDTO {
+	resp, err := Base.MakeApiCall(GetCiPipelineViaIdApiUrl+appId, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetCiPipelineViaIdApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetCiPipelineViaIdApi)
+	return pipelineConfigRouter.getCiPipelineViaIdResponseDTO
+}
+
 func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructPipelineConfigRouter {
 	switch apiName {
 	case CreateAppApi:
@@ -218,6 +244,8 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.createAppMaterialResponseDto)
 	case SaveAppCiPipelineApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.saveAppCiPipelineResponseDTO)
+	case GetCiPipelineViaIdApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.getCiPipelineViaIdResponseDTO)
 
 	}
 	return structPipelineConfigRouter
