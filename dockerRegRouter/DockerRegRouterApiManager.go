@@ -1,4 +1,4 @@
-package DockerRegRouter
+package dockerRegRouter
 
 import (
 	Base "automation-suite/testUtils"

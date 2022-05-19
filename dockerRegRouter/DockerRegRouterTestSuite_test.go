@@ -1,4 +1,4 @@
-package DockerRegRouter
+package dockerRegRouter
 
 import (
 	"github.com/stretchr/testify/suite"

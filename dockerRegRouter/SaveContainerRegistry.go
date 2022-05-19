@@ -1,4 +1,4 @@
-package DockerRegRouter
+package dockerRegRouter
 
 import (
 	"encoding/json"

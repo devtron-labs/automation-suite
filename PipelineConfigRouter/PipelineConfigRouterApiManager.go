@@ -1,6 +1,7 @@
 package PipelineConfigRouter
 
 import (
+	"automation-suite/dockerRegRouter"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"errors"
@@ -99,14 +100,21 @@ type GetCiPipelineViaIdResponseDTO struct {
 	} `json:"result"`
 }
 
+type GetContainerRegistryResponseDTO struct {
+	Code   int                                             `json:"code"`
+	Status string                                          `json:"status"`
+	Result []*dockerRegRouter.SaveDockerRegistryRequestDto `json:"result"`
+}
+
 type StructPipelineConfigRouter struct {
-	saveAppCiPipelineRequestDTO   SaveAppCiPipelineRequestDTO
-	createAppResponseDto          CreateAppResponseDto
-	deleteResponseDto             DeleteResponseDto
-	createAppMaterialRequestDto   CreateAppMaterialRequestDto
-	createAppMaterialResponseDto  CreateAppMaterialResponseDto
-	saveAppCiPipelineResponseDTO  SaveAppCiPipelineResponseDTO
-	getCiPipelineViaIdResponseDTO GetCiPipelineViaIdResponseDTO
+	saveAppCiPipelineRequestDTO     SaveAppCiPipelineRequestDTO
+	createAppResponseDto            CreateAppResponseDto
+	deleteResponseDto               DeleteResponseDto
+	createAppMaterialRequestDto     CreateAppMaterialRequestDto
+	createAppMaterialResponseDto    CreateAppMaterialResponseDto
+	saveAppCiPipelineResponseDTO    SaveAppCiPipelineResponseDTO
+	getCiPipelineViaIdResponseDTO   GetCiPipelineViaIdResponseDTO
+	getContainerRegistryResponseDTO GetContainerRegistryResponseDTO
 }
 
 type EnvironmentConfigPipelineConfigRouter struct {
@@ -236,6 +244,14 @@ func HitGetCiPipelineViaId(appId string, authToken string) GetCiPipelineViaIdRes
 	return pipelineConfigRouter.getCiPipelineViaIdResponseDTO
 }
 
+func HitGetContainerRegistry(appId string, authToken string) GetContainerRegistryResponseDTO {
+	resp, err := Base.MakeApiCall(GetContainerRegistryApiUrl+appId+"/autocomplete/docker", http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetContainerRegistryApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetContainerRegistryApi)
+	return pipelineConfigRouter.getContainerRegistryResponseDTO
+}
+
 func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructPipelineConfigRouter {
 	switch apiName {
 	case CreateAppApi:
@@ -246,7 +262,8 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.saveAppCiPipelineResponseDTO)
 	case GetCiPipelineViaIdApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.getCiPipelineViaIdResponseDTO)
-
+	case GetContainerRegistryApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.getContainerRegistryResponseDTO)
 	}
 	return structPipelineConfigRouter
 }

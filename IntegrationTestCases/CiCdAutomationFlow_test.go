@@ -1,9 +1,9 @@
 package IntegrationTestCases
 
 import (
-	"automation-suite/DockerRegRouter"
 	"automation-suite/GitopsConfigRouter"
 	"automation-suite/TeamRouter"
+	"automation-suite/dockerRegRouter"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
@@ -71,11 +71,11 @@ func TestFoo(t *testing.T) {
 		assert.NotNil(t, saveTeamResponseDto.Result.Id)
 	})
 	t.Run("TestSaveDockerRegistryWithValidPayload", func(t *testing.T) {
-		saveDockerRegistryRequestDto := DockerRegRouter.GetDockerRegistryRequestDto(false, "", "", "", "", false, "", "")
+		saveDockerRegistryRequestDto := dockerRegRouter.GetDockerRegistryRequestDto(false, "", "", "", "", false, "", "")
 		byteValueOfSaveDockerRegistry, _ := json.Marshal(saveDockerRegistryRequestDto)
 
 		log.Println("Hitting The post Docker registry API")
-		saveDockerRegistryResponseDto := DockerRegRouter.HitSaveDockerRegistryApi(false, byteValueOfSaveDockerRegistry, "", "", "", "", "", "", false, authToken)
+		saveDockerRegistryResponseDto := dockerRegRouter.HitSaveDockerRegistryApi(false, byteValueOfSaveDockerRegistry, "", "", "", "", "", "", false, authToken)
 
 		log.Println("Validating the Response of the save docker registry API...")
 		assert.Equal(t, saveDockerRegistryRequestDto.Id, saveDockerRegistryResponseDto.Result.Id)

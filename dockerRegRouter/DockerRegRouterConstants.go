@@ -1,4 +1,4 @@
-package DockerRegRouter
+package dockerRegRouter
 
 const (
 	SaveDockerRegistryApiUrl string = "/orchestrator/docker/registry"
