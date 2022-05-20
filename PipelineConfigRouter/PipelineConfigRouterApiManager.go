@@ -106,6 +106,20 @@ type GetContainerRegistryResponseDTO struct {
 	Result []*dockerRegRouter.SaveDockerRegistryRequestDto `json:"result"`
 }
 
+type GetChartReferenceResponseDTO struct {
+	Code   int    `json:"code"`
+	Status string `json:"status"`
+	Result struct {
+		ChartRefs []struct {
+			Id      int    `json:"id"`
+			Version string `json:"version"`
+			Name    string `json:"name"`
+		} `json:"chartRefs"`
+		LatestChartRef    int `json:"latestChartRef"`
+		LatestAppChartRef int `json:"latestAppChartRef"`
+	} `json:"result"`
+}
+
 type StructPipelineConfigRouter struct {
 	saveAppCiPipelineRequestDTO     SaveAppCiPipelineRequestDTO
 	createAppResponseDto            CreateAppResponseDto
@@ -115,6 +129,7 @@ type StructPipelineConfigRouter struct {
 	saveAppCiPipelineResponseDTO    SaveAppCiPipelineResponseDTO
 	getCiPipelineViaIdResponseDTO   GetCiPipelineViaIdResponseDTO
 	getContainerRegistryResponseDTO GetContainerRegistryResponseDTO
+	getChartReferenceResponseDTO    GetChartReferenceResponseDTO
 }
 
 type EnvironmentConfigPipelineConfigRouter struct {
@@ -252,6 +267,22 @@ func HitGetContainerRegistry(appId string, authToken string) GetContainerRegistr
 	return pipelineConfigRouter.getContainerRegistryResponseDTO
 }
 
+func HitGetChartReferenceViaAppId(appId string, authToken string) GetChartReferenceResponseDTO {
+	resp, err := Base.MakeApiCall(GetChartReferenceViaAppIdApiUrl+appId, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetChartReferenceViaAppIdApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetChartReferenceViaAppIdApi)
+	return pipelineConfigRouter.getChartReferenceResponseDTO
+}
+
+func HitGetTemplateViaAppIdAndChartRefId(appId string, chartRefId string, authToken string) GetChartReferenceResponseDTO {
+	resp, err := Base.MakeApiCall(GetChartReferenceViaAppIdApiUrl+appId+"/"+chartRefId, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetChartReferenceViaAppIdApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetChartReferenceViaAppIdApi)
+	return pipelineConfigRouter.getChartReferenceResponseDTO
+}
+
 func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructPipelineConfigRouter {
 	switch apiName {
 	case CreateAppApi:
@@ -264,6 +295,8 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.getCiPipelineViaIdResponseDTO)
 	case GetContainerRegistryApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.getContainerRegistryResponseDTO)
+	case GetChartReferenceViaAppIdApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.getChartReferenceResponseDTO)
 	}
 	return structPipelineConfigRouter
 }

@@ -11,10 +11,9 @@ func (suite *PipelineConfigSuite) TestClass2SaveAppCiPipeline() {
 	config, _ := GetEnvironmentConfigPipelineConfigRouter()
 	createAppApiResponse := suite.createAppResponseDto.Result
 	createAppMaterialResponse := suite.createAppMaterialResponseDto.Result
-	appName := createAppApiResponse.AppName
 
 	suite.Run("A=1=SaveAppCiPipelineWithValidPayload", func() {
-		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveAppCiPipeline(createAppApiResponse.Id, config.DockerRegistry, config.DockerRegistry+"/"+appName, config.DockerfilePath, config.DockerfileRepository, config.DockerfileRelativePath, createAppMaterialResponse.Material[0].Id)
+		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveAppCiPipeline(createAppApiResponse.Id, config.DockerRegistry, config.DockerRegistry+"/test", config.DockerfilePath, config.DockerfileRepository, config.DockerfileRelativePath, createAppMaterialResponse.Material[0].Id)
 		byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
 		log.Println("=== Hitting the SaveAppCiPipeline API ====")
 		saveAppCiPipelineResponse := HitSaveAppCiPipeline(byteValueOfSaveAppCiPipeline, suite.authToken)
@@ -23,7 +22,7 @@ func (suite *PipelineConfigSuite) TestClass2SaveAppCiPipeline() {
 
 	suite.Run("A=2=SaveAppCiPipelineWithInValidAppId", func() {
 		appId := testUtils.GetRandomNumberOf9Digit()
-		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveAppCiPipeline(appId, config.DockerRegistry, config.DockerRegistry+"/"+appName, config.DockerfilePath, config.DockerfileRepository, config.DockerfileRelativePath, createAppMaterialResponse.Material[0].Id)
+		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveAppCiPipeline(appId, config.DockerRegistry, config.DockerRegistry+"/test", config.DockerfilePath, config.DockerfileRepository, config.DockerfileRelativePath, createAppMaterialResponse.Material[0].Id)
 		byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
 		log.Println("=== Hitting the SaveAppCiPipeline API with Invalid AppId ====")
 		saveAppCiPipelineResponse := HitSaveAppCiPipeline(byteValueOfSaveAppCiPipeline, suite.authToken)
@@ -32,7 +31,7 @@ func (suite *PipelineConfigSuite) TestClass2SaveAppCiPipeline() {
 
 	suite.Run("A=3=SaveAppCiPipelineWithInValidMaterialId", func() {
 		invalidMaterialId := testUtils.GetRandomNumberOf9Digit()
-		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveAppCiPipeline(createAppApiResponse.Id, config.DockerRegistry, config.DockerRegistry+"/"+appName, config.DockerfilePath, config.DockerfileRepository, config.DockerfileRelativePath, invalidMaterialId)
+		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveAppCiPipeline(createAppApiResponse.Id, config.DockerRegistry, config.DockerRegistry+"/test", config.DockerfilePath, config.DockerfileRepository, config.DockerfileRelativePath, invalidMaterialId)
 		byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
 		log.Println("=== Hitting the SaveAppCiPipeline API with Invalid Material Id ====")
 		saveAppCiPipelineResponse := HitSaveAppCiPipeline(byteValueOfSaveAppCiPipeline, suite.authToken)
@@ -40,7 +39,7 @@ func (suite *PipelineConfigSuite) TestClass2SaveAppCiPipeline() {
 	})
 
 	suite.Run("A=4=SaveAppCiPipelineWithInValidDockerfileRepository", func() {
-		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveAppCiPipeline(createAppApiResponse.Id, config.DockerRegistry+"invalid", config.DockerRegistry+"/"+appName, config.DockerfilePath, config.DockerfileRepository, config.DockerfileRelativePath, createAppMaterialResponse.Material[0].Id)
+		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveAppCiPipeline(createAppApiResponse.Id, config.DockerRegistry+"invalid", config.DockerRegistry+"/test", config.DockerfilePath, config.DockerfileRepository, config.DockerfileRelativePath, createAppMaterialResponse.Material[0].Id)
 		byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
 		log.Println("=== Hitting the SaveAppCiPipeline API with Invalid Docker file Repository ====")
 		saveAppCiPipelineResponse := HitSaveAppCiPipeline(byteValueOfSaveAppCiPipeline, suite.authToken)
