@@ -9,15 +9,6 @@ import (
 	"net/http"
 )
 
-type GitopsConfigRouter struct {
-	suite.Suite
-	authToken string
-}
-
-func (suite *GitopsConfigRouter) SetupSuite() {
-	suite.authToken = Base.GetAuthToken()
-}
-
 type FetchAllGitopsConfigResponseDto struct {
 	Code   int                            `json:"code"`
 	Status string                         `json:"status"`
@@ -129,4 +120,13 @@ func GetGitopsConfig() (*GitopsConfig, error) {
 		return nil, errors.New("could not get config from ChartRepoRouterConfig")
 	}
 	return cfg, err
+}
+
+type GitOpsRouterTestSuite struct {
+	suite.Suite
+	authToken string
+}
+
+func (suite *GitOpsRouterTestSuite) SetupSuite() {
+	suite.authToken = Base.GetAuthToken()
 }

@@ -1,4 +1,4 @@
-package external_linkout
+package externalLinkout
 
 const (
 	CreateLinkApiUrl      string = "/orchestrator/external-links"

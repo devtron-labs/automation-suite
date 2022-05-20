@@ -7,15 +7,6 @@ import (
 	"net/http"
 )
 
-type AppListingRouter struct {
-	suite.Suite
-	authToken string
-}
-
-func (suite *AppListingRouter) SetupSuite() {
-	suite.authToken = Base.GetAuthToken()
-}
-
 type StructAppListingRouter struct {
 	fetchAllStageStatusResponseDto FetchAllStageStatusResponseDto
 }
@@ -49,4 +40,13 @@ func FetchAllStageStatus(id string, authToken string) FetchAllStageStatusRespons
 	structAppListingRouter := StructAppListingRouter{}
 	apiRouter := structAppListingRouter.UnmarshalGivenResponseBody(resp.Body(), FetchAllStageStatusApi)
 	return apiRouter.fetchAllStageStatusResponseDto
+}
+
+type AppsListingRouterTestSuite struct {
+	suite.Suite
+	authToken string
+}
+
+func (suite *AppsListingRouterTestSuite) SetupSuite() {
+	suite.authToken = Base.GetAuthToken()
 }

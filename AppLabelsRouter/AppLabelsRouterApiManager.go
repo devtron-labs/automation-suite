@@ -72,11 +72,11 @@ func GetEnvironmentConfigForAppLabelsRouter() (*EnvironmentConfigAppLabelsRouter
 	return cfg, err
 }
 
-type AppLabelsSuite struct {
+type AppLabelRouterTestSuite struct {
 	suite.Suite
 	authToken string
 }
 
-func (suite *AppLabelsSuite) SetupSuite() {
+func (suite *AppLabelRouterTestSuite) SetupSuite() {
 	suite.authToken = Base.GetAuthToken()
 }

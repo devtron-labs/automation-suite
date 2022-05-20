@@ -302,7 +302,7 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 }
 
 // PipelineConfigSuite =================PipelineConfigSuite Setup =========================
-type PipelineConfigSuite struct {
+type PipelinesConfigRouterTestSuite struct {
 	suite.Suite
 	authToken                    string
 	createAppResponseDto         CreateAppResponseDto
@@ -310,14 +310,14 @@ type PipelineConfigSuite struct {
 }
 
 // SetupSuite This method runs on first priority before starting the suite means before executing any test case of the suite
-func (suite *PipelineConfigSuite) SetupSuite() {
+func (suite *PipelinesConfigRouterTestSuite) SetupSuite() {
 	log.Println("=== Running Before Suite Method ===")
 	suite.authToken = Base.GetAuthToken()
 	suite.createAppResponseDto = suite.CreateApp()
 	suite.createAppMaterialResponseDto = suite.CreateAppMaterial()
 }
 
-func (suite *PipelineConfigSuite) CreateApp() CreateAppResponseDto {
+func (suite *PipelinesConfigRouterTestSuite) CreateApp() CreateAppResponseDto {
 	appName := strings.ToLower(Base.GetRandomStringOfGivenLength(10))
 	createAppRequestDto := GetAppRequestDto("app"+appName, 1, 0)
 	byteValueOfCreateApp, _ := json.Marshal(createAppRequestDto)
@@ -325,7 +325,7 @@ func (suite *PipelineConfigSuite) CreateApp() CreateAppResponseDto {
 	return createAppResponseDto
 }
 
-func (suite *PipelineConfigSuite) CreateAppMaterial() CreateAppMaterialResponseDto {
+func (suite *PipelinesConfigRouterTestSuite) CreateAppMaterial() CreateAppMaterialResponseDto {
 	configPipelineConfigRouter, _ := GetEnvironmentConfigPipelineConfigRouter()
 	createAppMaterialRequestDto := GetAppMaterialRequestDto(suite.createAppResponseDto.Result.Id, configPipelineConfigRouter.GitHubProjectUrl, 1, false)
 	appMaterialByteValue, _ := json.Marshal(createAppMaterialRequestDto)
@@ -333,7 +333,7 @@ func (suite *PipelineConfigSuite) CreateAppMaterial() CreateAppMaterialResponseD
 	return createAppMaterialResponseDto
 }
 
-func (suite *PipelineConfigSuite) TearDownSuite() {
+func (suite *PipelinesConfigRouterTestSuite) TearDownSuite() {
 	log.Println("=== Running the after suite method for deleting the data created via automation ===")
 	byteValueOfDeleteApp := GetPayLoadForDeleteAppAPI(suite.createAppResponseDto.Result.Id, suite.createAppResponseDto.Result.AppName, suite.createAppResponseDto.Result.TeamId, suite.createAppResponseDto.Result.TemplateId)
 	HitDeleteAppApi(byteValueOfDeleteApp, suite.createAppResponseDto.Result.Id, suite.authToken)

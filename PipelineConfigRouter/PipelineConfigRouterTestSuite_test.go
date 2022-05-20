@@ -6,5 +6,5 @@ import (
 )
 
 func TestPipelineConfigSuite(t *testing.T) {
-	suite.Run(t, new(PipelineConfigSuite))
+	suite.Run(t, new(PipelinesConfigRouterTestSuite))
 }

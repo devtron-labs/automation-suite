@@ -1,9 +1,8 @@
-package external_linkout
+package externalLinkout
 
 import (
 	Base "automation-suite/testUtils"
 	"encoding/json"
-	"fmt"
 	"github.com/stretchr/testify/suite"
 	"math/rand"
 	"net/http"
@@ -313,12 +312,11 @@ func HitUpdateLinkApi(byteValueOfStruct []byte, authToken string) CreateLinkResp
 	return linkRouter.createLinkResponseDto
 }
 
-type LinkTestSuite struct {
+type LinkOutRouterTestSuite struct {
 	suite.Suite
 	authToken string
 }
 
-func (suite *LinkTestSuite) SetupSuite() {
+func (suite *LinkOutRouterTestSuite) SetupSuite() {
 	suite.authToken = Base.GetAuthToken()
-	fmt.Println(suite.authToken)
 }

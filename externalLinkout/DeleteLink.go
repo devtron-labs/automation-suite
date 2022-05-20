@@ -1,4 +1,4 @@
-package external_linkout
+package externalLinkout
 
 import (
 	"encoding/json"

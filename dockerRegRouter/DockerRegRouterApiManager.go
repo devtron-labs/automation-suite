@@ -9,15 +9,6 @@ import (
 	"net/http"
 )
 
-type DockerRegRouter struct {
-	suite.Suite
-	authToken string
-}
-
-func (suite *DockerRegRouter) SetupSuite() {
-	suite.authToken = Base.GetAuthToken()
-}
-
 type StructDockerRegRouter struct {
 	saveDockerRegistryResponseDto SaveDockerRegistryResponseDto
 	deleteDockerRegistryResponse  DeleteDockerRegistryResponse
@@ -159,4 +150,13 @@ func HitDeleteDockerRegistryApi(byteValueOfStruct []byte, authToken string) Dele
 	structDockerRegRouter := StructDockerRegRouter{}
 	dockerRegRouter := structDockerRegRouter.UnmarshalGivenResponseBody(resp.Body(), DeleteDockerRegistry)
 	return dockerRegRouter.deleteDockerRegistryResponse
+}
+
+type DockersRegRouterTestSuite struct {
+	suite.Suite
+	authToken string
+}
+
+func (suite *DockersRegRouterTestSuite) SetupSuite() {
+	suite.authToken = Base.GetAuthToken()
 }

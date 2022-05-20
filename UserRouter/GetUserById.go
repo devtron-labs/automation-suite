@@ -21,6 +21,7 @@ func (suite *UserTestSuite) TestGetUserByIdWithValidArg() {
 	assert.Empty(suite.T(), responseOfGetUserById.Result.RoleFilters)
 
 	log.Println("Deleting the Test data Created via Automation")
+	HitDeleteUserApi(strconv.Itoa(responseOfCreateUserApi.Result[0].Id), suite.authToken)
 	HitDeleteRoleGroupByIdApi(strconv.Itoa(responseOfCreateUserApi.Result[0].Id), suite.authToken)
 }
 
