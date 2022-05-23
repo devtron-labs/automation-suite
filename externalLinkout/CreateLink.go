@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func (suite *LinkTestSuite) CreateLinkoutWithValidPayload() {
+func (suite *LinkOutRouterTestSuite) CreateLinkoutWithValidPayload() {
 
 	createLinkRequestDto := GetSaveLinkRequestDto()
 	byteValueOfStruct, _ := json.Marshal(createLinkRequestDto)
@@ -25,7 +25,7 @@ func (suite *LinkTestSuite) CreateLinkoutWithValidPayload() {
 	HitDeleteLinkApi(byteValueOfStruct, suite.authToken)
 }
 
-func (suite *LinkTestSuite) CreateLinkoutWithInvalidToolId() {
+func (suite *LinkOutRouterTestSuite) CreateLinkoutWithInvalidToolId() {
 	createLinkRequestDto := GetSaveLinkRequestInvalidMonitoringToolIdDto()
 	byteValueOfStruct, _ := json.Marshal(createLinkRequestDto)
 
@@ -41,7 +41,7 @@ func (suite *LinkTestSuite) CreateLinkoutWithInvalidToolId() {
 	HitDeleteLinkApi(byteValueOfStruct, suite.authToken)
 }
 
-func (suite *LinkTestSuite) CreateLinkoutWithInvalidClusterId() {
+func (suite *LinkOutRouterTestSuite) CreateLinkoutWithInvalidClusterId() {
 	createLinkRequestDto := GetSaveLinkRequestInvalidClusterIdDto()
 	byteValueOfStruct, _ := json.Marshal(createLinkRequestDto)
 
@@ -57,7 +57,7 @@ func (suite *LinkTestSuite) CreateLinkoutWithInvalidClusterId() {
 	HitDeleteLinkApi(byteValueOfStruct, suite.authToken)
 }
 
-func (suite *LinkTestSuite) CreateLinkoutWithOneValidOneInvalidClusterId() {
+func (suite *LinkOutRouterTestSuite) CreateLinkoutWithOneValidOneInvalidClusterId() {
 	createLinkRequestDto := GetSaveLinkRequestOneValidOneInvalidClusterId()
 	byteValueOfStruct, _ := json.Marshal(createLinkRequestDto)
 

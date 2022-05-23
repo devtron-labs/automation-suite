@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func (suite *GitopsConfigRouter) TestFetchAllGitopsConfig() {
+func (suite *GitOpsRouterTestSuite) TestFetchAllGitopsConfig() {
 	log.Println("Hitting GET api for Gitops config")
 	fetchAllLinkResponseDto := HitFetchAllGitopsConfigApi(suite.authToken)
 	noOfGitopsConfig := len(fetchAllLinkResponseDto.Result)

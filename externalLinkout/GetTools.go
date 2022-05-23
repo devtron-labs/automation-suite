@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-func (suite *LinkTestSuite) FetchAllToolsWithValidPayload() {
+func (suite *LinkOutRouterTestSuite) FetchAllToolsWithValidPayload() {
 	log.Println("Hitting the 'FetchAllTools' Api before creating any new entry")
 	fetchAllToolsResponseDto := HitFetchAllToolsApi()
 	noOfTools := len(fetchAllToolsResponseDto.Result)

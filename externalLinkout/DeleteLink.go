@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func (suite *LinkTestSuite) TestDeleteTeamWithValidPayload() {
+func (suite *LinkOutRouterTestSuite) TestDeleteTeamWithValidPayload() {
 	createLinkRequestDto := GetSaveLinkRequestDto()
 	byteValueOfStruct, _ := json.Marshal(createLinkRequestDto)
 

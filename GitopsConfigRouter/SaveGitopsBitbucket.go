@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-func (suite *GitopsConfigRouter) TestCreateGitopsConfigWithValidPayload() {
+func (suite *GitOpsRouterTestSuite) TestCreateGitopsConfigWithValidPayload() {
 	gitopsConfig, _ := GetGitopsConfig()
 	createGitopsConfigRequestDto := GetGitopsConfigRequestDto(gitopsConfig.Provider, gitopsConfig.Username, gitopsConfig.Host, gitopsConfig.Token, gitopsConfig.GitHubOrgId)
 	byteValueOfCreateGitopsConfig, _ := json.Marshal(createGitopsConfigRequestDto)
@@ -21,7 +21,7 @@ func (suite *GitopsConfigRouter) TestCreateGitopsConfigWithValidPayload() {
 
 }
 
-func (suite *GitopsConfigRouter) TestCreateGitopsConfigWithInValidProvider() {
+func (suite *GitOpsRouterTestSuite) TestCreateGitopsConfigWithInValidProvider() {
 	provider := Base.GetRandomStringOfGivenLength(10)
 	gitopsConfig, _ := GetGitopsConfig()
 	createGitopsConfigRequestDto := GetGitopsConfigRequestDto(provider, gitopsConfig.Username, gitopsConfig.Host, gitopsConfig.Token, gitopsConfig.GitHubOrgId)
@@ -34,7 +34,7 @@ func (suite *GitopsConfigRouter) TestCreateGitopsConfigWithInValidProvider() {
 	assert.Equal(suite.T(), 0, createLinkResponseDto.Code)
 }
 
-func (suite *GitopsConfigRouter) TestCreateGitopsConfigWithInValidToken() {
+func (suite *GitOpsRouterTestSuite) TestCreateGitopsConfigWithInValidToken() {
 	token := Base.GetRandomStringOfGivenLength(10)
 	gitopsConfig, _ := GetGitopsConfig()
 

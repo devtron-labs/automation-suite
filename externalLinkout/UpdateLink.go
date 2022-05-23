@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func (suite *LinkTestSuite) TestUpdateTeamWithValidPayload() {
+func (suite *LinkOutRouterTestSuite) TestUpdateTeamWithValidPayload() {
 	saveLinkRequestDto := GetSaveLinkRequestDto()
 	byteValueOfStruct, _ := json.Marshal(saveLinkRequestDto)
 	saveLinkResponseDto := HitCreateLinkApi(byteValueOfStruct, suite.authToken)
@@ -20,7 +20,7 @@ func (suite *LinkTestSuite) TestUpdateTeamWithValidPayload() {
 	byteValueOfStruct = GetPayLoadForDeleteLinkAPI(id, "UpdatedNameViaAutomation", updateLinkResponseDto.Result.MonitoringToolId, updateLinkResponseDto.Result.Url, updateLinkResponseDto.Result.Active)
 	HitDeleteLinkApi(updateLinkRequestPayload, suite.authToken)
 }
-func (suite *LinkTestSuite) TestUpdateTeamWithInvalidMonitoringToolId() {
+func (suite *LinkOutRouterTestSuite) TestUpdateTeamWithInvalidMonitoringToolId() {
 	saveLinkRequestDto := GetSaveLinkRequestDto()
 	byteValueOfStruct, _ := json.Marshal(saveLinkRequestDto)
 	saveLinkResponseDto := HitCreateLinkApi(byteValueOfStruct, suite.authToken)
@@ -39,7 +39,7 @@ func (suite *LinkTestSuite) TestUpdateTeamWithInvalidMonitoringToolId() {
 	HitDeleteLinkApi(updateLinkRequestPayload, suite.authToken)
 }
 
-func (suite *LinkTestSuite) TestUpdateTeamWithInvalidClusterId() {
+func (suite *LinkOutRouterTestSuite) TestUpdateTeamWithInvalidClusterId() {
 	saveLinkRequestDto := GetSaveLinkRequestDto()
 	byteValueOfStruct, _ := json.Marshal(saveLinkRequestDto)
 	saveLinkResponseDto := HitCreateLinkApi(byteValueOfStruct, suite.authToken)

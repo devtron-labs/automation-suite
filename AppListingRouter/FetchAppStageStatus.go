@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func (suite *AppListingRouter) TestFetchAllStageStatusWithValidAppId() {
+func (suite *AppsListingRouterTestSuite) TestFetchAllStageStatusWithValidAppId() {
 	fetchAllLinkResponseDto := FetchAllStageStatus(Base.ReadDataByFilenameAndKey("", "app_id"), suite.authToken)
 
 	log.Println("Validating the response of FetchAllLink API")
@@ -14,7 +14,7 @@ func (suite *AppListingRouter) TestFetchAllStageStatusWithValidAppId() {
 	assert.Equal(suite.T(), true, fetchAllLinkResponseDto.Result[len(fetchAllLinkResponseDto.Result)-1])
 
 }
-func (suite *AppListingRouter) TestFetchAllStageStatusWithInvalidAppId() {
+func (suite *AppsListingRouterTestSuite) TestFetchAllStageStatusWithInvalidAppId() {
 
 	fetchAllLinkResponseDto := FetchAllStageStatus(Base.GetRandomStringOfGivenLength(10), suite.authToken)
 

@@ -6,5 +6,5 @@ import (
 )
 
 func TestDockerRegRouterSuite(t *testing.T) {
-	suite.Run(t, new(DockerRegRouterTestSuite))
+	suite.Run(t, new(DockersRegRouterTestSuite))
 }

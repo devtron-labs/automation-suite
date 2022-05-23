@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func (suite *LinkTestSuite) FetchAllLinkouts() {
+func (suite *LinkOutRouterTestSuite) FetchAllLinkouts() {
 	log.Println("Hitting the 'FetchAllLink' Api before creating any new entry")
 	fetchAllLinkResponseDto := HitFetchAllLinkApi()
 	noOfTeams := len(fetchAllLinkResponseDto.Result)
@@ -31,7 +31,7 @@ func (suite *LinkTestSuite) FetchAllLinkouts() {
 	HitDeleteLinkApi(byteValueOfStruct, suite.authToken)
 }
 
-func (suite *LinkTestSuite) FetchAllLinkoutsWithValidClusterId() {
+func (suite *LinkOutRouterTestSuite) FetchAllLinkoutsWithValidClusterId() {
 	log.Println("Hitting the 'FetchAllLink' Api before creating any new entry")
 	fetchAllLinkResponseDto := HitFetchAllLinkApi()
 	noOfTeams := len(fetchAllLinkResponseDto.Result)
@@ -55,7 +55,7 @@ func (suite *LinkTestSuite) FetchAllLinkoutsWithValidClusterId() {
 	HitDeleteLinkApi(byteValueOfStruct, suite.authToken)
 }
 
-func (suite *LinkTestSuite) FetchAllLinkoutsWithInvalidClusterId() {
+func (suite *LinkOutRouterTestSuite) FetchAllLinkoutsWithInvalidClusterId() {
 	log.Println("Hitting the 'FetchAllLink' Api before creating any new entry")
 	fetchAllLinkResponseDto := HitFetchAllLinkApi()
 	noOfTeams := len(fetchAllLinkResponseDto.Result)

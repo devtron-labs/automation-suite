@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func (suite *DockerRegRouter) TestSaveDockerRegistryWithValidPayload() {
+func (suite *DockersRegRouterTestSuite) TestSaveDockerRegistryWithValidPayload() {
 	// Valid Payload IsDefault as 'false'
 	saveDockerRegistryRequestDto := GetDockerRegistryRequestDto(false, "", "", "", "", false, "", "")
 	byteValueOfSaveDockerRegistry, _ := json.Marshal(saveDockerRegistryRequestDto)
@@ -22,7 +22,7 @@ func (suite *DockerRegRouter) TestSaveDockerRegistryWithValidPayload() {
 	log.Println("Hitting the Delete team API for Removing the data created via automation")
 	HitDeleteDockerRegistryApi(byteValueOfDeleteDockerRegistry, suite.authToken)
 }
-func (suite *DockerRegRouter) TestSaveDockerRegistryWithValidPayloadDefaultTrue() {
+func (suite *DockersRegRouterTestSuite) TestSaveDockerRegistryWithValidPayloadDefaultTrue() {
 	// Valid Payload IsDefault as 'false'
 	saveDockerRegistryRequestDto := GetDockerRegistryRequestDto(false, "", "", "", "", true, "", "")
 	byteValueOfSaveDockerRegistry, _ := json.Marshal(saveDockerRegistryRequestDto)
@@ -39,7 +39,7 @@ func (suite *DockerRegRouter) TestSaveDockerRegistryWithValidPayloadDefaultTrue(
 	log.Println("Hitting the Delete team API for Removing the data created via automation")
 	HitDeleteDockerRegistryApi(byteValueOfDeleteDockerRegistry, suite.authToken)
 }
-func (suite *DockerRegRouter) TestSaveDockerRegistryWithPreviousId() {
+func (suite *DockersRegRouterTestSuite) TestSaveDockerRegistryWithPreviousId() {
 	saveDockerRegistryRequestDto := GetDockerRegistryRequestDto(false, "", "", "", "", false, "", "")
 	byteValueOfSaveDockerRegistry, _ := json.Marshal(saveDockerRegistryRequestDto)
 
