@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-func (suite *PipelinesConfigRouterTestSuite) TestClass3SaveAppCiPipeline() {
+func (suite *PipelinesConfigRouterTestSuite) TestClassA3SaveAppCiPipeline() {
 	config, _ := GetEnvironmentConfigPipelineConfigRouter()
 	createAppApiResponse := suite.createAppResponseDto.Result
 	createAppMaterialResponse := suite.createAppMaterialResponseDto.Result

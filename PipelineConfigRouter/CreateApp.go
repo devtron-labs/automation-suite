@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func (suite *PipelinesConfigRouterTestSuite) TestClass1CreateApp() {
+func (suite *PipelinesConfigRouterTestSuite) TestClassA1CreateApp() {
 	appName := "app" + strings.ToLower(Base.GetRandomStringOfGivenLength(10))
 
 	suite.Run("A=1=CreateAppWithValidPayload", func() {

@@ -123,17 +123,18 @@ type GetChartReferenceResponseDTO struct {
 }
 
 type StructPipelineConfigRouter struct {
-	saveAppCiPipelineRequestDTO     SaveAppCiPipelineRequestDTO
-	createAppResponseDto            CreateAppResponseDto
-	deleteResponseDto               DeleteResponseDto
-	createAppMaterialRequestDto     CreateAppMaterialRequestDto
-	createAppMaterialResponseDto    CreateAppMaterialResponseDto
-	getAppDetailsResponseDto        GetAppDetailsResponseDto
-	saveAppCiPipelineResponseDTO    SaveAppCiPipelineResponseDTO
-	getCiPipelineViaIdResponseDTO   GetCiPipelineViaIdResponseDTO
-	getContainerRegistryResponseDTO GetContainerRegistryResponseDTO
-	getChartReferenceResponseDTO    GetChartReferenceResponseDTO
-	getAppTemplateResponseDto       GetAppTemplateResponseDto
+	saveAppCiPipelineRequestDTO        SaveAppCiPipelineRequestDTO
+	createAppResponseDto               CreateAppResponseDto
+	deleteResponseDto                  DeleteResponseDto
+	createAppMaterialRequestDto        CreateAppMaterialRequestDto
+	createAppMaterialResponseDto       CreateAppMaterialResponseDto
+	getAppDetailsResponseDto           GetAppDetailsResponseDto
+	saveAppCiPipelineResponseDTO       SaveAppCiPipelineResponseDTO
+	getCiPipelineViaIdResponseDTO      GetCiPipelineViaIdResponseDTO
+	getContainerRegistryResponseDTO    GetContainerRegistryResponseDTO
+	getChartReferenceResponseDTO       GetChartReferenceResponseDTO
+	getAppTemplateResponseDto          GetAppTemplateResponseDto
+	getCdPipelineStrategiesResponseDto GetCdPipelineStrategiesResponseDto
 }
 
 type EnvironmentConfigPipelineConfigRouter struct {
@@ -335,9 +336,16 @@ func HitGetTemplateViaAppIdAndChartRefId(appId string, chartRefId string, authTo
 	return pipelineConfigRouter.getAppTemplateResponseDto
 }
 
+func HitGetCdPipelineStrategies(appId string, authToken string) GetCdPipelineStrategiesResponseDto {
+	resp, err := Base.MakeApiCall(GetCdPipelineStrategiesApiUrl+appId, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetCdPipelineStrategiesApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetCdPipelineStrategiesApi)
+	return pipelineConfigRouter.getCdPipelineStrategiesResponseDto
+}
+
 func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructPipelineConfigRouter {
 	switch apiName {
-
 	case DeleteAppMaterialApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.deleteResponseDto)
 	case GetAppDetailsApi:
@@ -356,6 +364,8 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.getChartReferenceResponseDTO)
 	case GetAppTemplateViaAppIdAndChartRefIdApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.getAppTemplateResponseDto)
+	case GetCdPipelineStrategiesApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.getCdPipelineStrategiesResponseDto)
 	}
 	return structPipelineConfigRouter
 }
@@ -1402,5 +1412,51 @@ type GetAppTemplateResponseDto struct {
 				} `json:"properties"`
 			} `json:"schema"`
 		} `json:"globalConfig"`
+	} `json:"result"`
+}
+
+// BlueGreen === GetCdPipelineStrategies ==== /////////
+type BlueGreen struct {
+	AutoPromotionSeconds  int  `json:"autoPromotionSeconds"`
+	ScaleDownDelaySeconds int  `json:"scaleDownDelaySeconds"`
+	PreviewReplicaCount   int  `json:"previewReplicaCount"`
+	AutoPromotionEnabled  bool `json:"autoPromotionEnabled"`
+}
+
+type Canary struct {
+	MaxSurge       string `json:"maxSurge"`
+	MaxUnavailable int    `json:"maxUnavailable"`
+	Steps          []struct {
+		SetWeight int `json:"setWeight,omitempty"`
+		Pause     struct {
+			Duration int `json:"duration"`
+		} `json:"pause,omitempty"`
+	} `json:"steps"`
+}
+
+type Rolling struct {
+	MaxSurge       string `json:"maxSurge"`
+	MaxUnavailable int    `json:"maxUnavailable"`
+}
+type GetCdPipelineStrategiesResponseDto struct {
+	Code   int           `json:"code"`
+	Status string        `json:"status"`
+	Errors []Base.Errors `json:"errors"`
+	Result struct {
+		PipelineStrategy []struct {
+			DeploymentTemplate string `json:"deploymentTemplate"`
+			Config             struct {
+				Deployment struct {
+					Strategy struct {
+						Rolling   Rolling   `json:"rolling,omitempty"`
+						BlueGreen BlueGreen `json:"blueGreen,omitempty"`
+						Canary    Canary    `json:"canary,omitempty"`
+						Recreate  struct {
+						} `json:"recreate,omitempty"`
+					} `json:"strategy"`
+				} `json:"deployment"`
+			} `json:"config"`
+			Default bool `json:"default"`
+		} `json:"pipelineStrategy"`
 	} `json:"result"`
 }

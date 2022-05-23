@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func (suite *PipelinesConfigRouterTestSuite) TestClass8GetAppTemplate() {
+func (suite *PipelinesConfigRouterTestSuite) TestClassA8GetAppTemplate() {
 	createAppApiResponse := suite.createAppResponseDto.Result
 	appId := strconv.Itoa(createAppApiResponse.Id)
 	latestChartRef := testUtils.ReadDataByFilenameAndKey("OutputDataGetChartReferenceViaAppId", "latestChartRef")

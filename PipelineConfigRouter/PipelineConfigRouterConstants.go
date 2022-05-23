@@ -19,4 +19,6 @@ const (
 	GetChartReferenceViaAppIdApiUrl           string = "/orchestrator/chartref/autocomplete/"
 	GetAppTemplateViaAppIdAndChartRefIdApi    string = "GetAppTemplateViaAppIdAndChartRefIdApi"
 	GetAppTemplateViaAppIdAndChartRefIdApiUrl string = "/orchestrator/app/template/"
+	GetCdPipelineStrategiesApiUrl             string = "/orchestrator/app/cd-pipeline/strategies/"
+	GetCdPipelineStrategiesApi                string = "GetCdPipelineStrategiesApi"
 )

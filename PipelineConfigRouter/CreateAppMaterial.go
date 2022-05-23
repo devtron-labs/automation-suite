@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-func (suite *PipelinesConfigRouterTestSuite) TestClass2CreateMaterial() {
+func (suite *PipelinesConfigRouterTestSuite) TestClassA2CreateMaterial() {
 	appId := suite.createAppResponseDto.Result.Id
 
 	suite.Run("A=1=CreateAppMaterialWithValidPayloadAndFetchSubmodulesFalse", func() {

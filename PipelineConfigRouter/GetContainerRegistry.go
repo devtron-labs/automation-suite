@@ -6,7 +6,7 @@ import (
 )
 
 // TestClass4GetContainerRegistry todo app ID is not required in URL for this API,I will remove this once dev will fix it
-func (suite *PipelinesConfigRouterTestSuite) TestClass5GetContainerRegistry() {
+func (suite *PipelinesConfigRouterTestSuite) TestClassA5GetContainerRegistry() {
 	createAppApiResponse := suite.createAppResponseDto.Result
 	appId := strconv.Itoa(createAppApiResponse.Id)
 	suite.Run("A=1=GetContainerRegistryWithValidAppId", func() {

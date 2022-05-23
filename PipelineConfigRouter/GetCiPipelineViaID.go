@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func (suite *PipelinesConfigRouterTestSuite) TestClass4GetCiPipeline() {
+func (suite *PipelinesConfigRouterTestSuite) TestClassA4GetCiPipeline() {
 	config, _ := GetEnvironmentConfigPipelineConfigRouter()
 	createAppApiResponse := suite.createAppResponseDto.Result
 	materialId := suite.createAppMaterialResponseDto.Result.Material[0].Id
