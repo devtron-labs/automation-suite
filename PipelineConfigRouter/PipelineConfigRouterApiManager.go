@@ -65,9 +65,10 @@ type AppMaterials struct {
 }
 
 type CreateAppMaterialResponseDto struct {
-	Code   int        `json:"code"`
-	Status string     `json:"status"`
-	Result AppDetails `json:"result"`
+	Code   int           `json:"code"`
+	Status string        `json:"status"`
+	Result AppDetails    `json:"result"`
+	Errors []Base.Errors `json:"errors"`
 }
 type AppDetails struct {
 	AppId    int            `json:"appId"`
@@ -126,6 +127,7 @@ type StructPipelineConfigRouter struct {
 	deleteResponseDto               DeleteResponseDto
 	createAppMaterialRequestDto     CreateAppMaterialRequestDto
 	createAppMaterialResponseDto    CreateAppMaterialResponseDto
+	getAppDetailsResponseDto        GetAppDetailsResponseDto
 	saveAppCiPipelineResponseDTO    SaveAppCiPipelineResponseDTO
 	getCiPipelineViaIdResponseDTO   GetCiPipelineViaIdResponseDTO
 	getContainerRegistryResponseDTO GetContainerRegistryResponseDTO
@@ -196,30 +198,23 @@ func HitCreateAppApi(payload []byte, appName string, teamId int, templateId int,
 	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), CreateAppApi)
 	return pipelineConfigRouter.createAppResponseDto
 }
-
-func GetAppMaterialRequestDto(appId int, url string, gitProviderId int, fetchSubmodules bool) CreateAppMaterialRequestDto {
-	var createAppMaterialRequestDto CreateAppMaterialRequestDto
+func GetAppMaterialRequestDto(appId int, gitProviderId int, fetchSubmodules bool) CreateAppMaterialRequestDto {
+	pipelineConfig, _ := GetEnvironmentConfigPipelineConfigRouter()
 	var slice AppMaterials
-	slice.Url = url
+	slice.Url = pipelineConfig.GitHubProjectUrl
 	slice.GitProviderId = gitProviderId
 	slice.FetchSubmodules = fetchSubmodules
+	var createAppMaterialRequestDto CreateAppMaterialRequestDto
 	createAppMaterialRequestDto.AppId = appId
 	createAppMaterialRequestDto.Materials = append(createAppMaterialRequestDto.Materials, slice)
 	return createAppMaterialRequestDto
 }
-func HitCreateAppMaterialApi(payload []byte, appId int, url string, gitProviderId int, fetchSubmodules bool, authToken string) CreateAppMaterialResponseDto {
+func HitCreateAppMaterialApi(payload []byte, appId int, gitProviderId int, fetchSubmodules bool, authToken string) CreateAppMaterialResponseDto {
 	var payloadOfApi string
 	if payload != nil {
 		payloadOfApi = string(payload)
 	} else {
-		var createAppMaterialRequestDto CreateAppMaterialRequestDto
-		var slice AppMaterials
-		slice.Url = url
-		slice.GitProviderId = gitProviderId
-		slice.FetchSubmodules = fetchSubmodules
-		createAppMaterialRequestDto.AppId = appId
-		createAppMaterialRequestDto.Materials = append(createAppMaterialRequestDto.Materials, slice)
-		byteValueOfStruct, _ := json.Marshal(createAppMaterialRequestDto)
+		byteValueOfStruct, _ := json.Marshal(GetAppMaterialRequestDto(appId, gitProviderId, fetchSubmodules))
 		payloadOfApi = string(byteValueOfStruct)
 	}
 
@@ -227,10 +222,65 @@ func HitCreateAppMaterialApi(payload []byte, appId int, url string, gitProviderI
 	Base.HandleError(err, CreateAppMaterialApi)
 
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
-	installationScriptRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), CreateAppMaterialApi)
-	return installationScriptRouter.createAppMaterialResponseDto
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), CreateAppMaterialApi)
+	return pipelineConfigRouter.createAppMaterialResponseDto
 }
 
+type GetAppDetailsResponseDto struct {
+	Code   int    `json:"code"`
+	Status string `json:"status"`
+	Result struct {
+		Id         int         `json:"id"`
+		AppName    string      `json:"appName"`
+		TeamId     int         `json:"teamId"`
+		TemplateId int         `json:"templateId"`
+		Material   []Materials `json:"material""`
+	} `json:"result"`
+	Errors []Base.Errors `json:"errors"`
+}
+type Materials struct {
+	Name            string `json:"name"`
+	Url             string `json:"url"`
+	Id              int    `json:"id"`
+	GitProviderId   int    `json:"gitProviderId"`
+	CheckoutPath    string `json:"checkoutPath"`
+	FetchSubmodules bool   `json:"fetchSubmodules"`
+}
+
+func HitGetMaterial(appId int, authToken string) GetAppDetailsResponseDto {
+	id := strconv.Itoa(appId)
+	resp, err := Base.MakeApiCall(GetAppDetailsApiUrl+"/"+id, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetAppDetailsApi)
+
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetAppDetailsApi)
+	return pipelineConfigRouter.getAppDetailsResponseDto
+}
+
+type DeleteAppMaterialRequestDto struct {
+	AppId     int          `json:"appId"`
+	Materials AppMaterials `json:"material"`
+}
+
+func GetPayLoadForDeleteAppMaterialAPI(appId int, slice2 AppMaterials) []byte {
+	var deleteAppMaterialRequestDto DeleteAppMaterialRequestDto
+	deleteAppMaterialRequestDto.AppId = appId
+	deleteAppMaterialRequestDto.Materials.Id = slice2.Id
+	deleteAppMaterialRequestDto.Materials.Url = slice2.Url
+	deleteAppMaterialRequestDto.Materials.GitProviderId = slice2.GitProviderId
+	deleteAppMaterialRequestDto.Materials.CheckoutPath = slice2.CheckoutPath
+	deleteAppMaterialRequestDto.Materials.FetchSubmodules = slice2.FetchSubmodules
+	byteValueOfStruct, _ := json.Marshal(deleteAppMaterialRequestDto)
+	return byteValueOfStruct
+}
+func HitDeleteAppMaterialApi(byteValueOfStruct []byte, authToken string) DeleteResponseDto {
+	resp, err := Base.MakeApiCall(CreateAppMaterialApiUrl+"/delete", http.MethodDelete, string(byteValueOfStruct), nil, authToken)
+	Base.HandleError(err, DeleteAppMaterialApi)
+
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), DeleteAppMaterialApi)
+	return pipelineConfigRouter.deleteResponseDto
+}
 func getRequestPayloadForSaveAppCiPipeline(AppId int, dockerRegistry string, dockerRepository string, dockerfilePath string, dockerfileRepository string, dockerfileRelativePath string, gitMaterialId int) SaveAppCiPipelineRequestDTO {
 	saveAppCiPipelineRequestDTO := SaveAppCiPipelineRequestDTO{}
 	saveAppCiPipelineRequestDTO.AppId = AppId
@@ -285,6 +335,11 @@ func HitGetTemplateViaAppIdAndChartRefId(appId string, chartRefId string, authTo
 
 func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructPipelineConfigRouter {
 	switch apiName {
+
+	case DeleteAppMaterialApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.deleteResponseDto)
+	case GetAppDetailsApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.getAppDetailsResponseDto)
 	case CreateAppApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.createAppResponseDto)
 	case CreateAppMaterialApi:
@@ -326,10 +381,9 @@ func (suite *PipelinesConfigRouterTestSuite) CreateApp() CreateAppResponseDto {
 }
 
 func (suite *PipelinesConfigRouterTestSuite) CreateAppMaterial() CreateAppMaterialResponseDto {
-	configPipelineConfigRouter, _ := GetEnvironmentConfigPipelineConfigRouter()
-	createAppMaterialRequestDto := GetAppMaterialRequestDto(suite.createAppResponseDto.Result.Id, configPipelineConfigRouter.GitHubProjectUrl, 1, false)
+	createAppMaterialRequestDto := GetAppMaterialRequestDto(suite.createAppResponseDto.Result.Id, 1, false)
 	appMaterialByteValue, _ := json.Marshal(createAppMaterialRequestDto)
-	createAppMaterialResponseDto := HitCreateAppMaterialApi(appMaterialByteValue, suite.createAppResponseDto.Result.Id, configPipelineConfigRouter.GitHubProjectUrl, 1, false, suite.authToken)
+	createAppMaterialResponseDto := HitCreateAppMaterialApi(appMaterialByteValue, suite.createAppResponseDto.Result.Id, 1, false, suite.authToken)
 	return createAppMaterialResponseDto
 }
 
