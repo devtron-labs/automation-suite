@@ -133,6 +133,8 @@ func GetRandomStringOfGivenLength(length int) string {
 func GetRandomNumberOf9Digit() int {
 	return 100000000 + rand.Intn(999999999-100000000)
 }
+
+// Create File, Pass "example.txt"
 func CreateFile(fileName string) {
 	f, err := os.Create(fileName)
 	defer f.Close()
@@ -140,6 +142,8 @@ func CreateFile(fileName string) {
 		panic(err)
 	}
 }
+
+// Delete File, Pass "example.txt"
 func DeleteFile(fileName string) {
 	fmt.Println("Removing File : ", fileName)
 	f := os.Remove(fileName)
@@ -147,6 +151,9 @@ func DeleteFile(fileName string) {
 		log.Fatal(f)
 	}
 }
+
+// Create (if not present) & add properties to file
+// Pass ("example.txt","key","value")
 func CreateFileAndEnterData(filename string, key string, value string) {
 	file, err := os.Open(filename)
 	if err != nil {
@@ -185,6 +192,8 @@ func CreateFileAndEnterData(filename string, key string, value string) {
 	defer f.Close()
 }
 
+// Return []values
+// Pass comma-seperated keys ("example.txt",key1, key2, key3,...)
 func ReadDataByFilenameAndKey(filename string, keys ...string) []string {
 	var output []string
 	for _, key := range keys {

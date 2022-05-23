@@ -127,7 +127,7 @@ type StructPipelineConfigRouter struct {
 	deleteResponseDto               DeleteResponseDto
 	createAppMaterialRequestDto     CreateAppMaterialRequestDto
 	createAppMaterialResponseDto    CreateAppMaterialResponseDto
-	fetchAppGetResponseDto          FetchAppGetResponseDto
+	getAppDetailsResponseDto        GetAppDetailsResponseDto
 	saveAppCiPipelineResponseDTO    SaveAppCiPipelineResponseDTO
 	getCiPipelineViaIdResponseDTO   GetCiPipelineViaIdResponseDTO
 	getContainerRegistryResponseDTO GetContainerRegistryResponseDTO
@@ -198,7 +198,6 @@ func HitCreateAppApi(payload []byte, appName string, teamId int, templateId int,
 	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), CreateAppApi)
 	return pipelineConfigRouter.createAppResponseDto
 }
-
 func GetAppMaterialRequestDto(appId int, gitProviderId int, fetchSubmodules bool) CreateAppMaterialRequestDto {
 	pipelineConfig, _ := GetEnvironmentConfigPipelineConfigRouter()
 	var slice AppMaterials
@@ -223,11 +222,11 @@ func HitCreateAppMaterialApi(payload []byte, appId int, gitProviderId int, fetch
 	Base.HandleError(err, CreateAppMaterialApi)
 
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
-	apiRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), CreateAppMaterialApi)
-	return apiRouter.createAppMaterialResponseDto
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), CreateAppMaterialApi)
+	return pipelineConfigRouter.createAppMaterialResponseDto
 }
 
-type FetchAppGetResponseDto struct {
+type GetAppDetailsResponseDto struct {
 	Code   int    `json:"code"`
 	Status string `json:"status"`
 	Result struct {
@@ -248,14 +247,14 @@ type Materials struct {
 	FetchSubmodules bool   `json:"fetchSubmodules"`
 }
 
-func HitGetMaterial(appId int, authToken string) FetchAppGetResponseDto {
+func HitGetMaterial(appId int, authToken string) GetAppDetailsResponseDto {
 	id := strconv.Itoa(appId)
-	resp, err := Base.MakeApiCall(GetAppGetApiUrl+"/"+id, http.MethodGet, "", nil, authToken)
-	Base.HandleError(err, FetchAppGetApi)
+	resp, err := Base.MakeApiCall(GetAppDetailsApiUrl+"/"+id, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetAppDetailsApi)
 
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
-	apiRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), FetchAppGetApi)
-	return apiRouter.fetchAppGetResponseDto
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetAppDetailsApi)
+	return pipelineConfigRouter.getAppDetailsResponseDto
 }
 
 type DeleteAppMaterialRequestDto struct {
@@ -279,8 +278,8 @@ func HitDeleteAppMaterialApi(byteValueOfStruct []byte, authToken string) DeleteR
 	Base.HandleError(err, DeleteAppMaterialApi)
 
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
-	apiRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), DeleteAppMaterialApi)
-	return apiRouter.deleteResponseDto
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), DeleteAppMaterialApi)
+	return pipelineConfigRouter.deleteResponseDto
 }
 func getRequestPayloadForSaveAppCiPipeline(AppId int, dockerRegistry string, dockerRepository string, dockerfilePath string, dockerfileRepository string, dockerfileRelativePath string, gitMaterialId int) SaveAppCiPipelineRequestDTO {
 	saveAppCiPipelineRequestDTO := SaveAppCiPipelineRequestDTO{}
@@ -336,12 +335,15 @@ func HitGetTemplateViaAppIdAndChartRefId(appId string, chartRefId string, authTo
 
 func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructPipelineConfigRouter {
 	switch apiName {
+
+	case DeleteAppMaterialApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.deleteResponseDto)
+	case GetAppDetailsApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.getAppDetailsResponseDto)
 	case CreateAppApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.createAppResponseDto)
 	case CreateAppMaterialApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.createAppMaterialResponseDto)
-	case FetchAppGetApi:
-		json.Unmarshal(response, &structPipelineConfigRouter.fetchAppGetResponseDto)
 	case SaveAppCiPipelineApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.saveAppCiPipelineResponseDTO)
 	case GetCiPipelineViaIdApi:
@@ -384,6 +386,7 @@ func (suite *PipelinesConfigRouterTestSuite) CreateAppMaterial() CreateAppMateri
 	createAppMaterialResponseDto := HitCreateAppMaterialApi(appMaterialByteValue, suite.createAppResponseDto.Result.Id, 1, false, suite.authToken)
 	return createAppMaterialResponseDto
 }
+
 func (suite *PipelinesConfigRouterTestSuite) TearDownSuite() {
 	log.Println("=== Running the after suite method for deleting the data created via automation ===")
 	byteValueOfDeleteApp := GetPayLoadForDeleteAppAPI(suite.createAppResponseDto.Result.Id, suite.createAppResponseDto.Result.AppName, suite.createAppResponseDto.Result.TeamId, suite.createAppResponseDto.Result.TemplateId)

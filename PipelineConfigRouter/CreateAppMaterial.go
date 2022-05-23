@@ -27,8 +27,10 @@ func (suite *PipelinesConfigRouterTestSuite) TestClass5CreateMaterial() {
 		byteValueOfDeleteApp := GetPayLoadForDeleteAppMaterialAPI(createAppMaterialResponseDto.Result.AppId, createAppMaterialResponseDto.Result.Material[0])
 		log.Println("Hitting the Delete material API for Removing the data created via automation")
 		HitDeleteAppMaterialApi(byteValueOfDeleteApp, suite.authToken)
+
 	})
 	suite.Run("A=2=CreateAppMaterialWithValidPayloadAndFetchSubmodulesTrue", func() {
+
 		createAppMaterialRequestDto := GetAppMaterialRequestDto(appId, 1, true)
 		byteValueOfStruct, _ := json.Marshal(createAppMaterialRequestDto)
 		log.Println("Hitting The create material API")
@@ -45,9 +47,11 @@ func (suite *PipelinesConfigRouterTestSuite) TestClass5CreateMaterial() {
 		byteValueOfDeleteApp := GetPayLoadForDeleteAppMaterialAPI(createAppMaterialResponseDto.Result.AppId, createAppMaterialResponseDto.Result.Material[0])
 		log.Println("Hitting the Delete material API for Removing the data created via automation")
 		HitDeleteAppMaterialApi(byteValueOfDeleteApp, suite.authToken)
+
 	})
 
 	suite.Run("A=3=CreateAppMaterialWithInvalidGitProviderId", func() {
+
 		gitProviderID := Base.GetRandomNumberOf9Digit()
 		createAppMaterialRequestDto := GetAppMaterialRequestDto(appId, gitProviderID, false)
 		byteValueOfStruct, _ := json.Marshal(createAppMaterialRequestDto)
@@ -56,9 +60,11 @@ func (suite *PipelinesConfigRouterTestSuite) TestClass5CreateMaterial() {
 
 		log.Println("Validating the Response of the Create material API...")
 		assert.Equal(suite.T(), "pg: no rows in result set", createAppMaterialResponseDto.Errors[0].UserMessage)
+
 	})
 
 	suite.Run("A=4=CreateAppMaterialWithInvalidCheckoutPath", func() {
+
 		createAppMaterialRequestDto := GetAppMaterialRequestDto(appId, 1, false)
 		createAppMaterialRequestDto.Materials[0].CheckoutPath = Base.GetRandomStringOfGivenLength(5)
 		byteValueOfStruct2, _ := json.Marshal(createAppMaterialRequestDto)
@@ -66,6 +72,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClass5CreateMaterial() {
 		createAppMaterialResponseDto := HitCreateAppMaterialApi(byteValueOfStruct2, appId, 1, false, suite.authToken)
 		log.Println("Validating the Response of the Create material API...")
 		assert.Equal(suite.T(), "Key: 'CreateMaterialDTO.Material[0].CheckoutPath' Error:Field validation for 'CheckoutPath' failed on the 'checkout-path-component' tag", createAppMaterialResponseDto.Errors[0].UserMessage)
+
 	})
 
 	// add testcase for ./path
