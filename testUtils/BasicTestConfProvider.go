@@ -140,8 +140,14 @@ func CreateFile(fileName string) {
 		panic(err)
 	}
 }
+func DeleteFile(fileName string) {
+	fmt.Println("Removing File : ", fileName)
+	f := os.Remove(fileName)
+	if f != nil {
+		log.Fatal(f)
+	}
+}
 func CreateFileAndEnterData(filename string, key string, value string) {
-	filename = "../" + filename + ".txt"
 	file, err := os.Open(filename)
 	if err != nil {
 		//panic(err)
@@ -179,36 +185,37 @@ func CreateFileAndEnterData(filename string, key string, value string) {
 	defer f.Close()
 }
 
-func ReadDataByFilenameAndKey(filename string, key string) string {
-	filename = "../" + filename + ".txt"
-	file, err := os.Open(filename)
-	if err != nil {
-		panic(err)
-	}
-	scanner := bufio.NewScanner(file)
-	var temp string
-	for scanner.Scan() {
-		line := scanner.Text()
-		temp = temp + line
-	}
-	temp = TrimSuffix(temp)
-	split := strings.Split(temp, ",")
-	var output string
-	flag := 1
-	for _, j := range split {
-		if len(j) != 0 {
-			split2 := strings.Split(j, ":")
-			temp2 := "\"" + key + "\""
-			if split2[0] == temp2 {
-				output = split2[1]
-				flag = 0
-				break
+func ReadDataByFilenameAndKey(filename string, keys ...string) []string {
+	var output []string
+	for _, key := range keys {
+		file, err := os.Open(filename)
+		if err != nil {
+			panic(err)
+		}
+		scanner := bufio.NewScanner(file)
+		var temp string
+		for scanner.Scan() {
+			line := scanner.Text()
+			temp = temp + line
+		}
+		temp = TrimSuffix(temp)
+		split := strings.Split(temp, ",")
+		flag := 1
+		for _, j := range split {
+			if len(j) != 0 {
+				split2 := strings.Split(j, ":")
+				temp2 := "\"" + key + "\""
+				if split2[0] == temp2 {
+					output = append(output, split2[1])
+					flag = 0
+					break
+				}
 			}
 		}
-	}
-	defer file.Close()
-	if flag == 1 {
-		panic("key NOT found")
+		if flag == 1 {
+			log.Println("key NOT found")
+			output = append(output, "")
+		}
 	}
 	return output
 }
