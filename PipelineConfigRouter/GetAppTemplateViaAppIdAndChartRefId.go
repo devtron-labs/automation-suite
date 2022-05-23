@@ -11,8 +11,15 @@ func (suite *PipelinesConfigRouterTestSuite) TestClass8GetAppTemplate() {
 	appId := strconv.Itoa(createAppApiResponse.Id)
 	latestChartRef := testUtils.ReadDataByFilenameAndKey("OutputDataGetChartReferenceViaAppId", "latestChartRef")
 	suite.Run("A=1=GetTemplateViaValidArgs", func() {
-		getChartReferenceResponse := HitGetTemplateViaAppIdAndChartRefId(appId, latestChartRef[0], suite.authToken)
-		indexOfLastResult := len(getChartReferenceResponse.Result.ChartRefs) - 1
-		assert.NotNil(suite.T(), getChartReferenceResponse.Result.ChartRefs[indexOfLastResult].Id)
+		getTemplateResponse := HitGetTemplateViaAppIdAndChartRefId(appId, latestChartRef[0], suite.authToken)
+		assert.NotNil(suite.T(), getTemplateResponse.Result.GlobalConfig.DefaultAppOverride)
+	})
+
+	suite.Run("A=2=GetTemplateViaInvalidChartRefId", func() {
+		invalidChartRefId := strconv.Itoa(testUtils.GetRandomNumberOf9Digit())
+		getTemplateResponse := HitGetTemplateViaAppIdAndChartRefId(appId, invalidChartRefId, suite.authToken)
+		assert.Equal(suite.T(), "pg: no rows in result set", getTemplateResponse.Errors[0].UserMessage)
 	})
 }
+
+//todo need to add one more case for invalid AppId as well once dev will fix the issue for invalid app-id
