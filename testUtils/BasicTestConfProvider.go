@@ -179,7 +179,7 @@ func CreateFileAndEnterData(filename string, key string, value string) {
 		}
 
 	}
-	result = result + ",\"" + key + "\":" + "\"" + value + "\"}"
+	result = result + ",\"" + key + "\":" + value + "}"
 	if result[0:1] == "," {
 		result = TrimFirstChar(result)
 	}
