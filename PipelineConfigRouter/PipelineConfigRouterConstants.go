@@ -21,4 +21,8 @@ const (
 	GetAppTemplateViaAppIdAndChartRefIdApiUrl string = "/orchestrator/app/template/"
 	GetCdPipelineStrategiesApiUrl             string = "/orchestrator/app/cd-pipeline/strategies/"
 	GetCdPipelineStrategiesApi                string = "GetCdPipelineStrategiesApi"
+	GetPipelineSuggestedCDApiUrl              string = "/orchestrator/app/pipeline/suggest/cd/"
+	GetPipelineSuggestedCDApi                 string = "GetPipelineSuggestedCDApi"
+	GetAllEnvironmentDetailsApiUrl            string = "/orchestrator/env/autocomplete?auth=true"
+	GetAllEnvironmentDetailsApi               string = "GetAllEnvironmentDetailsApiUrl"
 )
