@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 type ConfigMapDataRequestDTO struct {
@@ -19,13 +20,18 @@ type Data struct {
 	Key2 string `json:"key2"`
 }
 type ConfigData struct {
-	Name           string `json:"name"`
-	Data           Data   `json:"data"`
-	Type           string `json:"type"`
-	External       bool   `json:"external"`
-	MountPath      string `json:"mountPath"`
-	SubPath        bool   `json:"subPath"`
-	FilePermission string `json:"filePermission"`
+	Name             string      `json:"name"`
+	Data             Data        `json:"data"`
+	DefaultData      Data        `json:"defaultData"`
+	Global           bool        `json:"global"`
+	SecretData       interface{} `json:"secretData"`
+	Type             string      `json:"type"`
+	External         bool        `json:"external"`
+	MountPath        string      `json:"mountPath"`
+	DefaultMountPath string      `json:"defaultMountPath,omitempty"`
+	RoleARN          string      `json:"roleARN"`
+	SubPath          bool        `json:"subPath"`
+	FilePermission   string      `json:"filePermission"`
 }
 
 type SaveConfigMapResponseDTO struct {
@@ -66,7 +72,12 @@ func getRequestPayloadForSaveConfigmap(configId int, configName string, appId in
 			conf.Data.Key2 = "value2"
 		}
 	}
-
+	if external && subPath {
+		conf.Data.Key1 = ""
+		if updateData {
+			conf.Data.Key2 = ""
+		}
+	}
 	configDataList = append(configDataList, conf)
 	configMapDataRequestDTO.ConfigData = configDataList
 	return configMapDataRequestDTO
@@ -80,10 +91,23 @@ func HitSaveConfigMap(payload []byte, authToken string) SaveConfigMapResponseDTO
 	return configMapRouter.saveConfigMapResponseDTO
 }
 
+func HitGetEnvironmentConfigMap(appId int, envId int, authToken string) SaveConfigMapResponseDTO {
+	id := strconv.Itoa(appId)
+	envirId := strconv.Itoa(envId)
+	apiUrl := GetEnvironmentConfigMapApiUrl + id + "/" + envirId
+	resp, err := Base.MakeApiCall(apiUrl, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetEnvironmentConfigMapApi)
+
+	structConfigMapRouter := StructConfigMapRouter{}
+	pipelineConfigRouter := structConfigMapRouter.UnmarshalGivenResponseBody(resp.Body(), SaveConfigmapApi)
+	return pipelineConfigRouter.saveConfigMapResponseDTO
+}
+
 func (structConfigMapRouter StructConfigMapRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructConfigMapRouter {
 	switch apiName {
 	case SaveConfigmapApi:
 		json.Unmarshal(response, &structConfigMapRouter.saveConfigMapResponseDTO)
+
 	}
 	return structConfigMapRouter
 }
