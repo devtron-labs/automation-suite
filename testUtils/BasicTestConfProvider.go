@@ -12,6 +12,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -41,6 +42,25 @@ type ApiErrorDto struct {
 		InternalMessage string `json:"internalMessage"`
 		UserMessage     string `json:"userMessage"`
 	} `json:"errors"`
+}
+
+type CreateAppResponseDto struct {
+	Code   int                 `json:"code"`
+	Status string              `json:"status"`
+	Result CreateAppRequestDto `json:"result"`
+	Errors []Errors            `json:"errors"`
+}
+type CreateAppRequestDto struct {
+	Id         int    `json:"id"`
+	AppName    string `json:"appName"`
+	TeamId     int    `json:"teamId"`
+	TemplateId int    `json:"templateId"`
+}
+
+type DeleteResponseDto struct {
+	Code   int    `json:"code"`
+	Status string `json:"status"`
+	Result string `json:"result"`
 }
 
 type EnvironmentConfig struct {
@@ -242,4 +262,56 @@ func TrimFirstChar(s string) string {
 		}
 	}
 	return ""
+}
+
+func CreateApp(authToken string) CreateAppResponseDto {
+	appName := strings.ToLower(GetRandomStringOfGivenLength(10))
+	createAppRequestDto := GetAppRequestDto("app"+appName, 1, 0)
+	byteValueOfCreateApp, _ := json.Marshal(createAppRequestDto)
+
+	response, err := MakeApiCall("/orchestrator/app", http.MethodPost, string(byteValueOfCreateApp), nil, authToken)
+	HandleError(err, "CreateAppApi")
+	baseConfigRouter := BaseConfigRouter{}
+	pipelineConfigRouter := baseConfigRouter.UnmarshalGivenResponseBody(response.Body(), "SaveConfigmapApi")
+	return pipelineConfigRouter.createAppResponseDto
+}
+
+func GetAppRequestDto(appName string, teamId int, templateId int) CreateAppRequestDto {
+	var createAppRequestDto CreateAppRequestDto
+	createAppRequestDto.AppName = appName
+	createAppRequestDto.TeamId = teamId
+	createAppRequestDto.TemplateId = templateId
+	return createAppRequestDto
+}
+
+func (baseConfigRouter BaseConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) BaseConfigRouter {
+	switch apiName {
+	case "SaveConfigmapApi":
+		json.Unmarshal(response, &baseConfigRouter.createAppResponseDto)
+	}
+	return baseConfigRouter
+}
+
+type BaseConfigRouter struct {
+	createAppResponseDto CreateAppResponseDto
+	deleteResponseDto    DeleteResponseDto
+}
+
+func GetPayLoadForDeleteAppAPI(id int, appName string, teamId int, templateId int) []byte {
+	var createAppRequestDto CreateAppRequestDto
+	createAppRequestDto.Id = id
+	createAppRequestDto.AppName = appName
+	createAppRequestDto.TeamId = teamId
+	createAppRequestDto.TemplateId = templateId
+	byteValueOfStruct, _ := json.Marshal(createAppRequestDto)
+	return byteValueOfStruct
+}
+
+func DeleteApp(appId int, appName string, TeamId int, TemplateId int, authToken string) DeleteResponseDto {
+	byteValueOfDeleteApp := GetPayLoadForDeleteAppAPI(appId, appName, TeamId, TemplateId)
+	resp, err := MakeApiCall("/orchestrator/app/"+strconv.Itoa(appId), http.MethodDelete, string(byteValueOfDeleteApp), nil, authToken)
+	HandleError(err, "DeleteAppApi")
+	baseConfigRouter := BaseConfigRouter{}
+	apiRouter := baseConfigRouter.UnmarshalGivenResponseBody(resp.Body(), "DeleteAppApi")
+	return apiRouter.deleteResponseDto
 }
