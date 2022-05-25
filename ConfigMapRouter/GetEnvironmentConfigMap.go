@@ -27,9 +27,9 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA2GetEnvironmentConfigMap() {
 		createdAppId = createdAppResponse.Result.Id
 
 		log.Println("=== Here We are saving a config map ===")
-		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveConfigmap(0, configName, createdAppId, "environment", false, false, false, false)
+		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveSecretOrConfigmap(0, configName, createdAppId, environment, false, false, false, false)
 		byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
-		savedResponse := HitSaveConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
+		savedResponse := HitSaveGlobalConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
 		configId = savedResponse.Result.Id
 
 		configMap := HitGetEnvironmentConfigMap(createdAppId, 1, suite.authToken)
@@ -41,61 +41,61 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA2GetEnvironmentConfigMap() {
 
 	suite.Run("A=3=AddNewKubernetesConfigmapAsEnvVariable", func() {
 		newConfigName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveConfigmap(configId, newConfigName, createdAppId, "environment", false, false, false, true)
+		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveSecretOrConfigmap(configId, newConfigName, createdAppId, environment, false, false, false, true)
 		byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
 		log.Println("=== Hitting the SaveConfigMap API ====")
-		HitSaveConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
+		HitSaveGlobalConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
 
 		configMap := HitGetEnvironmentConfigMap(createdAppId, 1, suite.authToken)
 		log.Println("Validating the response of GetEnvConfig API")
-		assert.Equal(suite.T(), "environment", configMap.Result.ConfigData[0].Type)
-		assert.Equal(suite.T(), "value2", configMap.Result.ConfigData[0].DefaultData.Key2)
-		assert.Equal(suite.T(), configName, configMap.Result.ConfigData[0].Name)
+		assert.Equal(suite.T(), "environment", configMap.Result.ConfigData[1].Type)
+		assert.Equal(suite.T(), "value2", configMap.Result.ConfigData[1].DefaultData.Key2)
+		assert.Equal(suite.T(), newConfigName, configMap.Result.ConfigData[1].Name)
 	})
 
 	suite.Run("A=4=KubernetesConfigmapAsDataVolume", func() {
-		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveConfigmap(configId, configName, createdAppId, "volume", false, false, false, false)
+		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveSecretOrConfigmap(configId, configName, createdAppId, volume, false, false, false, false)
 		byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
 		log.Println("=== Hitting the SaveConfigMap API ====")
-		HitSaveConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
+		HitSaveGlobalConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
 		configMap := HitGetEnvironmentConfigMap(createdAppId, 1, suite.authToken)
 		assert.Equal(suite.T(), "volume", configMap.Result.ConfigData[0].Type)
 		assert.Equal(suite.T(), "/directory-path", configMap.Result.ConfigData[0].DefaultMountPath)
 	})
 
 	suite.Run("A=5=KubernetesConfigmapAsDataVolumeHavingSubPath", func() {
-		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveConfigmap(configId, configName, createdAppId, "volume", false, true, false, false)
+		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveSecretOrConfigmap(configId, configName, createdAppId, volume, false, true, false, false)
 		byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
 		log.Println("=== Hitting the SaveConfigMap API ====")
-		HitSaveConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
+		HitSaveGlobalConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
 		configMap := HitGetEnvironmentConfigMap(createdAppId, 1, suite.authToken)
 		assert.True(suite.T(), configMap.Result.ConfigData[0].SubPath)
 	})
 
 	suite.Run("A=6=KubernetesConfigmapAsDataVolumeHavingSubPathAndFilePermission", func() {
-		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveConfigmap(configId, configName, createdAppId, "volume", false, true, true, false)
+		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveSecretOrConfigmap(configId, configName, createdAppId, volume, false, true, true, false)
 		byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
 		log.Println("=== Hitting the SaveConfigMap API ====")
-		HitSaveConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
+		HitSaveGlobalConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
 		configMap := HitGetEnvironmentConfigMap(createdAppId, 1, suite.authToken)
 		assert.Equal(suite.T(), "0744", configMap.Result.ConfigData[0].FilePermission)
 	})
 
 	suite.Run("A=7=ExternalConfigmapAsEnvVariable", func() {
-		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveConfigmap(configId, configName, createdAppId, "environment", true, false, false, false)
+		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveSecretOrConfigmap(configId, configName, createdAppId, environment, true, false, false, false)
 		byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
 		log.Println("=== Hitting the SaveConfigMap API ====")
-		HitSaveConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
+		HitSaveGlobalConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
 		configMap := HitGetEnvironmentConfigMap(createdAppId, 1, suite.authToken)
 		assert.Equal(suite.T(), "environment", configMap.Result.ConfigData[0].Type)
 		assert.True(suite.T(), configMap.Result.ConfigData[0].External)
 	})
 
 	suite.Run("A=8=ExternalConfigmapAsDataVolume", func() {
-		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveConfigmap(configId, configName, createdAppId, "volume", true, false, false, false)
+		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveSecretOrConfigmap(configId, configName, createdAppId, volume, true, false, false, false)
 		byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
 		log.Println("=== Hitting the SaveConfigMap API ====")
-		HitSaveConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
+		HitSaveGlobalConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
 		configMap := HitGetEnvironmentConfigMap(createdAppId, 1, suite.authToken)
 		assert.Equal(suite.T(), "volume", configMap.Result.ConfigData[0].Type)
 		assert.True(suite.T(), configMap.Result.ConfigData[0].External)
@@ -103,10 +103,10 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA2GetEnvironmentConfigMap() {
 	})
 
 	suite.Run("A=9=ExternalConfigmapAsDataVolumeHavingSubPath", func() {
-		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveConfigmap(configId, configName, createdAppId, "volume", true, true, false, false)
+		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveSecretOrConfigmap(configId, configName, createdAppId, volume, true, true, false, false)
 		byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
 		log.Println("=== Hitting the SaveConfigMap API ====")
-		HitSaveConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
+		HitSaveGlobalConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
 		configMap := HitGetEnvironmentConfigMap(createdAppId, 1, suite.authToken)
 		assert.Equal(suite.T(), "volume", configMap.Result.ConfigData[0].Type)
 		assert.True(suite.T(), configMap.Result.ConfigData[0].External)
@@ -114,10 +114,10 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA2GetEnvironmentConfigMap() {
 	})
 
 	suite.Run("B=1=ExternalConfigmapAsDataVolumeHavingSubPathAndFilePermission", func() {
-		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveConfigmap(configId, configName, createdAppId, "volume", true, true, true, false)
+		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveSecretOrConfigmap(configId, configName, createdAppId, volume, true, true, true, false)
 		byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
 		log.Println("=== Hitting the SaveConfigMap API ====")
-		HitSaveConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
+		HitSaveGlobalConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
 		configMap := HitGetEnvironmentConfigMap(createdAppId, 1, suite.authToken)
 		assert.True(suite.T(), configMap.Result.ConfigData[0].External)
 		assert.Equal(suite.T(), "", configMap.Result.ConfigData[0].Data.Key1)
@@ -126,14 +126,14 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA2GetEnvironmentConfigMap() {
 
 	suite.Run("B=2=AddNewExternalConfigmapAsDataVolume", func() {
 		newConfigName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveConfigmap(configId, newConfigName, createdAppId, "volume", true, true, true, true)
+		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveSecretOrConfigmap(configId, newConfigName, createdAppId, volume, true, true, true, true)
 		byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
 		log.Println("=== Hitting the SaveConfigMap API ====")
-		HitSaveConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
+		HitSaveGlobalConfigMap(byteValueOfSaveAppCiPipeline, suite.authToken)
 		configMap := HitGetEnvironmentConfigMap(createdAppId, 1, suite.authToken)
-		assert.True(suite.T(), configMap.Result.ConfigData[0].External)
-		assert.Equal(suite.T(), "", configMap.Result.ConfigData[0].Data.Key2)
-		assert.Equal(suite.T(), "0744", configMap.Result.ConfigData[0].FilePermission)
+		assert.True(suite.T(), configMap.Result.ConfigData[2].External)
+		assert.Equal(suite.T(), "", configMap.Result.ConfigData[2].Data.Key2)
+		assert.Equal(suite.T(), "0744", configMap.Result.ConfigData[2].FilePermission)
 
 		log.Println("=== Here We are Deleting the test data created for Automation ===")
 		Base.DeleteApp(createdAppId, createdAppResponse.Result.AppName, createdAppResponse.Result.TeamId, createdAppResponse.Result.TemplateId, suite.authToken)
