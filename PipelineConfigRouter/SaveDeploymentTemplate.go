@@ -41,7 +41,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA9SaveDeploymentTemplate()
 
 		byteValueOfSaveDeploymentTemplate, _ := json.Marshal(saveDeploymentTemplate)
 
-		log.Println("=== Here we hitting 7 verifying SaveTemplate API ===")
+		log.Println("=== Here we hitting & verifying SaveTemplate API ===")
 		saveDeploymentTemplateResponse := HitSaveDeploymentTemplateApi(byteValueOfSaveDeploymentTemplate, suite.authToken)
 		assert.Equal(suite.T(), createAppApiResponse.Id, saveDeploymentTemplateResponse.Result.AppId)
 		assert.Equal(suite.T(), latestChartRef, saveDeploymentTemplateResponse.Result.ChartRefId)
@@ -86,7 +86,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA9SaveDeploymentTemplate()
 		saveDeploymentTemplate.ValuesOverride.Resources.Limits.Memory = "100Mi"
 		byteValueOfSaveDeploymentTemplate, _ := json.Marshal(saveDeploymentTemplate)
 
-		log.Println("=== Here we hitting 7 verifying SaveTemplate API ===")
+		log.Println("=== Here we hitting & verifying SaveTemplate API ===")
 		saveDeploymentTemplateResponse := HitSaveDeploymentTemplateApi(byteValueOfSaveDeploymentTemplate, suite.authToken)
 		assert.Equal(suite.T(), createAppApiResponse.Id, saveDeploymentTemplateResponse.Result.AppId)
 		assert.Equal(suite.T(), 50, saveDeploymentTemplateResponse.Result.DefaultAppOverride.GracePeriod)

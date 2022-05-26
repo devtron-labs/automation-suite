@@ -57,43 +57,7 @@ type StructConfigMapRouter struct {
 	saveConfigMapResponseDTO SaveConfigMapResponseDTO
 }
 
-func getRequestPayloadForSaveSecretOrConfigmap(configId int, configName string, appId int, typeReq string, external bool, subPath bool, isFilePermissionRequired bool, updateData bool) ConfigMapAndSecretDataRequestDTO {
-	configMapDataRequestDTO := ConfigMapAndSecretDataRequestDTO{}
-	configMapDataRequestDTO.AppId = appId
-	configMapDataRequestDTO.Id = configId
-	configMapDataRequestDTO.EnvironmentId = 1
-	var configDataList = make([]ConfigData, 0)
-	conf := ConfigData{}
-	conf.Name = configName
-	conf.Type = typeReq
-
-	if typeReq == "volume" {
-		conf.MountPath = "/directory-path"
-		conf.SubPath = subPath
-
-		if isFilePermissionRequired {
-			conf.FilePermission = "0744"
-		}
-	}
-	conf.External = external
-	if !external {
-		conf.Data.Key1 = "value1"
-		if updateData {
-			conf.Data.Key2 = "value2"
-		}
-	}
-	if external && subPath {
-		conf.Data.Key1 = ""
-		if updateData {
-			conf.Data.Key2 = ""
-		}
-	}
-	configDataList = append(configDataList, conf)
-	configMapDataRequestDTO.ConfigData = configDataList
-	return configMapDataRequestDTO
-}
-
-func getRequestPayloadForSecret(configId int, configName string, appId int, userOfSecretAs string, externalType string, isSubPathNeeded bool, isFilePermissionNeeded bool) ConfigMapAndSecretDataRequestDTO {
+func getRequestPayloadForSecretOrConfig(configId int, configName string, appId int, userOfSecretAs string, externalType string, isSubPathNeeded bool, isFilePermissionNeeded bool) ConfigMapAndSecretDataRequestDTO {
 	configMapDataRequestDTO := ConfigMapAndSecretDataRequestDTO{}
 	var configDataList = make([]ConfigData, 0)
 	conf := ConfigData{}
@@ -119,16 +83,16 @@ func getRequestPayloadForSecret(configId int, configName string, appId int, user
 			data.RoleARN = ""
 			conf = data
 		}
-	case KubernetesSecret:
+	case Kubernetes:
 		{
-			data := GetConfigData(KubernetesSecret+configName, userOfSecretAs, false, "", isSubPathNeeded, isFilePermissionNeeded)
+			data := GetConfigData(Kubernetes+configName, userOfSecretAs, false, "", isSubPathNeeded, isFilePermissionNeeded)
 			data.RoleARN = ""
 			data.Data = GetDataForConfigOrSecret()
 			conf = data
 		}
-	case ExternalKubernetesSecret:
+	case ExternalKubernetes:
 		{
-			data := GetConfigData(ExternalKubernetesSecret+configName, userOfSecretAs, false, KubernetesSecret, isSubPathNeeded, isFilePermissionNeeded)
+			data := GetConfigData(ExternalKubernetes+configName, userOfSecretAs, false, Kubernetes, isSubPathNeeded, isFilePermissionNeeded)
 			data.RoleARN = ""
 			conf = data
 		}
@@ -198,8 +162,8 @@ func HitGetEnvironmentConfigMap(appId int, envId int, authToken string) SaveConf
 }
 
 func HitSaveEnvironmentSecret(payload []byte, authToken string) SaveConfigMapResponseDTO {
-	resp, err := Base.MakeApiCall(SaveEnvironmentSecretApiUrl, http.MethodPost, string(payload), nil, authToken)
-	Base.HandleError(err, SaveEnvironmentSecretApi)
+	resp, err := Base.MakeApiCall(SaveGlobalSecretApiUrl, http.MethodPost, string(payload), nil, authToken)
+	Base.HandleError(err, SaveGlobalSecretApi)
 	structConfigMapRouter := StructConfigMapRouter{}
 	configMapRouter := structConfigMapRouter.UnmarshalGivenResponseBody(resp.Body(), SaveGlobalConfigmapApi)
 	return configMapRouter.saveConfigMapResponseDTO
