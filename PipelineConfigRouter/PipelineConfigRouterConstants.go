@@ -25,4 +25,6 @@ const (
 	GetPipelineSuggestedCDApi                 string = "GetPipelineSuggestedCDApi"
 	GetAllEnvironmentDetailsApiUrl            string = "/orchestrator/env/autocomplete?auth=true"
 	GetAllEnvironmentDetailsApi               string = "GetAllEnvironmentDetailsApiUrl"
+	SaveDeploymentTemplateAPiUrl              string = "/orchestrator/app/template"
+	SaveDeploymentTemplateApi                 string = "SaveDeploymentTemplateApi"
 )

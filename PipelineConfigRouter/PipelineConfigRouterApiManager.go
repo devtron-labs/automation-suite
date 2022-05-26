@@ -122,20 +122,6 @@ type GetChartReferenceResponseDTO struct {
 	} `json:"result"`
 }
 
-type LivenessProbe struct {
-	Path                string        `json:"Path"`
-	Command             []interface{} `json:"command"`
-	FailureThreshold    int           `json:"failureThreshold"`
-	HttpHeaders         []interface{} `json:"httpHeaders"`
-	InitialDelaySeconds int           `json:"initialDelaySeconds"`
-	PeriodSeconds       int           `json:"periodSeconds"`
-	Port                int           `json:"port"`
-	Scheme              string        `json:"scheme"`
-	SuccessThreshold    int           `json:"successThreshold"`
-	Tcp                 bool          `json:"tcp"`
-	TimeoutSeconds      int           `json:"timeoutSeconds"`
-}
-
 // BlueGreen === GetCdPipelineStrategies ==== /////////
 type BlueGreen struct {
 	AutoPromotionSeconds  int  `json:"autoPromotionSeconds"`
@@ -219,6 +205,7 @@ type StructPipelineConfigRouter struct {
 	getCdPipelineStrategiesResponseDto GetCdPipelineStrategiesResponseDto
 	pipelineSuggestedCDResponseDTO     PipelineSuggestedCDResponseDTO
 	environmentDetailsResponseDTO      EnvironmentDetailsResponseDTO
+	saveDeploymentTemplateResponseDTO  SaveDeploymentTemplateResponseDTO
 }
 
 type EnvironmentConfigPipelineConfigRouter struct {
@@ -444,6 +431,23 @@ func HitGetAllEnvironmentDetails(queryParams map[string]string, authToken string
 	return pipelineConfigRouter.environmentDetailsResponseDTO
 }
 
+func GetRequestPayloadForSaveDeploymentTemplate(AppId int, chartRefId int, defaultOverride DefaultAppOverride) SaveDeploymentTemplateRequestDTO {
+	saveDeploymentTemplateRequestDTO := SaveDeploymentTemplateRequestDTO{}
+	saveDeploymentTemplateRequestDTO.AppId = AppId
+	saveDeploymentTemplateRequestDTO.ChartRefId = chartRefId
+	saveDeploymentTemplateRequestDTO.ValuesOverride = defaultOverride
+	saveDeploymentTemplateRequestDTO.DefaultAppOverride = defaultOverride
+	return saveDeploymentTemplateRequestDTO
+}
+
+func HitSaveDeploymentTemplateApi(payload []byte, authToken string) SaveDeploymentTemplateResponseDTO {
+	resp, err := Base.MakeApiCall(SaveDeploymentTemplateAPiUrl, http.MethodPost, string(payload), nil, authToken)
+	Base.HandleError(err, SaveDeploymentTemplateApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), SaveDeploymentTemplateApi)
+	return pipelineConfigRouter.saveDeploymentTemplateResponseDTO
+}
+
 func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructPipelineConfigRouter {
 	switch apiName {
 	case DeleteAppMaterialApi:
@@ -466,11 +470,12 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.getAppTemplateResponseDto)
 	case GetCdPipelineStrategiesApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.getCdPipelineStrategiesResponseDto)
-
 	case GetPipelineSuggestedCDApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.pipelineSuggestedCDResponseDTO)
 	case GetAllEnvironmentDetailsApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.environmentDetailsResponseDTO)
+	case SaveDeploymentTemplateApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.saveDeploymentTemplateResponseDTO)
 	}
 	return structPipelineConfigRouter
 }
