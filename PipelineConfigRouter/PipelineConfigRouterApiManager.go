@@ -1361,7 +1361,7 @@ func HitDeleteAppMaterialApi(byteValueOfStruct []byte, authToken string) DeleteR
 	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), DeleteAppMaterialApi)
 	return pipelineConfigRouter.deleteResponseDto
 }
-func getRequestPayloadForSaveAppCiPipeline(AppId int, dockerRegistry string, dockerRepository string, dockerfilePath string, dockerfileRepository string, dockerfileRelativePath string, gitMaterialId int) SaveAppCiPipelineRequestDTO {
+func GetRequestPayloadForSaveAppCiPipeline(AppId int, dockerRegistry string, dockerRepository string, dockerfilePath string, dockerfileRepository string, dockerfileRelativePath string, gitMaterialId int) SaveAppCiPipelineRequestDTO {
 	saveAppCiPipelineRequestDTO := SaveAppCiPipelineRequestDTO{}
 	saveAppCiPipelineRequestDTO.AppId = AppId
 	saveAppCiPipelineRequestDTO.DockerRepository = dockerRepository

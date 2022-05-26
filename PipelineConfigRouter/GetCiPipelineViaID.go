@@ -34,7 +34,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA4GetCiPipeline() {
 	suite.Run("A=2=GetCiPipelineViaValidAppID", func() {
 		log.Println("=== getting Test Data for Hitting the SaveAppCiPipeline API ====")
 		appName := createAppApiResponse.AppName
-		requestPayloadForSaveAppCiPipeline := getRequestPayloadForSaveAppCiPipeline(createAppApiResponse.Id, config.DockerRegistry, config.DockerRegistry+"/"+appName, config.DockerfilePath, config.DockerfileRepository, config.DockerfileRelativePath, materialId)
+		requestPayloadForSaveAppCiPipeline := GetRequestPayloadForSaveAppCiPipeline(createAppApiResponse.Id, config.DockerRegistry, config.DockerRegistry+"/"+appName, config.DockerfilePath, config.DockerfileRepository, config.DockerfileRelativePath, materialId)
 		byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
 		log.Println("=== Hitting the SaveAppCiPipeline API ====")
 		HitSaveAppCiPipeline(byteValueOfSaveAppCiPipeline, suite.authToken)

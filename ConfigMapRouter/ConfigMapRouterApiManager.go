@@ -93,7 +93,7 @@ func getRequestPayloadForSaveSecretOrConfigmap(configId int, configName string, 
 	return configMapDataRequestDTO
 }
 
-func getRequestPayloadForSecret(configId int, configName string, appId int, userOfSecretAs string, externalType string) ConfigMapAndSecretDataRequestDTO {
+func getRequestPayloadForSecret(configId int, configName string, appId int, userOfSecretAs string, externalType string, isSubPathNeeded bool, isFilePermissionNeeded bool) ConfigMapAndSecretDataRequestDTO {
 	configMapDataRequestDTO := ConfigMapAndSecretDataRequestDTO{}
 	var configDataList = make([]ConfigData, 0)
 	conf := ConfigData{}
@@ -103,32 +103,32 @@ func getRequestPayloadForSecret(configId int, configName string, appId int, user
 	switch externalType {
 	case AWSSystemManager:
 		{
-			data := GetConfigData(configName, userOfSecretAs, true, AWSSystemManager)
+			data := GetConfigData(AWSSystemManager+configName, userOfSecretAs, true, AWSSystemManager, isSubPathNeeded, isFilePermissionNeeded)
 			data.RoleARN = "RoleARNAdmin"
 			conf = data
 		}
 	case HashiCorpVault:
 		{
-			data := GetConfigData(configName, userOfSecretAs, true, HashiCorpVault)
+			data := GetConfigData(HashiCorpVault+configName, userOfSecretAs, true, HashiCorpVault, isSubPathNeeded, isFilePermissionNeeded)
 			data.RoleARN = ""
 			conf = data
 		}
 	case AWSSecretsManager:
 		{
-			data := GetConfigData(configName, userOfSecretAs, true, AWSSecretsManager)
+			data := GetConfigData(AWSSecretsManager+configName, userOfSecretAs, true, AWSSecretsManager, isSubPathNeeded, isFilePermissionNeeded)
 			data.RoleARN = ""
 			conf = data
 		}
 	case KubernetesSecret:
 		{
-			data := GetConfigData(configName, userOfSecretAs, false, "")
+			data := GetConfigData(KubernetesSecret+configName, userOfSecretAs, false, "", isSubPathNeeded, isFilePermissionNeeded)
 			data.RoleARN = ""
 			data.Data = GetDataForConfigOrSecret()
 			conf = data
 		}
 	case ExternalKubernetesSecret:
 		{
-			data := GetConfigData(configName, userOfSecretAs, true, KubernetesSecret)
+			data := GetConfigData(ExternalKubernetesSecret+configName, userOfSecretAs, false, KubernetesSecret, isSubPathNeeded, isFilePermissionNeeded)
 			data.RoleARN = ""
 			conf = data
 		}
@@ -138,10 +138,19 @@ func getRequestPayloadForSecret(configId int, configName string, appId int, user
 	return configMapDataRequestDTO
 }
 
-func GetConfigData(configName string, userOfSecretAs string, isSecretDataNeeded bool, externalSecretType string) ConfigData {
+func GetConfigData(configName string, userOfSecretAs string, isSecretDataNeeded bool, externalSecretType string, isSubPathNeeded bool, isFilePermissionRequired bool) ConfigData {
 	conf := ConfigData{}
 	conf.Name = configName
 	conf.Type = userOfSecretAs
+	if userOfSecretAs == volume {
+		conf.MountPath = "/directory-path"
+		conf.SubPath = isSubPathNeeded
+
+		if isFilePermissionRequired {
+			conf.FilePermission = "0744"
+		}
+
+	}
 	conf.External = true
 	conf.ExternalSecretType = externalSecretType
 	if isSecretDataNeeded {
@@ -208,19 +217,10 @@ func (structConfigMapRouter StructConfigMapRouter) UnmarshalGivenResponseBody(re
 // ConfigsMapRouterTestSuite =================PipelineConfigSuite Setup =========================
 type ConfigsMapRouterTestSuite struct {
 	suite.Suite
-	authToken            string
-	createAppResponseDto Base.CreateAppResponseDto
-	deleteResponseDto    Base.DeleteResponseDto
+	authToken string
 }
 
 func (suite *ConfigsMapRouterTestSuite) SetupSuite() {
 	log.Println("=== Running Before Suite Method ===")
 	suite.authToken = Base.GetAuthToken()
-	suite.createAppResponseDto = Base.CreateApp(suite.authToken)
-}
-
-func (suite *ConfigsMapRouterTestSuite) TearDownSuite() {
-	log.Println("=== Running the after suite method for deleting the data created via automation ===")
-	createAppResponse := suite.createAppResponseDto
-	suite.deleteResponseDto = Base.DeleteApp(createAppResponse.Result.Id, createAppResponse.Result.AppName, createAppResponse.Result.TeamId, createAppResponse.Result.TemplateId, suite.authToken)
 }

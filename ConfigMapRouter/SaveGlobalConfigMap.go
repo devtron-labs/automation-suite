@@ -11,7 +11,7 @@ import (
 // TestClassA1SaveGlobalConfigMap todo need to take call for some changes once product will final that config file should delete after app deletion or not
 // TestClassA1SaveGlobalConfigMap todo once product will final that we can add config file before deployment template of not
 func (suite *ConfigsMapRouterTestSuite) TestClassA1SaveGlobalConfigMap() {
-	createAppApiResponse := suite.createAppResponseDto.Result
+	createAppApiResponse := Base.CreateApp(suite.authToken).Result
 	configName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
 	var configId int
 	suite.Run("A=1=KubernetesConfigmapAsEnvVariable", func() {
