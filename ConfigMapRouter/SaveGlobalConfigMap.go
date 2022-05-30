@@ -47,30 +47,30 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA1SaveGlobalConfigMap() {
 	var configId int
 
 	suite.Run("A=1=KubernetesConfigmapAsEnvVariable", func() {
-		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(0, configName, createAppApiResponse.Id, environment, Kubernetes, false, false)
+		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(0, configName, createAppApiResponse.Id, environment, kubernetes, false, false, false)
 		byteValueOfSaverConfigMap, _ := json.Marshal(requestPayloadForConfigMap)
 		log.Println("=== Hitting the SaveGlobalConfigMap API ====")
 		configMap := HitSaveGlobalConfigMap(byteValueOfSaverConfigMap, suite.authToken)
 		configId = configMap.Result.Id
 		assert.Equal(suite.T(), environment, configMap.Result.ConfigData[0].Type)
 		assert.Equal(suite.T(), "value1", configMap.Result.ConfigData[0].Data.Key1)
-		assert.Equal(suite.T(), Kubernetes+configName, configMap.Result.ConfigData[0].Name)
+		assert.Equal(suite.T(), kubernetes+configName, configMap.Result.ConfigData[0].Name)
 	})
 
 	suite.Run("A=2=AddNewKubernetesConfigmapAsEnvVariable", func() {
 		newConfigName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, environment, Kubernetes, false, false)
+		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, environment, kubernetes, false, false, false)
 		byteValueOfSaverConfigMap, _ := json.Marshal(requestPayloadForConfigMap)
 		log.Println("=== Hitting the SaveGlobalConfigMap API ====")
 		configMap := HitSaveGlobalConfigMap(byteValueOfSaverConfigMap, suite.authToken)
 		configId = configMap.Result.Id
 		assert.Equal(suite.T(), environment, configMap.Result.ConfigData[0].Type)
 		assert.Equal(suite.T(), "value2", configMap.Result.ConfigData[0].Data.Key2)
-		assert.Equal(suite.T(), Kubernetes+newConfigName, configMap.Result.ConfigData[0].Name)
+		assert.Equal(suite.T(), kubernetes+newConfigName, configMap.Result.ConfigData[0].Name)
 	})
 
 	suite.Run("A=3=KubernetesConfigmapAsDataVolume", func() {
-		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, configName, createAppApiResponse.Id, volume, Kubernetes, false, false)
+		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, configName, createAppApiResponse.Id, volume, kubernetes, false, false, false)
 		byteValueOfSaverConfigMap, _ := json.Marshal(requestPayloadForConfigMap)
 		log.Println("=== Hitting the SaveGlobalConfigMap API ====")
 		configMap := HitSaveGlobalConfigMap(byteValueOfSaverConfigMap, suite.authToken)
@@ -79,7 +79,7 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA1SaveGlobalConfigMap() {
 	})
 
 	suite.Run("A=4=KubernetesConfigmapAsDataVolumeHavingSubPath", func() {
-		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, configName, createAppApiResponse.Id, volume, Kubernetes, true, false)
+		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, configName, createAppApiResponse.Id, volume, kubernetes, true, false, false)
 		byteValueOfSaverConfigMap, _ := json.Marshal(requestPayloadForConfigMap)
 		log.Println("=== Hitting the SaveGlobalConfigMap API ====")
 		configMap := HitSaveGlobalConfigMap(byteValueOfSaverConfigMap, suite.authToken)
@@ -87,7 +87,7 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA1SaveGlobalConfigMap() {
 	})
 
 	suite.Run("A=5=KubernetesConfigmapAsDataVolumeHavingSubPathAndFilePermission", func() {
-		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, configName, createAppApiResponse.Id, volume, Kubernetes, true, true)
+		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, configName, createAppApiResponse.Id, volume, kubernetes, true, true, false)
 		byteValueOfSaverConfigMap, _ := json.Marshal(requestPayloadForConfigMap)
 		log.Println("=== Hitting the SaveGlobalConfigMap API ====")
 		configMap := HitSaveGlobalConfigMap(byteValueOfSaverConfigMap, suite.authToken)
@@ -95,7 +95,7 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA1SaveGlobalConfigMap() {
 	})
 
 	suite.Run("A=6=ExternalConfigmapAsEnvVariable", func() {
-		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, configName, createAppApiResponse.Id, environment, ExternalKubernetes, false, false)
+		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, configName, createAppApiResponse.Id, environment, externalKubernetes, false, false, false)
 		byteValueOfSaverConfigMap, _ := json.Marshal(requestPayloadForConfigMap)
 		log.Println("=== Hitting the SaveGlobalConfigMap API ====")
 		configMap := HitSaveGlobalConfigMap(byteValueOfSaverConfigMap, suite.authToken)
@@ -104,7 +104,7 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA1SaveGlobalConfigMap() {
 	})
 
 	suite.Run("A=7=ExternalConfigmapAsDataVolume", func() {
-		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, configName, createAppApiResponse.Id, volume, ExternalKubernetes, false, false)
+		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, configName, createAppApiResponse.Id, volume, externalKubernetes, false, false, false)
 		byteValueOfSaverConfigMap, _ := json.Marshal(requestPayloadForConfigMap)
 		log.Println("=== Hitting the SaveGlobalConfigMap API ====")
 		configMap := HitSaveGlobalConfigMap(byteValueOfSaverConfigMap, suite.authToken)
@@ -114,7 +114,7 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA1SaveGlobalConfigMap() {
 	})
 
 	suite.Run("A=8=ExternalConfigmapAsDataVolumeHavingSubPath", func() {
-		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, configName, createAppApiResponse.Id, volume, ExternalKubernetes, true, false)
+		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, configName, createAppApiResponse.Id, volume, externalKubernetes, true, false, false)
 		byteValueOfSaverConfigMap, _ := json.Marshal(requestPayloadForConfigMap)
 		log.Println("=== Hitting the SaveGlobalConfigMap API ====")
 		configMap := HitSaveGlobalConfigMap(byteValueOfSaverConfigMap, suite.authToken)
@@ -124,7 +124,7 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA1SaveGlobalConfigMap() {
 	})
 
 	suite.Run("A=9=ExternalConfigmapAsDataVolumeHavingSubPathAndFilePermission", func() {
-		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, configName, createAppApiResponse.Id, volume, ExternalKubernetes, true, true)
+		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, configName, createAppApiResponse.Id, volume, externalKubernetes, true, true, false)
 		byteValueOfSaverConfigMap, _ := json.Marshal(requestPayloadForConfigMap)
 		log.Println("=== Hitting the SaveGlobalConfigMap API ====")
 		configMap := HitSaveGlobalConfigMap(byteValueOfSaverConfigMap, suite.authToken)
@@ -135,12 +135,12 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA1SaveGlobalConfigMap() {
 
 	suite.Run("B=1=AddNewExternalConfigmapAsDataVolume", func() {
 		newConfigName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, ExternalKubernetes, true, true)
+		requestPayloadForConfigMap := getRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, externalKubernetes, true, true, false)
 		byteValueOfSaverConfigMap, _ := json.Marshal(requestPayloadForConfigMap)
 		log.Println("=== Hitting the SaveGlobalConfigMap API ====")
 		configMap := HitSaveGlobalConfigMap(byteValueOfSaverConfigMap, suite.authToken)
 		assert.True(suite.T(), configMap.Result.ConfigData[0].External)
-		assert.Equal(suite.T(), ExternalKubernetes+newConfigName, configMap.Result.ConfigData[0].Name)
+		assert.Equal(suite.T(), externalKubernetes+newConfigName, configMap.Result.ConfigData[0].Name)
 		assert.Equal(suite.T(), "0744", configMap.Result.ConfigData[0].FilePermission)
 	})
 

@@ -2,6 +2,7 @@ package ConfigMapRouter
 
 import (
 	Base "automation-suite/testUtils"
+	"encoding/base64"
 	"encoding/json"
 	"github.com/stretchr/testify/suite"
 	"log"
@@ -57,7 +58,7 @@ type StructConfigMapRouter struct {
 	saveConfigMapResponseDTO SaveConfigMapResponseDTO
 }
 
-func getRequestPayloadForSecretOrConfig(configId int, configName string, appId int, userOfSecretAs string, externalType string, isSubPathNeeded bool, isFilePermissionNeeded bool) ConfigMapAndSecretDataRequestDTO {
+func getRequestPayloadForSecretOrConfig(configId int, configName string, appId int, userOfSecretAs string, externalType string, isSubPathNeeded bool, isFilePermissionNeeded bool, isSecret bool) ConfigMapAndSecretDataRequestDTO {
 	configMapDataRequestDTO := ConfigMapAndSecretDataRequestDTO{}
 	var configDataList = make([]ConfigData, 0)
 	conf := ConfigData{}
@@ -65,34 +66,34 @@ func getRequestPayloadForSecretOrConfig(configId int, configName string, appId i
 	configMapDataRequestDTO.Id = configId
 	configMapDataRequestDTO.EnvironmentId = 1
 	switch externalType {
-	case AWSSystemManager:
+	case awsSystemManager:
 		{
-			data := GetConfigData(AWSSystemManager+configName, userOfSecretAs, true, AWSSystemManager, isSubPathNeeded, isFilePermissionNeeded)
+			data := GetConfigData(awsSystemManager+configName, userOfSecretAs, true, awsSystemManager, isSubPathNeeded, isFilePermissionNeeded, isSecret)
 			data.RoleARN = "RoleARNAdmin"
 			conf = data
 		}
-	case HashiCorpVault:
+	case hashiCorpVault:
 		{
-			data := GetConfigData(HashiCorpVault+configName, userOfSecretAs, true, HashiCorpVault, isSubPathNeeded, isFilePermissionNeeded)
+			data := GetConfigData(hashiCorpVault+configName, userOfSecretAs, true, hashiCorpVault, isSubPathNeeded, isFilePermissionNeeded, isSecret)
 			data.RoleARN = ""
 			conf = data
 		}
-	case AWSSecretsManager:
+	case awsSecretsManager:
 		{
-			data := GetConfigData(AWSSecretsManager+configName, userOfSecretAs, true, AWSSecretsManager, isSubPathNeeded, isFilePermissionNeeded)
+			data := GetConfigData(awsSecretsManager+configName, userOfSecretAs, true, awsSecretsManager, isSubPathNeeded, isFilePermissionNeeded, isSecret)
 			data.RoleARN = ""
 			conf = data
 		}
-	case Kubernetes:
+	case kubernetes:
 		{
-			data := GetConfigData(Kubernetes+configName, userOfSecretAs, false, "", isSubPathNeeded, isFilePermissionNeeded)
+			data := GetConfigData(kubernetes+configName, userOfSecretAs, false, "", isSubPathNeeded, isFilePermissionNeeded, isSecret)
 			data.RoleARN = ""
-			data.Data = GetDataForConfigOrSecret()
+			data.Data = GetDataForConfigOrSecret(isSecret)
 			conf = data
 		}
-	case ExternalKubernetes:
+	case externalKubernetes:
 		{
-			data := GetConfigData(ExternalKubernetes+configName, userOfSecretAs, false, Kubernetes, isSubPathNeeded, isFilePermissionNeeded)
+			data := GetConfigData(externalKubernetes+configName, userOfSecretAs, false, kubernetes, isSubPathNeeded, isFilePermissionNeeded, isSecret)
 			data.RoleARN = ""
 			conf = data
 		}
@@ -102,7 +103,7 @@ func getRequestPayloadForSecretOrConfig(configId int, configName string, appId i
 	return configMapDataRequestDTO
 }
 
-func GetConfigData(configName string, userOfSecretAs string, isSecretDataNeeded bool, externalSecretType string, isSubPathNeeded bool, isFilePermissionRequired bool) ConfigData {
+func GetConfigData(configName string, userOfSecretAs string, isSecretDataNeeded bool, externalSecretType string, isSubPathNeeded bool, isFilePermissionRequired bool, isSecret bool) ConfigData {
 	conf := ConfigData{}
 	conf.Name = configName
 	conf.Type = userOfSecretAs
@@ -118,26 +119,40 @@ func GetConfigData(configName string, userOfSecretAs string, isSecretDataNeeded 
 	conf.External = true
 	conf.ExternalSecretType = externalSecretType
 	if isSecretDataNeeded {
-		conf.SecretData = GetSecretData()
+		conf.SecretData = GetSecretData(isSecret)
 	}
 	return conf
 }
 
-func GetSecretData() []SecretData {
+func GetSecretData(isSecret bool) []SecretData {
 	var secretDataList = make([]SecretData, 0)
 	data := SecretData{}
-	data.Key = "service/credentials"
-	data.Name = "secret-key"
-	data.IsBinary = true
-	data.Property = "property-name"
+	var key, name string
+	if isSecret {
+		key = base64.StdEncoding.EncodeToString([]byte("service/credentials"))
+		name = base64.StdEncoding.EncodeToString([]byte("secret-key"))
+	} else {
+		key = "service/credentials"
+		name = "secret-key"
+	}
+	data.Key = key
+	data.Name = name
 	secretDataList = append(secretDataList, data)
 	return secretDataList
 }
 
-func GetDataForConfigOrSecret() Data {
+func GetDataForConfigOrSecret(isSecret bool) Data {
 	data := Data{}
-	data.Key1 = "value1"
-	data.Key2 = "value2"
+	var value1, value2 string
+	if isSecret {
+		value1 = base64.StdEncoding.EncodeToString([]byte("value1"))
+		value2 = base64.StdEncoding.EncodeToString([]byte("value2"))
+	} else {
+		value1 = "value1"
+		value2 = "value2"
+	}
+	data.Key1 = value1
+	data.Key2 = value2
 	return data
 }
 
@@ -161,12 +176,23 @@ func HitGetEnvironmentConfigMap(appId int, envId int, authToken string) SaveConf
 	return pipelineConfigRouter.saveConfigMapResponseDTO
 }
 
-func HitSaveEnvironmentSecret(payload []byte, authToken string) SaveConfigMapResponseDTO {
+func HitSaveGlobalSecretApi(payload []byte, authToken string) SaveConfigMapResponseDTO {
 	resp, err := Base.MakeApiCall(SaveGlobalSecretApiUrl, http.MethodPost, string(payload), nil, authToken)
 	Base.HandleError(err, SaveGlobalSecretApi)
 	structConfigMapRouter := StructConfigMapRouter{}
 	configMapRouter := structConfigMapRouter.UnmarshalGivenResponseBody(resp.Body(), SaveGlobalConfigmapApi)
 	return configMapRouter.saveConfigMapResponseDTO
+}
+
+func HitGetEnvironmentSecretApi(appId int, envId int, authToken string) SaveConfigMapResponseDTO {
+	id := strconv.Itoa(appId)
+	environmentId := strconv.Itoa(envId)
+	apiUrl := GetEnvSecretApiUrl + id + "/" + environmentId
+	resp, err := Base.MakeApiCall(apiUrl, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetEnvironmentConfigMapApi)
+	structConfigMapRouter := StructConfigMapRouter{}
+	pipelineConfigRouter := structConfigMapRouter.UnmarshalGivenResponseBody(resp.Body(), SaveGlobalConfigmapApi)
+	return pipelineConfigRouter.saveConfigMapResponseDTO
 }
 
 func (structConfigMapRouter StructConfigMapRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructConfigMapRouter {
