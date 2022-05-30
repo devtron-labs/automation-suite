@@ -1,0 +1,299 @@
+{
+  "appId": 418,
+  "appWorkflowId": 0,
+  "action": 0,
+  "ciPipeline": {
+    "active": true,
+    "ciMaterial": [
+      {
+        "gitMaterialId": 171,
+        "id": 0,
+        "source": {
+          "type": "SOURCE_TYPE_BRANCH_FIXED",
+          "value": "main"
+        }
+      }
+    ],
+    "dockerArgs": {
+      "--progress": "auto"
+    },
+    "externalCiConfig": {},
+    "id": 0,
+    "isExternal": false,
+    "isManual": false,
+    "name": "ci-352-y1jq",
+    "linkedCount": 0,
+    "scanEnabled": false,
+    "preBuildStage": {
+      "id": 0,
+      "steps": [
+        {
+          "id": 1,
+          "index": 1,
+          "name": "Task 1",
+          "description": "Pre-build-task1",
+          "stepType": "INLINE",
+          "directoryPath": "",
+          "inlineStepDetail": {
+            "scriptType": "SHELL",
+            "script": "#!/bin/sh \nset -eo pipefail \n#set -v  ## uncomment this to debug the script \necho \"====Value of variable1====\"\necho $varibale1\necho \"===exporting OutVariable1===\"\nexport OutVariable1=OutValue1",
+            "conditionDetails": [
+              {
+                "id": 0,
+                "conditionOnVariable": "IsVariable1Present",
+                "conditionOperator": "==",
+                "conditionType": "TRIGGER",
+                "conditionalValue": "true"
+              },
+              {
+                "id": 1,
+                "conditionOnVariable": "OutVariable1",
+                "conditionOperator": "==",
+                "conditionType": "PASS",
+                "conditionalValue": "OutValue1"
+              }
+            ],
+            "inputVariables": [
+              {
+                "id": 5,
+                "name": "DOCKER_IMAGE_TAG",
+                "value": "",
+                "format": "STRING",
+                "description": "DOCKER_IMAGE_TAG",
+                "defaultValue": "",
+                "variableType": "GLOBAL",
+                "refVariableStepIndex": 0,
+                "refVariableName": "DOCKER_IMAGE_TAG",
+                "refVariableStage": ""
+              },
+              {
+                "id": 4,
+                "name": "variableDate",
+                "value": "Friday, 20 May 2022",
+                "format": "DATE",
+                "description": "Variable for Date",
+                "defaultValue": "",
+                "variableType": "NEW",
+                "refVariableStepIndex": 0,
+                "refVariableName": "",
+                "refVariableStage": ""
+              },
+              {
+                "id": 3,
+                "name": "variableNumber",
+                "value": "10",
+                "format": "NUMBER",
+                "description": "Variable for Numbers",
+                "defaultValue": "",
+                "variableType": "NEW",
+                "refVariableStepIndex": 0,
+                "refVariableName": "",
+                "refVariableStage": ""
+              },
+              {
+                "id": 2,
+                "name": "IsVariable1Present",
+                "value": "true",
+                "format": "BOOL",
+                "description": "IsVariable1Present",
+                "defaultValue": "",
+                "variableType": "NEW",
+                "refVariableStepIndex": 0,
+                "refVariableName": "",
+                "refVariableStage": ""
+              },
+              {
+                "id": 1,
+                "name": "variable1",
+                "value": "value1",
+                "format": "STRING",
+                "description": "Description of variable 1",
+                "defaultValue": "",
+                "variableType": "NEW",
+                "refVariableStepIndex": 0,
+                "refVariableName": "",
+                "refVariableStage": ""
+              }
+            ],
+            "outputVariables": [
+              {
+                "id": 1,
+                "name": "OutVariable1",
+                "value": "",
+                "format": "STRING",
+                "description": "Out variable 1",
+                "defaultValue": "",
+                "variableType": "NEW",
+                "refVariableStepIndex": 0,
+                "refVariableName": ""
+              }
+            ],
+            "commandArgsMap": [
+              {
+                "command": "",
+                "args": []
+              }
+            ],
+            "portMap": [],
+            "mountCodeToContainer": false,
+            "mountDirectoryFromHost": false
+          },
+          "outputDirectoryPath": [
+            "/output/task1/script.sh"
+          ]
+        },
+        {
+          "id": 2,
+          "index": 2,
+          "name": "Task 2",
+          "description": "Task2 description",
+          "stepType": "INLINE",
+          "directoryPath": "",
+          "inlineStepDetail": {
+            "scriptType": "CONTAINER_IMAGE",
+            "script": "echo \"hello World\"\necho \"Printing host bin directory\"\nls /host/bin\necho \"Printing source code directory\"\nls /sourcecode",
+            "conditionDetails": [
+              {
+                "id": 0,
+                "conditionOnVariable": "outVariable1FromTask1",
+                "conditionOperator": "!=",
+                "conditionType": "SKIP",
+                "conditionalValue": "OutValue1"
+              }
+            ],
+            "inputVariables": [
+              {
+                "id": 1,
+                "name": "outVariable1FromTask1",
+                "value": "",
+                "format": "STRING",
+                "description": "out Variable 1 From Task1",
+                "defaultValue": "",
+                "variableType": "FROM_PREVIOUS_STEP",
+                "refVariableStepIndex": 1,
+                "refVariableName": "OutVariable1",
+                "refVariableStage": "PRE_CI"
+              }
+            ],
+            "outputVariables": null,
+            "commandArgsMap": [
+              {
+                "command": "sh",
+                "args": [
+                  "/output/task2/script.sh"
+                ]
+              }
+            ],
+            "portMap": [
+              {
+                "portOnLocal": 8080,
+                "portOnContainer": 80
+              }
+            ],
+            "mountCodeToContainer": true,
+            "mountDirectoryFromHost": true,
+            "containerImagePath": "alpine:latest",
+            "isMountCustomScript": true,
+            "storeScriptAt": "/output/task2/script.sh",
+            "mountCodeToContainerPath": "/sourcecode",
+            "mountPathMap": [
+              {
+                "filePathOnDisk": "/bin",
+                "filePathOnContainer": "/host/bin"
+              }
+            ]
+          },
+          "outputDirectoryPath": [
+            "/save"
+          ]
+        }
+      ]
+    },
+    "postBuildStage": {
+      "id": 0,
+      "steps": [
+        {
+          "id": 1,
+          "index": 1,
+          "name": "Sonarqube",
+          "description": "Enhance Your Workflow with Continuous Code Quality & Code Security.",
+          "stepType": "REF_PLUGIN",
+          "directoryPath": "",
+          "pluginRefStepDetail": {
+            "id": 0,
+            "pluginId": 2,
+            "conditionDetails": [
+              {
+                "id": 0,
+                "conditionOnVariable": "SonarqubeProjectKey",
+                "conditionOperator": "==",
+                "conditionType": "TRIGGER",
+                "conditionalValue": "test-sonarqube"
+              }
+            ],
+            "inputVariables": [
+              {
+                "id": 6,
+                "name": "SonarqubeProjectKey",
+                "format": "STRING",
+                "description": "project key of grafana sonarqube account",
+                "isExposed": true,
+                "allowEmptyValue": true,
+                "defaultValue": "",
+                "variableType": "NEW",
+                "variableStepIndexInPlugin": 1,
+                "value": "test-sonarqube",
+                "refVariableName": "",
+                "refVariableStage": ""
+              },
+              {
+                "id": 7,
+                "name": "SonarqubeApiKey",
+                "format": "STRING",
+                "description": "api key of sonarqube account",
+                "isExposed": true,
+                "allowEmptyValue": true,
+                "defaultValue": "",
+                "variableType": "NEW",
+                "variableStepIndexInPlugin": 1,
+                "value": "eyJrIjoiMjBhZGNlNzYwMzUyZGE5Nzc0YWUzZTFkMWY0MzlhNjZmN2ZkMTMzYyIsIm4iOiJkZXZ0cm9uLWFwaS1rZXkiLCJpZCI6NjQxMzkyfQ==",
+                "refVariableName": "",
+                "refVariableStage": ""
+              },
+              {
+                "id": 8,
+                "name": "SonarqubeEndpoint",
+                "format": "STRING",
+                "description": "api endpoint of sonarqube account",
+                "isExposed": true,
+                "allowEmptyValue": true,
+                "defaultValue": "",
+                "variableType": "NEW",
+                "variableStepIndexInPlugin": 1,
+                "value": "https://sonarqube.devtron.info:32443/",
+                "refVariableName": "",
+                "refVariableStage": ""
+              },
+              {
+                "id": 9,
+                "name": "CheckoutPath",
+                "format": "STRING",
+                "description": "checkout path of git material",
+                "isExposed": true,
+                "allowEmptyValue": true,
+                "defaultValue": "",
+                "variableType": "NEW",
+                "variableStepIndexInPlugin": 1,
+                "value": "./",
+                "refVariableName": "",
+                "refVariableStage": ""
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+
+

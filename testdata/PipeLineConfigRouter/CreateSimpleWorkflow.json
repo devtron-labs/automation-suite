@@ -1,0 +1,297 @@
+{
+  "appId": 0,
+  "appWorkflowId": 0,
+  "action": 0,
+  "ciPipeline": {
+    "active": true,
+    "ciMaterial": [
+      {
+        "gitMaterialId": 0,
+        "id": 0,
+        "source": {
+          "type": "",
+          "value": ""
+        }
+      }
+    ],
+    "dockerArgs": {
+      "--progress": ""
+    },
+    "externalCiConfig": {},
+    "id": 0,
+    "isExternal": false,
+    "isManual": false,
+    "name": "",
+    "linkedCount": 0,
+    "scanEnabled": false,
+    "preBuildStage": {
+      "id": 0,
+      "steps": [
+        {
+          "id": 0,
+          "index": 0,
+          "name": "",
+          "description": "",
+          "stepType": "",
+          "directoryPath": "",
+          "inlineStepDetail": {
+            "scriptType": "SHELL",
+            "script": "#!/bin/sh \nset -eo pipefail \n#set -v  ## uncomment this to debug the script \necho \"====Value of variable1====\"\necho $varibale1\necho \"===exporting OutVariable1===\"\nexport OutVariable1=OutValue1",
+            "conditionDetails": [
+              {
+                "id": 0,
+                "conditionOnVariable": "",
+                "conditionOperator": "",
+                "conditionType": "",
+                "conditionalValue": ""
+              },
+              {
+                "id": 0,
+                "conditionOnVariable": "",
+                "conditionOperator": "",
+                "conditionType": "",
+                "conditionalValue": ""
+              }
+            ],
+            "inputVariables": [
+              {
+                "id": 0,
+                "name": "",
+                "value": "",
+                "format": "",
+                "description": "",
+                "defaultValue": "",
+                "variableType": "",
+                "refVariableStepIndex": 0,
+                "refVariableName": "",
+                "refVariableStage": ""
+              },
+              {
+                "id": 0,
+                "name": "",
+                "value": "",
+                "format": "",
+                "description": "",
+                "defaultValue": "",
+                "variableType": "",
+                "refVariableStepIndex": 0,
+                "refVariableName": "",
+                "refVariableStage": ""
+              },
+              {
+                "id": 0,
+                "name": "",
+                "value": "",
+                "format": "",
+                "description": "",
+                "defaultValue": "",
+                "variableType": "",
+                "refVariableStepIndex": 0,
+                "refVariableName": "",
+                "refVariableStage": ""
+              },
+              {
+                "id": 0,
+                "name": "",
+                "value": "",
+                "format": "",
+                "description": "",
+                "defaultValue": "",
+                "variableType": "",
+                "refVariableStepIndex": 0,
+                "refVariableName": "",
+                "refVariableStage": ""
+              },
+              {
+                "id": 0,
+                "name": "",
+                "value": "",
+                "format": "",
+                "description": "",
+                "defaultValue": "",
+                "variableType": "",
+                "refVariableStepIndex": 0,
+                "refVariableName": "",
+                "refVariableStage": ""
+              }
+            ],
+            "outputVariables": [
+              {
+                "id": 0,
+                "name": "",
+                "value": "",
+                "format": "",
+                "description": "",
+                "defaultValue": "",
+                "variableType": "",
+                "refVariableStepIndex": 0,
+                "refVariableName": ""
+              }
+            ],
+            "commandArgsMap": [
+              {
+                "command": "",
+                "args": []
+              }
+            ],
+            "portMap": [],
+            "mountCodeToContainer": false,
+            "mountDirectoryFromHost": false
+          },
+          "outputDirectoryPath": [
+            ""
+          ]
+        },
+        {
+          "id": 0,
+          "index": 0,
+          "name": "",
+          "description": "",
+          "stepType": "",
+          "directoryPath": "",
+          "inlineStepDetail": {
+            "scriptType": "",
+            "script": "",
+            "conditionDetails": [
+              {
+                "id": 0,
+                "conditionOnVariable": "",
+                "conditionOperator": "",
+                "conditionType": "",
+                "conditionalValue": ""
+              }
+            ],
+            "inputVariables": [
+              {
+                "id": 0,
+                "name": "",
+                "value": "",
+                "format": "",
+                "description": "",
+                "defaultValue": "",
+                "variableType": "",
+                "refVariableStepIndex": 0,
+                "refVariableName": "",
+                "refVariableStage": ""
+              }
+            ],
+            "outputVariables": null,
+            "commandArgsMap": [
+              {
+                "command": "",
+                "args": [
+                  ""
+                ]
+              }
+            ],
+            "portMap": [
+              {
+                "portOnLocal": 0,
+                "portOnContainer": 0
+              }
+            ],
+            "mountCodeToContainer": false,
+            "mountDirectoryFromHost": false,
+            "containerImagePath": "",
+            "isMountCustomScript": false,
+            "storeScriptAt": "",
+            "mountCodeToContainerPath": "",
+            "mountPathMap": [
+              {
+                "filePathOnDisk": "",
+                "filePathOnContainer": ""
+              }
+            ]
+          },
+          "outputDirectoryPath": [
+            ""
+          ]
+        }
+      ]
+    },
+    "postBuildStage": {
+      "id": 0,
+      "steps": [
+        {
+          "id": 0,
+          "index": 0,
+          "name": "",
+          "description": "",
+          "stepType": "",
+          "directoryPath": "",
+          "pluginRefStepDetail": {
+            "id": 0,
+            "pluginId": 0,
+            "conditionDetails": [
+              {
+                "id": 0,
+                "conditionOnVariable": "",
+                "conditionOperator": "",
+                "conditionType": "",
+                "conditionalValue": ""
+              }
+            ],
+            "inputVariables": [
+              {
+                "id": 0,
+                "name": "",
+                "format": "",
+                "description": "",
+                "isExposed": false,
+                "allowEmptyValue": false,
+                "defaultValue": "",
+                "variableType": "",
+                "variableStepIndexInPlugin": 0,
+                "value": "",
+                "refVariableName": "",
+                "refVariableStage": ""
+              },
+              {
+                "id": 0,
+                "name": "",
+                "format": "",
+                "description": "",
+                "isExposed": false,
+                "allowEmptyValue": false,
+                "defaultValue": "",
+                "variableType": "",
+                "variableStepIndexInPlugin": 0,
+                "value": "",
+                "refVariableName": "",
+                "refVariableStage": ""
+              },
+              {
+                "id": 0,
+                "name": "",
+                "format": "",
+                "description": "",
+                "isExposed": false,
+                "allowEmptyValue": false,
+                "defaultValue": "",
+                "variableType": "",
+                "variableStepIndexInPlugin": 0,
+                "value": "",
+                "refVariableName": "",
+                "refVariableStage": ""
+              },
+              {
+                "id": 0,
+                "name": "",
+                "format": "",
+                "description": "",
+                "isExposed": false,
+                "allowEmptyValue": false,
+                "defaultValue": "",
+                "variableType": "",
+                "variableStepIndexInPlugin": 0,
+                "value": "",
+                "refVariableName": "",
+                "refVariableStage": ""
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

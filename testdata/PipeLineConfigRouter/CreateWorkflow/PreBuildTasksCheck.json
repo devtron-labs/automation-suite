@@ -1,0 +1,56 @@
+{
+  "appId": 0,
+  "appWorkflowId": 0,
+  "action": 0,
+  "ciPipeline": {
+    "active": true,
+    "ciMaterial": [
+      {
+        "gitMaterialId": 0,
+        "id": 0,
+        "source": {
+          "type": "",
+          "value": ""
+        }
+      }
+    ],
+    "dockerArgs": {},
+    "externalCiConfig": {},
+    "id": 0,
+    "isExternal": false,
+    "isManual": false,
+    "name": "",
+    "linkedCount": 0,
+    "scanEnabled": false,
+    "preBuildStage": {
+      "id": 0,
+      "steps": [
+        {
+          "id": 0,
+          "index": 0,
+          "name": "Task 1",
+          "description": "hijdus",
+          "stepType": "INLINE",
+          "directoryPath": "",
+          "inlineStepDetail": {
+            "scriptType": "SHELL",
+            "script": "#!/bin/sh \nset -eo pipefail \n#set -v  ## uncomment this to debug the script \n",
+            "conditionDetails": [],
+            "inputVariables": [],
+            "outputVariables": [],
+            "commandArgsMap": [
+              {
+                "command": "",
+                "args": []
+              }
+            ],
+            "portMap": [],
+            "mountCodeToContainer": false,
+            "mountDirectoryFromHost": false
+          }
+        }
+      ]
+    },
+    "postBuildStage": {}
+  }
+}

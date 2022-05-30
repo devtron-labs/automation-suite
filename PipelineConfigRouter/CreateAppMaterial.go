@@ -21,7 +21,8 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA2CreateMaterial() {
 		fetchAppGetResponseDto := HitGetMaterial(createAppMaterialResponseDto.Result.AppId, suite.authToken)
 		log.Println("Validating the Response of the Get material API...")
 		assert.Equal(suite.T(), createAppMaterialResponseDto.Result.AppId, fetchAppGetResponseDto.Result.Id)
-		assert.Equal(suite.T(), false, fetchAppGetResponseDto.Result.Material[0].FetchSubmodules)
+		len := len(fetchAppGetResponseDto.Result.Material)
+		assert.Equal(suite.T(), false, fetchAppGetResponseDto.Result.Material[len-1].FetchSubmodules)
 
 		log.Println("getting payload for Delete material API")
 		byteValueOfDeleteApp := GetPayLoadForDeleteAppMaterialAPI(createAppMaterialResponseDto.Result.AppId, createAppMaterialResponseDto.Result.Material[0])
@@ -41,7 +42,8 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA2CreateMaterial() {
 		fetchAppGetResponseDto := HitGetMaterial(createAppMaterialResponseDto.Result.AppId, suite.authToken)
 		log.Println("Validating the Response of the Get material API...")
 		assert.Equal(suite.T(), createAppMaterialResponseDto.Result.AppId, fetchAppGetResponseDto.Result.Id)
-		assert.Equal(suite.T(), true, fetchAppGetResponseDto.Result.Material[0].FetchSubmodules)
+		len := len(fetchAppGetResponseDto.Result.Material)
+		assert.Equal(suite.T(), true, fetchAppGetResponseDto.Result.Material[len-1].FetchSubmodules)
 
 		log.Println("getting payload for Delete material API")
 		byteValueOfDeleteApp := GetPayLoadForDeleteAppMaterialAPI(createAppMaterialResponseDto.Result.AppId, createAppMaterialResponseDto.Result.Material[0])

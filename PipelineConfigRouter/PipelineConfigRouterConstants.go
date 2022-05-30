@@ -27,4 +27,10 @@ const (
 	GetAllEnvironmentDetailsApi               string = "GetAllEnvironmentDetailsApiUrl"
 	SaveDeploymentTemplateAPiUrl              string = "/orchestrator/app/template"
 	SaveDeploymentTemplateApi                 string = "SaveDeploymentTemplateApi"
+	CreateWorkflowApiUrl                      string = "/orchestrator/app/ci-pipeline/patch"
+	CreateWorkflowApi                         string = "CreateWorkflowApi"
+	GetWorkflowDetailsApi                     string = "GetWorkflowDetailsApi"
+	DeleteWorkflowApiUrl                      string = "/orchestrator/app/app-wf/"
+	FetchSuggestedCiPipelineNameApiUrl        string = "/orchestrator/app/pipeline/suggest/ci/"
+	FetchSuggestedCiPipelineNameApi           string = "FetchSuggestedCiPipelineNameApi"
 )

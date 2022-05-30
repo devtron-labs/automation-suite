@@ -2,7 +2,6 @@ package PipelineConfigRouter
 
 import (
 	"automation-suite/dockerRegRouter"
-	"automation-suite/testUtils"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"errors"
@@ -206,6 +205,9 @@ type StructPipelineConfigRouter struct {
 	pipelineSuggestedCDResponseDTO     PipelineSuggestedCDResponseDTO
 	environmentDetailsResponseDTO      EnvironmentDetailsResponseDTO
 	saveDeploymentTemplateResponseDTO  SaveDeploymentTemplateResponseDTO
+	getWorkflowDetails                 GetWorkflowDetails
+	createWorkflowResponseDto          CreateWorkflowResponseDto
+	fetchSuggestedCiPipelineName       FetchSuggestedCiPipelineName
 }
 
 type EnvironmentConfigPipelineConfigRouter struct {
@@ -278,6 +280,7 @@ func GetAppMaterialRequestDto(appId int, gitProviderId int, fetchSubmodules bool
 	slice.Url = pipelineConfig.GitHubProjectUrl
 	slice.GitProviderId = gitProviderId
 	slice.FetchSubmodules = fetchSubmodules
+	slice.CheckoutPath = "./" + Base.GetRandomStringOfGivenLength(5)
 	var createAppMaterialRequestDto CreateAppMaterialRequestDto
 	createAppMaterialRequestDto.AppId = appId
 	createAppMaterialRequestDto.Materials = append(createAppMaterialRequestDto.Materials, slice)
@@ -476,6 +479,15 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.environmentDetailsResponseDTO)
 	case SaveDeploymentTemplateApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.saveDeploymentTemplateResponseDTO)
+	case CreateWorkflowApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.createWorkflowResponseDto)
+	case FetchSuggestedCiPipelineNameApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.fetchSuggestedCiPipelineName)
+	case GetWorkflowDetailsApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.getWorkflowDetails)
+	case DeleteAppApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.deleteResponseDto)
+
 	}
 	return structPipelineConfigRouter
 }
@@ -513,7 +525,530 @@ func (suite *PipelinesConfigRouterTestSuite) CreateAppMaterial() CreateAppMateri
 
 func (suite *PipelinesConfigRouterTestSuite) TearDownSuite() {
 	log.Println("=== Running the after suite method for deleting the data created via automation ===")
-	byteValueOfDeleteApp := GetPayLoadForDeleteAppAPI(suite.createAppResponseDto.Result.Id, suite.createAppResponseDto.Result.AppName, suite.createAppResponseDto.Result.TeamId, suite.createAppResponseDto.Result.TemplateId)
-	HitDeleteAppApi(byteValueOfDeleteApp, suite.createAppResponseDto.Result.Id, suite.authToken)
-	testUtils.DeleteFile("OutputDataGetChartReferenceViaAppId")
+	//byteValueOfDeleteApp := GetPayLoadForDeleteAppAPI(suite.createAppResponseDto.Result.Id, suite.createAppResponseDto.Result.AppName, suite.createAppResponseDto.Result.TeamId, suite.createAppResponseDto.Result.TemplateId)
+	//HitDeleteAppApi(byteValueOfDeleteApp, suite.createAppResponseDto.Result.Id, suite.authToken)
+	//testUtils.DeleteFile("OutputDataGetChartReferenceViaAppId")
+}
+
+/////////////////=== Create Workflow API ====//////////////
+type CiMaterial struct {
+	Source struct {
+		Type  string `json:"type"`
+		Value string `json:"value"`
+	} `json:"source"`
+	GitMaterialId   int    `json:"gitMaterialId"`
+	Id              int    `json:"id"`
+	GitMaterialName string `json:"gitMaterialName"`
+}
+
+type PreBuildStage struct {
+	Id    int    `json:"id"`
+	Type  string `json:"type"`
+	Steps []struct {
+		Id                  int      `json:"id"`
+		Name                string   `json:"name"`
+		Description         string   `json:"description"`
+		Index               int      `json:"index"`
+		StepType            string   `json:"stepType"`
+		OutputDirectoryPath []string `json:"outputDirectoryPath"`
+		InlineStepDetail    struct {
+			ScriptType             string `json:"scriptType"`
+			Script                 string `json:"script"`
+			StoreScriptAt          string `json:"storeScriptAt"`
+			MountDirectoryFromHost bool   `json:"mountDirectoryFromHost"`
+			CommandArgsMap         []struct {
+				Command string   `json:"command"`
+				Args    []string `json:"args"`
+			} `json:"commandArgsMap"`
+			InputVariables []struct {
+				Id                   int    `json:"id"`
+				Name                 string `json:"name"`
+				Format               string `json:"format"`
+				Description          string `json:"description"`
+				Value                string `json:"value"`
+				VariableType         string `json:"variableType"`
+				RefVariableName      string `json:"refVariableName,omitempty"`
+				RefVariableStage     string `json:"refVariableStage"`
+				RefVariableStepIndex int    `json:"refVariableStepIndex,omitempty"`
+			} `json:"inputVariables"`
+			OutputVariables []struct {
+				Id               int    `json:"id"`
+				Name             string `json:"name"`
+				Format           string `json:"format"`
+				Description      string `json:"description"`
+				Value            string `json:"value"`
+				VariableType     string `json:"variableType"`
+				RefVariableStage string `json:"refVariableStage"`
+			} `json:"outputVariables"`
+			ConditionDetails []struct {
+				Id                  int    `json:"id"`
+				ConditionOnVariable string `json:"conditionOnVariable"`
+				ConditionType       string `json:"conditionType"`
+				ConditionOperator   string `json:"conditionOperator"`
+				ConditionalValue    string `json:"conditionalValue"`
+			} `json:"conditionDetails"`
+			MountCodeToContainer     bool   `json:"mountCodeToContainer,omitempty"`
+			MountCodeToContainerPath string `json:"mountCodeToContainerPath,omitempty"`
+			ContainerImagePath       string `json:"containerImagePath,omitempty"`
+			MountPathMap             []struct {
+				FilePathOnDisk      string `json:"filePathOnDisk"`
+				FilePathOnContainer string `json:"filePathOnContainer"`
+			} `json:"mountPathMap,omitempty"`
+			PortMap []struct {
+				PortOnLocal     int `json:"portOnLocal"`
+				PortOnContainer int `json:"portOnContainer"`
+			} `json:"portMap,omitempty"`
+			IsMountCustomScript bool `json:"isMountCustomScript,omitempty"`
+		} `json:"inlineStepDetail"`
+		PluginRefStepDetail interface{} `json:"pluginRefStepDetail"`
+	} `json:"steps"`
+}
+type Step struct {
+	Id                  int      `json:"id"`
+	Name                string   `json:"name"`
+	Description         string   `json:"description"`
+	Index               int      `json:"index"`
+	StepType            string   `json:"stepType"`
+	OutputDirectoryPath []string `json:"outputDirectoryPath"`
+	InlineStepDetail    struct {
+		ScriptType     string `json:"scriptType"`
+		Script         string `json:"script"`
+		StoreScriptAt  string `json:"storeScriptAt"`
+		CommandArgsMap []struct {
+			Command string   `json:"command"`
+			Args    []string `json:"args"`
+		} `json:"commandArgsMap"`
+		InputVariables  []InputVariables `json:"inputVariables"`
+		OutputVariables []struct {
+			Id               int    `json:"id"`
+			Name             string `json:"name"`
+			Format           string `json:"format"`
+			Description      string `json:"description"`
+			Value            string `json:"value"`
+			VariableType     string `json:"variableType"`
+			RefVariableStage string `json:"refVariableStage"`
+		} `json:"outputVariables"`
+		ConditionDetails []struct {
+			Id                  int    `json:"id"`
+			ConditionOnVariable string `json:"conditionOnVariable"`
+			ConditionType       string `json:"conditionType"`
+			ConditionOperator   string `json:"conditionOperator"`
+			ConditionalValue    string `json:"conditionalValue"`
+		} `json:"conditionDetails"`
+		MountCodeToContainer     bool   `json:"mountCodeToContainer,omitempty"`
+		MountCodeToContainerPath string `json:"mountCodeToContainerPath,omitempty"`
+		MountDirectoryFromHost   bool   `json:"mountDirectoryFromHost"`
+		ContainerImagePath       string `json:"containerImagePath,omitempty"`
+		MountPathMap             []struct {
+			FilePathOnDisk      string `json:"filePathOnDisk"`
+			FilePathOnContainer string `json:"filePathOnContainer"`
+		} `json:"mountPathMap,omitempty"`
+		PortMap []struct {
+			PortOnLocal     int `json:"portOnLocal"`
+			PortOnContainer int `json:"portOnContainer"`
+		} `json:"portMap,omitempty"`
+		IsMountCustomScript bool `json:"isMountCustomScript,omitempty"`
+	} `json:"inlineStepDetail"`
+	PluginRefStepDetail interface{} `json:"pluginRefStepDetail"`
+}
+type CiPipeline struct {
+	IsManual         bool              `json:"isManual"`
+	DockerArgs       map[string]string `json:"dockerArgs"`
+	IsExternal       bool              `json:"isExternal"`
+	ParentCiPipeline int               `json:"parentCiPipeline"`
+	ParentAppId      int               `json:"parentAppId"`
+	ExternalCiConfig struct {
+		Id         int    `json:"id"`
+		WebhookUrl string `json:"webhookUrl"`
+		Payload    string `json:"payload"`
+		AccessKey  string `json:"accessKey"`
+	} `json:"externalCiConfig"`
+	CiMaterial    []CiMaterial `json:"ciMaterial"`
+	Name          string       `json:"name"`
+	Id            int          `json:"id"`
+	Active        bool         `json:"active"`
+	LinkedCount   int          `json:"linkedCount"`
+	ScanEnabled   bool         `json:"scanEnabled"`
+	AppWorkflowId int          `json:"appWorkflowId"`
+	PreBuildStage struct {
+		Id    int    `json:"id"`
+		Type  string `json:"type"`
+		Steps []Step `json:"steps"`
+	} `json:"preBuildStage"`
+	PostBuildStage struct {
+		Id    int    `json:"id"`
+		Type  string `json:"type"`
+		Steps []Step `json:"steps"`
+	} `json:"postBuildStage"`
+}
+type GetWorkflowDetails struct {
+	Code   int        `json:"code"`
+	Status string     `json:"status"`
+	Result CiPipeline `json:"result"`
+}
+type ConditionDetails struct {
+	Id                  int    `json:"id"`
+	ConditionOnVariable string `json:"conditionOnVariable"`
+	ConditionType       string `json:"conditionType"`
+	ConditionOperator   string `json:"conditionOperator"`
+	ConditionalValue    string `json:"conditionalValue"`
+}
+
+// Payload with added missing fields
+type CreateWorkflowRequestDto struct {
+	AppId         int        `json:"appId"`
+	AppWorkflowId int        `json:"appWorkflowId"`
+	Action        int        `json:"action"`
+	CiPipeline    CiPipeline `json:"ciPipeline"`
+}
+type CreateWorkflowResponseDto struct {
+	Code   int    `json:"code"`
+	Status string `json:"status"`
+	Result struct {
+		Id                int    `json:"id"`
+		AppId             int    `json:"appId"`
+		DockerRegistry    string `json:"dockerRegistry"`
+		DockerRepository  string `json:"dockerRepository"`
+		DockerBuildConfig struct {
+			GitMaterialId          int    `json:"gitMaterialId"`
+			DockerfileRelativePath string `json:"dockerfileRelativePath"`
+		} `json:"dockerBuildConfig"`
+		CiPipelines []struct {
+			IsManual         bool              `json:"isManual"`
+			DockerArgs       map[string]string `json:"dockerArgs"`
+			IsExternal       bool              `json:"isExternal"`
+			ParentCiPipeline int               `json:"parentCiPipeline"`
+			ParentAppId      int               `json:"parentAppId"`
+			ExternalCiConfig struct {
+				Id         int    `json:"id"`
+				WebhookUrl string `json:"webhookUrl"`
+				Payload    string `json:"payload"`
+				AccessKey  string `json:"accessKey"`
+			} `json:"externalCiConfig"`
+			CiMaterial []struct {
+				Source struct {
+					Type  string `json:"type"`
+					Value string `json:"value"`
+				} `json:"source"`
+				GitMaterialId   int    `json:"gitMaterialId"`
+				Id              int    `json:"id"`
+				GitMaterialName string `json:"gitMaterialName"`
+			} `json:"ciMaterial"`
+
+			Name          string `json:"name"`
+			Id            int    `json:"id"`
+			Active        bool   `json:"active"`
+			LinkedCount   int    `json:"linkedCount"`
+			ScanEnabled   bool   `json:"scanEnabled"`
+			PreBuildStage struct {
+				Id    int    `json:"id"`
+				Type  string `json:"type"`
+				Steps []struct {
+					Id                  int      `json:"id"`
+					Name                string   `json:"name"`
+					Description         string   `json:"description"`
+					Index               int      `json:"index"`
+					StepType            string   `json:"stepType"`
+					OutputDirectoryPath []string `json:"outputDirectoryPath"`
+					InlineStepDetail    struct {
+						ScriptType             string `json:"scriptType"`
+						Script                 string `json:"script"`
+						StoreScriptAt          string `json:"storeScriptAt"`
+						MountDirectoryFromHost bool   `json:"mountDirectoryFromHost"`
+						CommandArgsMap         []struct {
+							Command string   `json:"command"`
+							Args    []string `json:"args"`
+						} `json:"commandArgsMap"`
+						InputVariables []struct {
+							Id                   int    `json:"id"`
+							Name                 string `json:"name"`
+							Format               string `json:"format"`
+							Description          string `json:"description"`
+							Value                string `json:"value"`
+							VariableType         string `json:"variableType"`
+							RefVariableName      string `json:"refVariableName,omitempty"`
+							RefVariableStage     string `json:"refVariableStage"`
+							RefVariableStepIndex int    `json:"refVariableStepIndex,omitempty"`
+						} `json:"inputVariables"`
+						OutputVariables []struct {
+							Id               int    `json:"id"`
+							Name             string `json:"name"`
+							Format           string `json:"format"`
+							Description      string `json:"description"`
+							Value            string `json:"value"`
+							VariableType     string `json:"variableType"`
+							RefVariableStage string `json:"refVariableStage"`
+						} `json:"outputVariables"`
+						ConditionDetails []struct {
+							Id                  int    `json:"id"`
+							ConditionOnVariable string `json:"conditionOnVariable"`
+							ConditionType       string `json:"conditionType"`
+							ConditionOperator   string `json:"conditionOperator"`
+							ConditionalValue    string `json:"conditionalValue"`
+						} `json:"conditionDetails"`
+						MountCodeToContainer     bool   `json:"mountCodeToContainer,omitempty"`
+						MountCodeToContainerPath string `json:"mountCodeToContainerPath,omitempty"`
+						ContainerImagePath       string `json:"containerImagePath,omitempty"`
+						MountPathMap             []struct {
+							FilePathOnDisk      string `json:"filePathOnDisk"`
+							FilePathOnContainer string `json:"filePathOnContainer"`
+						} `json:"mountPathMap,omitempty"`
+						PortMap []struct {
+							PortOnLocal     int `json:"portOnLocal"`
+							PortOnContainer int `json:"portOnContainer"`
+						} `json:"portMap,omitempty"`
+						IsMountCustomScript bool `json:"isMountCustomScript,omitempty"`
+					} `json:"inlineStepDetail"`
+					PluginRefStepDetail interface{} `json:"pluginRefStepDetail"`
+				} `json:"steps"`
+			} `json:"preBuildStage"`
+			PostBuildStage struct {
+				Id    int    `json:"id"`
+				Type  string `json:"type"`
+				Steps []struct {
+					Id                  int      `json:"id"`
+					Name                string   `json:"name"`
+					Description         string   `json:"description"`
+					Index               int      `json:"index"`
+					StepType            string   `json:"stepType"`
+					OutputDirectoryPath []string `json:"outputDirectoryPath"`
+					InlineStepDetail    struct {
+						ScriptType             string `json:"scriptType"`
+						Script                 string `json:"script"`
+						StoreScriptAt          string `json:"storeScriptAt"`
+						MountDirectoryFromHost bool   `json:"mountDirectoryFromHost"`
+						CommandArgsMap         []struct {
+							Command string   `json:"command"`
+							Args    []string `json:"args"`
+						} `json:"commandArgsMap"`
+						InputVariables []struct {
+							Id                   int    `json:"id"`
+							Name                 string `json:"name"`
+							Format               string `json:"format"`
+							Description          string `json:"description"`
+							Value                string `json:"value"`
+							VariableType         string `json:"variableType"`
+							RefVariableName      string `json:"refVariableName,omitempty"`
+							RefVariableStage     string `json:"refVariableStage"`
+							RefVariableStepIndex int    `json:"refVariableStepIndex,omitempty"`
+						} `json:"inputVariables"`
+						OutputVariables []struct {
+							Id               int    `json:"id"`
+							Name             string `json:"name"`
+							Format           string `json:"format"`
+							Description      string `json:"description"`
+							Value            string `json:"value"`
+							VariableType     string `json:"variableType"`
+							RefVariableStage string `json:"refVariableStage"`
+						} `json:"outputVariables"`
+						ConditionDetails []struct {
+							Id                  int    `json:"id"`
+							ConditionOnVariable string `json:"conditionOnVariable"`
+							ConditionType       string `json:"conditionType"`
+							ConditionOperator   string `json:"conditionOperator"`
+							ConditionalValue    string `json:"conditionalValue"`
+						} `json:"conditionDetails"`
+						MountCodeToContainer     bool   `json:"mountCodeToContainer,omitempty"`
+						MountCodeToContainerPath string `json:"mountCodeToContainerPath,omitempty"`
+						ContainerImagePath       string `json:"containerImagePath,omitempty"`
+						MountPathMap             []struct {
+							FilePathOnDisk      string `json:"filePathOnDisk"`
+							FilePathOnContainer string `json:"filePathOnContainer"`
+						} `json:"mountPathMap,omitempty"`
+						PortMap []struct {
+							PortOnLocal     int `json:"portOnLocal"`
+							PortOnContainer int `json:"portOnContainer"`
+						} `json:"portMap,omitempty"`
+						IsMountCustomScript bool `json:"isMountCustomScript,omitempty"`
+					} `json:"inlineStepDetail"`
+					PluginRefStepDetail interface{} `json:"pluginRefStepDetail"`
+				} `json:"steps"`
+			} `json:"postBuildStage"`
+		} `json:"ciPipelines"`
+		AppName   string `json:"appName"`
+		Materials []struct {
+			GitMaterialId int    `json:"gitMaterialId"`
+			MaterialName  string `json:"materialName"`
+		} `json:"materials"`
+		AppWorkflowId int  `json:"appWorkflowId"`
+		ScanEnabled   bool `json:"scanEnabled"`
+	} `json:"result"`
+}
+
+func HitCreateWorkflowApi(payload []byte, authToken string) CreateWorkflowResponseDto {
+	resp, err := Base.MakeApiCall(CreateWorkflowApiUrl, http.MethodPost, string(payload), nil, authToken)
+	Base.HandleError(err, CreateWorkflowApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), CreateWorkflowApi)
+	return pipelineConfigRouter.createWorkflowResponseDto
+}
+func worflowTypeProvider(temp string) string {
+	var str string
+	switch temp {
+	case "1":
+		str = "SOURCE_TYPE_BRANCH_FIXED"
+	case "2":
+		str = "WEBHOOK"
+	case "3":
+		str = "WEBHOOK"
+	}
+	return str
+}
+func getRequestPayloadForCreateWorkflow(forDelete bool, wfTypeId string, appId int, wfId int) CreateWorkflowRequestDto {
+	var createWorkflowRequestDto CreateWorkflowRequestDto
+	if forDelete == true {
+		createWorkflowRequestDto.AppWorkflowId = wfId
+		createWorkflowRequestDto.AppId = appId
+		createWorkflowRequestDto.Action = 2
+		return createWorkflowRequestDto
+	}
+	wfTypeStr := worflowTypeProvider(wfTypeId)
+	var CiMaterial CiMaterial
+	CiMaterial.Source.Type = wfTypeStr
+	createWorkflowRequestDto.CiPipeline.CiMaterial = append(createWorkflowRequestDto.CiPipeline.CiMaterial, CiMaterial)
+	return createWorkflowRequestDto
+}
+func HitGetWorkflowGetailsApi(appId int, wfId int, authToken string) GetWorkflowDetails {
+	resp, err := Base.MakeApiCall(GetCiPipelineViaIdApiUrl+strconv.Itoa(appId)+"/"+strconv.Itoa(wfId), http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetWorkflowDetailsApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetWorkflowDetailsApi)
+	return pipelineConfigRouter.getWorkflowDetails
+}
+func HitDeleteWorkflowApi(appId int, wfId int, authToken string) DeleteResponseDto {
+	resp, err := Base.MakeApiCall(DeleteWorkflowApiUrl+strconv.Itoa(appId)+"/"+strconv.Itoa(wfId), http.MethodDelete, "", nil, authToken)
+	Base.HandleError(err, DeleteAppApi)
+
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), DeleteAppApi)
+	return pipelineConfigRouter.deleteResponseDto
+}
+
+type FetchSuggestedCiPipelineName struct {
+	Code   int    `json:"code"`
+	Status string `json:"status"`
+	Result string `json:"result"`
+}
+
+func HitFetchSuggestedCiPipelineName(appId int, authToken string) FetchSuggestedCiPipelineName {
+	resp, err := Base.MakeApiCall(FetchSuggestedCiPipelineNameApiUrl+strconv.Itoa(appId), http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, FetchSuggestedCiPipelineNameApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), FetchSuggestedCiPipelineNameApi)
+	return pipelineConfigRouter.fetchSuggestedCiPipelineName
+}
+
+type InputVariables struct {
+	Id                        int    `json:"id"`
+	Name                      string `json:"name"`
+	Format                    string `json:"format"`
+	Description               string `json:"description"`
+	IsExposed                 bool   `json:"isExposed"`
+	AllowEmptyValue           bool   `json:"allowEmptyValue"`
+	Value                     string `json:"value"`
+	VariableType              string `json:"variableType"`
+	VariableStepIndexInPlugin int    `json:"variableStepIndexInPlugin"`
+	RefVariableStage          string `json:"refVariableStage"`
+	RefVariableName           string `json:"refVariableName"`
+}
+
+func inputVariablesSelector(inputType int) []InputVariables {
+	var inputVariable InputVariables
+	switch inputType {
+	case 1:
+		inputVariable.Format = "STRING"
+		inputVariable.Value = Base.GetRandomStringOfGivenLength(5)
+		inputVariable.VariableType = "NEW"
+		break
+	case 2:
+		inputVariable.Format = "BOOL"
+		inputVariable.Value = "true"
+		inputVariable.VariableType = "NEW"
+		break
+	case 3:
+		inputVariable.Format = "NUMBER"
+		inputVariable.Value = strconv.Itoa(Base.GetRandomNumberOf9Digit())
+		inputVariable.VariableType = "NEW"
+		break
+	case 4:
+		inputVariable.Format = "DATE"
+		inputVariable.Value = "2006-01-02"
+		inputVariable.VariableType = "NEW"
+		break
+	case 5:
+		inputVariable.Format = "STRING"
+		inputVariable.VariableType = "GLOBAL"
+		inputVariable.RefVariableName = "DOCKER_IMAGE_TAG"
+		break
+	}
+	inputVariable.Name = Base.GetRandomStringOfGivenLength(5) + "_" + inputVariable.Format
+	inputVariable.Description = inputVariable.Name + "_Desc_" + Base.GetRandomStringOfGivenLength(10)
+	var input []InputVariables
+	input = append(input, inputVariable)
+	return input
+}
+func getConditionDetails(id int) []ConditionDetails {
+	var conditionDetails ConditionDetails
+	conditionDetails.ConditionType = "TRIGGER"
+	switch id {
+	case 1:
+		conditionDetails.ConditionOperator = "=="
+		break
+	case 2:
+		conditionDetails.ConditionOperator = "!="
+		break
+	case 3:
+		conditionDetails.ConditionOperator = ">"
+		break
+	case 4:
+		conditionDetails.ConditionOperator = "<"
+		break
+	case 5:
+		conditionDetails.ConditionOperator = "<="
+		break
+	case 6:
+		conditionDetails.ConditionOperator = ">="
+		break
+	}
+	var input []ConditionDetails
+	input = append(input, conditionDetails)
+	return input
+}
+func getPreBuildStepRequestPayloadDto(scriptType int) []Step {
+	var step Step
+	step.Name = Base.GetRandomStringOfGivenLength(10)
+	step.Description = Base.GetRandomStringOfGivenLength(20)
+	step.StepType = "INLINE"
+	switch scriptType {
+	case 1:
+		{
+			step.InlineStepDetail.ScriptType = "SHELL"
+			step.InlineStepDetail.Script = "#!/bin/sh \nset -eo pipefail \n#set -v  ## uncomment this to debug the script \n"
+			i := 0
+			log.Println("Adding tasks")
+			for i = 1; i < 6; i++ {
+				inputVariables := inputVariablesSelector(i)
+				conditionDetails := getConditionDetails(i)
+				step.InlineStepDetail.InputVariables = append(step.InlineStepDetail.InputVariables, inputVariables[0])
+				step.InlineStepDetail.ConditionDetails = append(step.InlineStepDetail.ConditionDetails, conditionDetails[0])
+				step.InlineStepDetail.ConditionDetails[0].ConditionOnVariable = step.InlineStepDetail.InputVariables[0].Name
+				step.InlineStepDetail.ConditionDetails[0].ConditionOnVariable = Base.GetRandomStringOfGivenLength(4)
+			}
+			step.OutputDirectoryPath = append(step.OutputDirectoryPath, "./"+Base.GetRandomStringOfGivenLength(5))
+			break
+		}
+	case 2:
+		{
+			step.InlineStepDetail.ScriptType = "CONTAINER_IMAGE"
+			step.InlineStepDetail.ContainerImagePath = "alpine:latest"
+			break
+		}
+
+	}
+
+	step.InlineStepDetail.MountCodeToContainer = false
+	step.InlineStepDetail.MountDirectoryFromHost = false
+	var steps []Step
+	steps = append(steps, step)
+	return steps
 }

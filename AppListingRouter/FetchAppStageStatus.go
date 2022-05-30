@@ -7,7 +7,9 @@ import (
 )
 
 func (suite *AppsListingRouterTestSuite) TestFetchAllStageStatusWithValidAppId() {
-	fetchAllLinkResponseDto := FetchAllStageStatus(Base.ReadDataByFilenameAndKey("", "app_id"), suite.authToken)
+	var slice []string
+	slice = append(slice, "app_id")
+	fetchAllLinkResponseDto := FetchAllStageStatus(Base.ReadDataByFilenameAndKey("", slice...), suite.authToken)
 
 	log.Println("Validating the response of FetchAllLink API")
 	assert.Equal(suite.T(), 200, fetchAllLinkResponseDto.Code)
