@@ -58,7 +58,7 @@ type StructConfigMapRouter struct {
 	saveConfigMapResponseDTO SaveConfigMapResponseDTO
 }
 
-func getRequestPayloadForSecretOrConfig(configId int, configName string, appId int, userOfSecretAs string, externalType string, isSubPathNeeded bool, isFilePermissionNeeded bool, isSecret bool) ConfigMapAndSecretDataRequestDTO {
+func GetRequestPayloadForSecretOrConfig(configId int, configName string, appId int, userOfSecretAs string, externalType string, isSubPathNeeded bool, isFilePermissionNeeded bool, isSecret bool) ConfigMapAndSecretDataRequestDTO {
 	configMapDataRequestDTO := ConfigMapAndSecretDataRequestDTO{}
 	var configDataList = make([]ConfigData, 0)
 	conf := ConfigData{}
