@@ -611,23 +611,12 @@ type Step struct {
 	StepType            string   `json:"stepType"`
 	OutputDirectoryPath []string `json:"outputDirectoryPath"`
 	InlineStepDetail    struct {
-		ScriptType     string `json:"scriptType"`
-		Script         string `json:"script"`
-		StoreScriptAt  string `json:"storeScriptAt"`
-		CommandArgsMap []struct {
-			Command string   `json:"command"`
-			Args    []string `json:"args"`
-		} `json:"commandArgsMap"`
-		InputVariables  []InputVariables `json:"inputVariables"`
-		OutputVariables []struct {
-			Id               int    `json:"id"`
-			Name             string `json:"name"`
-			Format           string `json:"format"`
-			Description      string `json:"description"`
-			Value            string `json:"value"`
-			VariableType     string `json:"variableType"`
-			RefVariableStage string `json:"refVariableStage"`
-		} `json:"outputVariables"`
+		ScriptType       string           `json:"scriptType"`
+		Script           string           `json:"script"`
+		StoreScriptAt    string           `json:"storeScriptAt"`
+		CommandArgsMap   []CommandArgsMap `json:"commandArgsMap"`
+		InputVariables   []InputVariables `json:"inputVariables"`
+		OutputVariables  []InputVariables `json:"outputVariables"`
 		ConditionDetails []struct {
 			Id                  int    `json:"id"`
 			ConditionOnVariable string `json:"conditionOnVariable"`
@@ -896,6 +885,7 @@ func worflowTypeProvider(temp string) string {
 }
 func getRequestPayloadForCreateWorkflow(forDelete bool, wfTypeId string, appId int, wfId int) CreateWorkflowRequestDto {
 	var createWorkflowRequestDto CreateWorkflowRequestDto
+
 	if forDelete == true {
 		createWorkflowRequestDto.AppWorkflowId = wfId
 		createWorkflowRequestDto.AppId = appId
@@ -905,6 +895,8 @@ func getRequestPayloadForCreateWorkflow(forDelete bool, wfTypeId string, appId i
 	wfTypeStr := worflowTypeProvider(wfTypeId)
 	var CiMaterial CiMaterial
 	CiMaterial.Source.Type = wfTypeStr
+	createWorkflowRequestDto.CiPipeline.Active = true
+	createWorkflowRequestDto.AppId = appId
 	createWorkflowRequestDto.CiPipeline.CiMaterial = append(createWorkflowRequestDto.CiPipeline.CiMaterial, CiMaterial)
 	return createWorkflowRequestDto
 }
@@ -1014,6 +1006,15 @@ func getConditionDetails(id int) []ConditionDetails {
 	input = append(input, conditionDetails)
 	return input
 }
+
+type CommandArgsMap struct {
+	Command string `json:"command"`
+	Args    []Args `json:"args"`
+}
+type Args struct {
+	Arg string `json:"args"`
+}
+
 func getPreBuildStepRequestPayloadDto(scriptType int) []Step {
 	var step Step
 	step.Name = Base.GetRandomStringOfGivenLength(10)
@@ -1023,17 +1024,10 @@ func getPreBuildStepRequestPayloadDto(scriptType int) []Step {
 	case 1:
 		{
 			step.InlineStepDetail.ScriptType = "SHELL"
-			step.InlineStepDetail.Script = "#!/bin/sh \nset -eo pipefail \n#set -v  ## uncomment this to debug the script \n"
-			i := 0
-			log.Println("Adding tasks")
-			for i = 1; i < 6; i++ {
-				inputVariables := inputVariablesSelector(i)
-				conditionDetails := getConditionDetails(i)
-				step.InlineStepDetail.InputVariables = append(step.InlineStepDetail.InputVariables, inputVariables[0])
-				step.InlineStepDetail.ConditionDetails = append(step.InlineStepDetail.ConditionDetails, conditionDetails[0])
-				step.InlineStepDetail.ConditionDetails[0].ConditionOnVariable = step.InlineStepDetail.InputVariables[0].Name
-				step.InlineStepDetail.ConditionDetails[0].ConditionOnVariable = Base.GetRandomStringOfGivenLength(4)
-			}
+
+			outputVariables := inputVariablesSelector(1)
+			step.InlineStepDetail.OutputVariables = append(step.InlineStepDetail.OutputVariables, outputVariables[0])
+
 			step.OutputDirectoryPath = append(step.OutputDirectoryPath, "./"+Base.GetRandomStringOfGivenLength(5))
 			break
 		}
@@ -1041,14 +1035,88 @@ func getPreBuildStepRequestPayloadDto(scriptType int) []Step {
 		{
 			step.InlineStepDetail.ScriptType = "CONTAINER_IMAGE"
 			step.InlineStepDetail.ContainerImagePath = "alpine:latest"
+			/*
+				var arg Args
+				arg.Arg = "/" + Base.GetRandomStringOfGivenLength(5) + ".sh"
+				var args []Args
+				args = append(args, arg)
+				var commandArgsMap CommandArgsMap
+				commandArgsMap.Command = "sh"
+				commandArgsMap.Args = args
+
+				var commandArgsMap2 []CommandArgsMap
+				commandArgsMap2 = append(commandArgsMap2, commandArgsMap)
+				step.InlineStepDetail.CommandArgsMap = append(step.InlineStepDetail.CommandArgsMap, commandArgsMap2[0])
+
+			*/
 			break
 		}
 
 	}
-
+	step.InlineStepDetail.Script = "#!/bin/sh \nset -eo pipefail \n#set -v  ## uncomment this to debug the script \n"
+	i := 0
+	log.Println("Adding tasks")
+	for i = 1; i < 6; i++ {
+		inputVariables := inputVariablesSelector(i)
+		conditionDetails := getConditionDetails(i)
+		step.InlineStepDetail.InputVariables = append(step.InlineStepDetail.InputVariables, inputVariables[0])
+		step.InlineStepDetail.ConditionDetails = append(step.InlineStepDetail.ConditionDetails, conditionDetails[0])
+		step.InlineStepDetail.ConditionDetails[0].ConditionOnVariable = step.InlineStepDetail.InputVariables[0].Name
+		step.InlineStepDetail.ConditionDetails[0].ConditionalValue = Base.GetRandomStringOfGivenLength(4)
+	}
 	step.InlineStepDetail.MountCodeToContainer = false
 	step.InlineStepDetail.MountDirectoryFromHost = false
 	var steps []Step
 	steps = append(steps, step)
 	return steps
+}
+
+func HitCreateWorkflowApiWithFullPayload(appId int, authToken string) CreateWorkflowResponseDto {
+	createWorkflowRequestDto := getRequestPayloadForCreateWorkflow(false, "1", appId, 0)
+	key := Base.GetRandomStringOfGivenLength(10)
+	createWorkflowRequestDto.CiPipeline.DockerArgs = make(map[string]string)
+	createWorkflowRequestDto.CiPipeline.DockerArgs[key] = Base.GetRandomStringOfGivenLength(10)
+	fetchSuggestedCiPipelineName := HitFetchSuggestedCiPipelineName(appId, authToken)
+	createWorkflowRequestDto.CiPipeline.Name = fetchSuggestedCiPipelineName.Result
+	fetchAppGetResponseDto := HitGetMaterial(appId, authToken)
+	createWorkflowRequestDto.CiPipeline.CiMaterial[0].GitMaterialId = fetchAppGetResponseDto.Result.Material[0].Id
+	createWorkflowRequestDto.CiPipeline.CiMaterial[0].Source.Value = strings.ToLower(Base.GetRandomStringOfGivenLength(10))
+
+	i := 0
+	for i = 1; i < 3; i++ {
+		preBuildStepRequestPayload := getPreBuildStepRequestPayloadDto(i)
+		postBuildStepRequestPayload := getPreBuildStepRequestPayloadDto(i)
+
+		createWorkflowRequestDto.CiPipeline.PreBuildStage.Steps = append(createWorkflowRequestDto.CiPipeline.PreBuildStage.Steps, preBuildStepRequestPayload[0])
+		createWorkflowRequestDto.CiPipeline.PostBuildStage.Steps = append(createWorkflowRequestDto.CiPipeline.PostBuildStage.Steps, postBuildStepRequestPayload[0])
+	}
+
+	byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
+	log.Println("Hitting the Create Workflow Api with valid payload")
+	createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, authToken)
+	return createWorkflowResponseDto
+}
+
+func DeleteWorkflow(appId int, wfId int, authToken string) {
+	getWorkflowDetailsResponseDto := HitGetWorkflowGetailsApi(appId, wfId, authToken)
+	log.Println("Validating get workflow details api")
+	log.Println("Getting data for delete ci-pipeline")
+
+	deleteCiPipelineRequestDto := getRequestPayloadForCreateWorkflow(true, "1", appId, wfId)
+	deleteCiPipelineRequestDto.CiPipeline = getWorkflowDetailsResponseDto.Result
+	log.Println("Removing the data created via ci-pipeline API")
+	byteValueOfDeleteCiPipeline, _ := json.Marshal(deleteCiPipelineRequestDto)
+
+	log.Println("Hitting the Create Workflow Api with action=2 for delete ci-pipeline")
+	//deleteCiPipelineResponseDto := HitCreateWorkflowApi(byteValueOfDeleteCiPipeline, authToken)
+	HitCreateWorkflowApi(byteValueOfDeleteCiPipeline, authToken)
+
+	log.Println("Validating delete ci-pipeline")
+	//assert.Equal(suite.T(), deleteCiPipelineResponseDto.Result.AppId, appId)
+
+	log.Println("Deleting workflow")
+	//respOfDeleteWorkflowApi := HitDeleteWorkflowApi(appId, wfId, authToken)
+	HitDeleteWorkflowApi(appId, wfId, authToken)
+	//assert.Equal(suite.T(), 200, respOfDeleteWorkflowApi.Code)
+	return
 }
