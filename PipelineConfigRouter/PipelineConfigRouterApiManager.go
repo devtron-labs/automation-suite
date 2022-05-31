@@ -142,10 +142,6 @@ type Canary struct {
 	} `json:"steps"`
 }
 
-type Rolling struct {
-	MaxSurge       string `json:"maxSurge"`
-	MaxUnavailable int    `json:"maxUnavailable"`
-}
 type GetCdPipelineStrategiesResponseDto struct {
 	Code   int           `json:"code"`
 	Status string        `json:"status"`
@@ -156,9 +152,9 @@ type GetCdPipelineStrategiesResponseDto struct {
 			Config             struct {
 				Deployment struct {
 					Strategy struct {
-						Rolling   Rolling   `json:"rolling,omitempty"`
-						BlueGreen BlueGreen `json:"blueGreen,omitempty"`
-						Canary    Canary    `json:"canary,omitempty"`
+						Rolling   RequestDTOs.Rolling `json:"rolling,omitempty"`
+						BlueGreen BlueGreen           `json:"blueGreen,omitempty"`
+						Canary    Canary              `json:"canary,omitempty"`
 						Recreate  struct {
 						} `json:"recreate,omitempty"`
 					} `json:"strategy"`
@@ -1134,18 +1130,74 @@ func DeleteWorkflow(appId int, wfId int, authToken string) {
 	return
 }
 
-func createSaveCdPipelineRequestPayload(appId int) {
+func getRequestPayloadForSaveCdPipelineApi(appId int, AppWorkflowId int, EnvironmentId int, CiPipelineId int, ParentPipelineId int, strategy string) RequestDTOs.SaveCdPipelineRequestDTO {
 	CdPipelineRequestDTO := RequestDTOs.SaveCdPipelineRequestDTO{}
-	CdPipelineRequestDTO.Pipelines = nil
 	CdPipelineRequestDTO.AppId = appId
+	CdPipelineRequestDTO.Pipelines = getPipeLines(AppWorkflowId, EnvironmentId, CiPipelineId, ParentPipelineId, strategy)
+	return CdPipelineRequestDTO
 }
 
-func getPipeLinesForSaveCdPipelineApi() {
-	CdPipelineRequestDTO := RequestDTOs.SaveCdPipelineRequestDTO{}
-	CdPipelineRequestDTO.Pipelines[0].CiPipelineId = 0
-	CdPipelineRequestDTO.Pipelines[0].ParentPipelineId = 0
-	//CdPipelineRequestDTO.Pipelines[0].ParentPipelineType = 0
-	CdPipelineRequestDTO.Pipelines[0].Name = ""
-	//CdPipelineRequestDTO.Pipelines[0].PreStage =
+func getPipeLines(AppWorkflowId int, EnvironmentId int, CiPipelineId int, ParentPipelineId int, strategy string) []RequestDTOs.Pipeline {
+	var pipelines []RequestDTOs.Pipeline
+	pipeline := RequestDTOs.Pipeline{}
+	pipeline.AppWorkflowId = AppWorkflowId
+	pipeline.EnvironmentId = EnvironmentId
+	pipeline.CiPipelineId = CiPipelineId
+	pipeline.TriggerType = "MANUAL"
+	pipeline.Name = "cd-pipeline"
+	pipeline.Strategies = getStrategies()
+	pipeline.Namespace = "devtron-demo"
+	pipeline.PreStage = getPreStage(strategy)
+	pipeline.PostStage = getPostStage(strategy)
+	pipeline.PreStageConfigMapSecretNames = getPreStageConfigMapSecretNames()
+	pipeline.PostStageConfigMapSecretNames = getPostStageConfigMapSecretNames()
+	pipeline.ParentPipelineId = ParentPipelineId
+	pipeline.ParentPipelineType = "CI_PIPELINE"
+	pipelines = append(pipelines, pipeline)
+	return pipelines
+}
 
+func getStrategies() []RequestDTOs.Strategies {
+	var strategies []RequestDTOs.Strategies
+	strategy := RequestDTOs.Strategies{}
+	strategy.Config.Deployment.Strategy.Rolling = getRolling()
+	strategy.Default = true
+	strategy.DeploymentTemplate = "ROLLING"
+	strategies = append(strategies, strategy)
+	return strategies
+}
+
+func getRolling() RequestDTOs.Rolling {
+	rolling := RequestDTOs.Rolling{}
+	rolling.MaxSurge = "25%"
+	rolling.MaxUnavailable = 1
+	return rolling
+}
+
+func getPreStage(triggerType string) RequestDTOs.Stage {
+	preStage := RequestDTOs.Stage{}
+	preStage.TriggerType = triggerType
+	preStage.Switch = "config"
+	return preStage
+}
+
+func getPostStage(triggerType string) RequestDTOs.Stage {
+	postStage := RequestDTOs.Stage{}
+	postStage.TriggerType = triggerType
+	postStage.Switch = "config"
+	return postStage
+}
+
+func getPreStageConfigMapSecretNames() RequestDTOs.StageConfigMapSecretNames {
+	preStageConfigMapSecretNames := RequestDTOs.StageConfigMapSecretNames{}
+	preStageConfigMapSecretNames.ConfigMaps = []string{"config1"}
+	preStageConfigMapSecretNames.Secrets = []string{"secret1"}
+	return preStageConfigMapSecretNames
+}
+
+func getPostStageConfigMapSecretNames() RequestDTOs.StageConfigMapSecretNames {
+	postStageConfigMapSecretNames := RequestDTOs.StageConfigMapSecretNames{}
+	postStageConfigMapSecretNames.ConfigMaps = []string{"config1"}
+	postStageConfigMapSecretNames.Secrets = []string{"secret1"}
+	return postStageConfigMapSecretNames
 }

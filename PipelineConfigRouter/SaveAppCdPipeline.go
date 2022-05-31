@@ -3,6 +3,7 @@ package PipelineConfigRouter
 import (
 	Base "automation-suite/testUtils"
 	"encoding/json"
+	"fmt"
 	"log"
 	"strconv"
 )
@@ -48,12 +49,16 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA5SaveAppCdPipeline() {
 	log.Println("=== Here we are saving Global Secret ===")
 	requestPayloadForSecret := ConfigMapRouter.GetRequestPayloadForSecretOrConfig(0, configName, createAppApiResponse.Id, "environment", "kubernetes", false, false, true)
 	byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
-	ConfigMapRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-	*/
+	ConfigMapRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)*/
+
 	log.Println("=== Here we are saving workflow with Pre/Post CI ===")
+	workflowResponse := HitCreateWorkflowApiWithFullPayload(createAppApiResponse.Id, suite.authToken).Result
 
 	suite.Run("A=1=SaveCdPipelineWithValidPayload", func() {
-
+		payload := getRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, "AUTOMATIC")
+		bytePayload, _ := json.Marshal(payload)
+		api := HitSaveCdPipelineApi(bytePayload, suite.authToken)
+		fmt.Println(api)
 	})
 
 	log.Println("=== Here we Deleting the Test data created after verification ===")
