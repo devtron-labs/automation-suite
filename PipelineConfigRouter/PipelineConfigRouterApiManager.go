@@ -1,6 +1,8 @@
 package PipelineConfigRouter
 
 import (
+	"automation-suite/PipelineConfigRouter/RequestDTOs"
+	"automation-suite/PipelineConfigRouter/ResponseDTOs"
 	"automation-suite/dockerRegRouter"
 	Base "automation-suite/testUtils"
 	"encoding/json"
@@ -208,6 +210,8 @@ type StructPipelineConfigRouter struct {
 	getWorkflowDetails                 GetWorkflowDetails
 	createWorkflowResponseDto          CreateWorkflowResponseDto
 	fetchSuggestedCiPipelineName       FetchSuggestedCiPipelineName
+	saveCdPipelineRequestDTO           RequestDTOs.SaveCdPipelineRequestDTO
+	saveCdPipelineResponseDTO          ResponseDTOs.SaveCdPipelineResponseDTO
 }
 
 type EnvironmentConfigPipelineConfigRouter struct {
@@ -451,6 +455,14 @@ func HitSaveDeploymentTemplateApi(payload []byte, authToken string) SaveDeployme
 	return pipelineConfigRouter.saveDeploymentTemplateResponseDTO
 }
 
+func HitSaveCdPipelineApi(payload []byte, authToken string) RequestDTOs.SaveCdPipelineRequestDTO {
+	resp, err := Base.MakeApiCall(SaveCdPipelineApiUrl, http.MethodPost, string(payload), nil, authToken)
+	Base.HandleError(err, SaveCdPipelineApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), SaveCdPipelineApi)
+	return pipelineConfigRouter.saveCdPipelineRequestDTO
+}
+
 func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructPipelineConfigRouter {
 	switch apiName {
 	case DeleteAppMaterialApi:
@@ -487,7 +499,8 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.getWorkflowDetails)
 	case DeleteAppApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.deleteResponseDto)
-
+	case SaveCdPipelineApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.saveCdPipelineResponseDTO)
 	}
 	return structPipelineConfigRouter
 }
@@ -1119,4 +1132,20 @@ func DeleteWorkflow(appId int, wfId int, authToken string) {
 	HitDeleteWorkflowApi(appId, wfId, authToken)
 	//assert.Equal(suite.T(), 200, respOfDeleteWorkflowApi.Code)
 	return
+}
+
+func createSaveCdPipelineRequestPayload(appId int) {
+	CdPipelineRequestDTO := RequestDTOs.SaveCdPipelineRequestDTO{}
+	CdPipelineRequestDTO.Pipelines = nil
+	CdPipelineRequestDTO.AppId = appId
+}
+
+func getPipeLinesForSaveCdPipelineApi() {
+	CdPipelineRequestDTO := RequestDTOs.SaveCdPipelineRequestDTO{}
+	CdPipelineRequestDTO.Pipelines[0].CiPipelineId = 0
+	CdPipelineRequestDTO.Pipelines[0].ParentPipelineId = 0
+	//CdPipelineRequestDTO.Pipelines[0].ParentPipelineType = 0
+	CdPipelineRequestDTO.Pipelines[0].Name = ""
+	//CdPipelineRequestDTO.Pipelines[0].PreStage =
+
 }

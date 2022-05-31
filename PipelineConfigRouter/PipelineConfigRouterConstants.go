@@ -34,5 +34,5 @@ const (
 	FetchSuggestedCiPipelineNameApiUrl        string = "/orchestrator/app/pipeline/suggest/ci/"
 	FetchSuggestedCiPipelineNameApi           string = "FetchSuggestedCiPipelineNameApi"
 	SaveCdPipelineApiUrl                      string = "/orchestrator/app/cd-pipeline"
-	SaveCdPipelineApi                         string = "SaveCdPipelineApis"
+	SaveCdPipelineApi                         string = "SaveCdPipelineApi"
 )
