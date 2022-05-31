@@ -1,15 +1,13 @@
 package PipelineConfigRouter
 
 import (
-	"automation-suite/ConfigMapRouter"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"log"
 	"strconv"
-	"strings"
 )
 
-func (suite *PipelinesConfigRouterTestSuite) TestClassA4GetEnvironmentSecret() {
+func (suite *PipelinesConfigRouterTestSuite) TestClassA5SaveAppCdPipeline() {
 	config, _ := GetEnvironmentConfigPipelineConfigRouter()
 	log.Println("=== Here we are creating a App ===")
 	createAppApiResponse := Base.CreateApp(suite.authToken).Result
@@ -41,7 +39,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 	log.Println("=== Here we are hitting SaveTemplate API ===")
 	HitSaveDeploymentTemplateApi(byteValueOfSaveDeploymentTemplate, suite.authToken)
 
-	log.Println("=== Here we are saving Global Configmap ===")
+	/*log.Println("=== Here we are saving Global Configmap ===")
 	configName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
 	requestPayloadForConfigMap := ConfigMapRouter.GetRequestPayloadForSecretOrConfig(0, configName, createAppApiResponse.Id, "environment", "kubernetes", false, false, false)
 	byteValueOfSaverConfigMap, _ := json.Marshal(requestPayloadForConfigMap)
@@ -51,8 +49,12 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 	requestPayloadForSecret := ConfigMapRouter.GetRequestPayloadForSecretOrConfig(0, configName, createAppApiResponse.Id, "environment", "kubernetes", false, false, true)
 	byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 	ConfigMapRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-
+	*/
 	log.Println("=== Here we are saving workflow with Pre/Post CI ===")
+
+	suite.Run("A=1=SaveCdPipelineWithValidPayload", func() {
+
+	})
 
 	log.Println("=== Here we Deleting the Test data created after verification ===")
 	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
