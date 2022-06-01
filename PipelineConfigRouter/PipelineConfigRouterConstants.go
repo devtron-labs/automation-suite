@@ -35,4 +35,8 @@ const (
 	FetchSuggestedCiPipelineNameApi           string = "FetchSuggestedCiPipelineNameApi"
 	SaveCdPipelineApiUrl                      string = "/orchestrator/app/cd-pipeline"
 	SaveCdPipelineApi                         string = "SaveCdPipelineApi"
+	Automatic                                 string = "AUTOMATIC"
+	Manual                                    string = "MANUAL"
+	DeleteCdPipelineApiUrl                    string = "/orchestrator/app/cd-pipeline/patch"
+	DeleteCdPipelineApi                       string = "DeleteCdPipelineApi"
 )

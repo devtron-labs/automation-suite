@@ -208,6 +208,7 @@ type StructPipelineConfigRouter struct {
 	fetchSuggestedCiPipelineName       FetchSuggestedCiPipelineName
 	saveCdPipelineRequestDTO           RequestDTOs.SaveCdPipelineRequestDTO
 	saveCdPipelineResponseDTO          ResponseDTOs.SaveCdPipelineResponseDTO
+	deleteCdPipelineRequestDTO         RequestDTOs.DeleteCdPipelineRequestDTO
 }
 
 type EnvironmentConfigPipelineConfigRouter struct {
@@ -451,12 +452,28 @@ func HitSaveDeploymentTemplateApi(payload []byte, authToken string) SaveDeployme
 	return pipelineConfigRouter.saveDeploymentTemplateResponseDTO
 }
 
-func HitSaveCdPipelineApi(payload []byte, authToken string) RequestDTOs.SaveCdPipelineRequestDTO {
+func HitSaveCdPipelineApi(payload []byte, authToken string) ResponseDTOs.SaveCdPipelineResponseDTO {
 	resp, err := Base.MakeApiCall(SaveCdPipelineApiUrl, http.MethodPost, string(payload), nil, authToken)
 	Base.HandleError(err, SaveCdPipelineApi)
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
 	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), SaveCdPipelineApi)
-	return pipelineConfigRouter.saveCdPipelineRequestDTO
+	return pipelineConfigRouter.saveCdPipelineResponseDTO
+}
+
+func HitDeleteCdPipelineApi(payload []byte, authToken string) RequestDTOs.DeleteCdPipelineRequestDTO {
+	resp, err := Base.MakeApiCall(DeleteCdPipelineApiUrl, http.MethodPost, string(payload), nil, authToken)
+	Base.HandleError(err, DeleteCdPipelineApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), DeleteCdPipelineApi)
+	return pipelineConfigRouter.deleteCdPipelineRequestDTO
+}
+
+func GetPayloadForDeleteCdPipeline(AppId int, pipelineId int) RequestDTOs.DeleteCdPipelineRequestDTO {
+	deleteRequest := RequestDTOs.DeleteCdPipelineRequestDTO{}
+	deleteRequest.Pipeline.Id = pipelineId
+	deleteRequest.Action = 1
+	deleteRequest.AppId = AppId
+	return deleteRequest
 }
 
 func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructPipelineConfigRouter {
@@ -1130,25 +1147,26 @@ func DeleteWorkflow(appId int, wfId int, authToken string) {
 	return
 }
 
-func getRequestPayloadForSaveCdPipelineApi(appId int, AppWorkflowId int, EnvironmentId int, CiPipelineId int, ParentPipelineId int, strategy string) RequestDTOs.SaveCdPipelineRequestDTO {
+func getRequestPayloadForSaveCdPipelineApi(appId int, AppWorkflowId int, EnvironmentId int, CiPipelineId int, ParentPipelineId int, strategy string, prescript string, postscript string, pipelineTriggerType string) RequestDTOs.SaveCdPipelineRequestDTO {
 	CdPipelineRequestDTO := RequestDTOs.SaveCdPipelineRequestDTO{}
 	CdPipelineRequestDTO.AppId = appId
-	CdPipelineRequestDTO.Pipelines = getPipeLines(AppWorkflowId, EnvironmentId, CiPipelineId, ParentPipelineId, strategy)
+	CdPipelineRequestDTO.Pipelines = getPipeLines(AppWorkflowId, EnvironmentId, CiPipelineId, ParentPipelineId, strategy, prescript, postscript, pipelineTriggerType)
 	return CdPipelineRequestDTO
 }
 
-func getPipeLines(AppWorkflowId int, EnvironmentId int, CiPipelineId int, ParentPipelineId int, strategy string) []RequestDTOs.Pipeline {
+func getPipeLines(AppWorkflowId int, EnvironmentId int, CiPipelineId int, ParentPipelineId int, strategy string, prescript string, postscript string, pipelineTriggerType string) []RequestDTOs.Pipeline {
 	var pipelines []RequestDTOs.Pipeline
 	pipeline := RequestDTOs.Pipeline{}
 	pipeline.AppWorkflowId = AppWorkflowId
 	pipeline.EnvironmentId = EnvironmentId
+	pipeline.DeploymentTemplate = "ROLLING"
 	pipeline.CiPipelineId = CiPipelineId
-	pipeline.TriggerType = "MANUAL"
+	pipeline.TriggerType = pipelineTriggerType
 	pipeline.Name = "cd-pipeline"
 	pipeline.Strategies = getStrategies()
 	pipeline.Namespace = "devtron-demo"
-	pipeline.PreStage = getPreStage(strategy)
-	pipeline.PostStage = getPostStage(strategy)
+	pipeline.PreStage = getPreStage(strategy, prescript)
+	pipeline.PostStage = getPostStage(strategy, postscript)
 	pipeline.PreStageConfigMapSecretNames = getPreStageConfigMapSecretNames()
 	pipeline.PostStageConfigMapSecretNames = getPostStageConfigMapSecretNames()
 	pipeline.ParentPipelineId = ParentPipelineId
@@ -1174,17 +1192,23 @@ func getRolling() RequestDTOs.Rolling {
 	return rolling
 }
 
-func getPreStage(triggerType string) RequestDTOs.Stage {
+func getPreStage(triggerType string, script string) RequestDTOs.Stage {
 	preStage := RequestDTOs.Stage{}
 	preStage.TriggerType = triggerType
+	preStage.Config = script
+	preStage.Name = "Pre-Deployment"
 	preStage.Switch = "config"
+	preStage.IsCollapse = false
 	return preStage
 }
 
-func getPostStage(triggerType string) RequestDTOs.Stage {
+func getPostStage(triggerType string, script string) RequestDTOs.Stage {
 	postStage := RequestDTOs.Stage{}
 	postStage.TriggerType = triggerType
+	postStage.Config = script
+	postStage.Name = "Post-Deployment"
 	postStage.Switch = "config"
+	postStage.IsCollapse = false
 	return postStage
 }
 

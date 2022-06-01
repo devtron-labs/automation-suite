@@ -1,6 +1,7 @@
 package ConfigMapRouter
 
 import (
+	"automation-suite/HelperRouter"
 	"automation-suite/PipelineConfigRouter"
 	Base "automation-suite/testUtils"
 	"encoding/json"
@@ -48,12 +49,12 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 	var configId int
 
 	suite.Run("A=1=KubernetesSecretAsEnvVariable", func() {
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(0, configName, createAppApiResponse.Id, environment, kubernetes, false, false, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(0, configName, createAppApiResponse.Id, environment, kubernetes, false, false, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		configMap := HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		configMap := HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
 		configId = configMap.Result.Id
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData)
 		assert.Equal(suite.T(), environment, environmentSecret.Result.ConfigData[index-1].Type)
 		assert.Equal(suite.T(), kubernetes+configName, environmentSecret.Result.ConfigData[index-1].Name)
@@ -61,11 +62,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("A=2=AddNewKubernetesSecretAsEnvVariable", func() {
 		newConfigName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, environment, kubernetes, false, false, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, environment, kubernetes, false, false, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.Equal(suite.T(), environment, environmentSecret.Result.ConfigData[index].Type)
 		assert.Equal(suite.T(), kubernetes+newConfigName, environmentSecret.Result.ConfigData[index].Name)
@@ -73,44 +74,44 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("A=3=KubernetesSecretAsDataVolume", func() {
 		configNameStr := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, kubernetes, false, false, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, kubernetes, false, false, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.Equal(suite.T(), volume, environmentSecret.Result.ConfigData[index].Type)
 	})
 
 	suite.Run("A=4=KubernetesSecretAsDataVolumeHavingSubPath", func() {
 		configNameStr := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, kubernetes, true, false, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, kubernetes, true, false, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[index].SubPath)
 	})
 
 	suite.Run("A=5=KubernetesSecretAsDataVolumeHavingSubPathAndFilePermission", func() {
 		configNameStr := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, kubernetes, true, true, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, kubernetes, true, true, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.Equal(suite.T(), "0744", environmentSecret.Result.ConfigData[index].FilePermission)
 	})
 
 	suite.Run("A=6=ExternalSecretAsEnvVariable", func() {
 		configNameStr := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, environment, externalKubernetes, false, false, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, environment, externalKubernetes, false, false, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.Equal(suite.T(), environment, environmentSecret.Result.ConfigData[index].Type)
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[index].External)
@@ -118,11 +119,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("A=7=ExternalSecretAsDataVolume", func() {
 		configNameStr := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, externalKubernetes, false, false, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, externalKubernetes, false, false, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.Equal(suite.T(), volume, environmentSecret.Result.ConfigData[index].Type)
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[index].External)
@@ -130,11 +131,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("A=8=ExternalSecretAsDataVolumeHavingSubPath", func() {
 		configNameStr := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, externalKubernetes, true, false, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, externalKubernetes, true, false, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.Equal(suite.T(), volume, environmentSecret.Result.ConfigData[index].Type)
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[index].External)
@@ -143,11 +144,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("A=9=ExternalSecretAsDataVolumeHavingSubPathAndFilePermission", func() {
 		configNameStr := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, externalKubernetes, true, true, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, externalKubernetes, true, true, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[index].External)
 		assert.Equal(suite.T(), "", environmentSecret.Result.ConfigData[index].Data.Key1)
@@ -156,11 +157,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("B=1=AddNewExternalSecretAsDataVolume", func() {
 		newConfigName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, externalKubernetes, true, true, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, externalKubernetes, true, true, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[index].External)
 		assert.Equal(suite.T(), "", environmentSecret.Result.ConfigData[index].Data.Key2)
@@ -169,11 +170,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("B=2=AWSSystemManagerAsEnvVariable", func() {
 		newConfigName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, environment, awsSystemManager, false, false, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, environment, awsSystemManager, false, false, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.Equal(suite.T(), awsSystemManager, environmentSecret.Result.ConfigData[index].ExternalSecretType)
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[index].External)
@@ -181,11 +182,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("B=3=AWSSystemManagerAsDataVolume", func() {
 		newConfigName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, awsSystemManager, false, false, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, awsSystemManager, false, false, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.Equal(suite.T(), volume, environmentSecret.Result.ConfigData[index].Type)
 		assert.Equal(suite.T(), awsSystemManager, environmentSecret.Result.ConfigData[index].ExternalSecretType)
@@ -193,11 +194,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("B=4=AWSSystemManagerAsDataVolumeHavingSubPath", func() {
 		newConfigName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, awsSystemManager, true, false, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, awsSystemManager, true, false, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.Equal(suite.T(), awsSystemManager, environmentSecret.Result.ConfigData[index].ExternalSecretType)
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[index].SubPath)
@@ -205,11 +206,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("B=5=AWSSystemManagerAsDataVolumeHavingSubPathAndFilePermission", func() {
 		configNameStr := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, awsSystemManager, true, true, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, awsSystemManager, true, true, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[index].External)
 		assert.Equal(suite.T(), "0744", environmentSecret.Result.ConfigData[index].FilePermission)
@@ -217,11 +218,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("B=6=AddNewAWSSystemManagerAsDataVolume", func() {
 		newConfigName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, awsSystemManager, true, true, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, awsSystemManager, true, true, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[0].External)
 		assert.Equal(suite.T(), awsSystemManager+newConfigName, environmentSecret.Result.ConfigData[index].Name)
@@ -230,11 +231,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("B=7=AWSSecretsManagerAsEnvVariable", func() {
 		newConfigName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, environment, awsSecretsManager, false, false, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, environment, awsSecretsManager, false, false, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.Equal(suite.T(), awsSecretsManager, environmentSecret.Result.ConfigData[index].ExternalSecretType)
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[index].External)
@@ -242,11 +243,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("B=8=AWSSecretsManagerAsDataVolume", func() {
 		configNameStr := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, awsSecretsManager, false, false, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, awsSecretsManager, false, false, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.Equal(suite.T(), volume, environmentSecret.Result.ConfigData[index].Type)
 		assert.Equal(suite.T(), awsSecretsManager, environmentSecret.Result.ConfigData[index].ExternalSecretType)
@@ -254,11 +255,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("B=9=AWSSecretsManagerAsDataVolumeHavingSubPath", func() {
 		configNameStr := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, awsSecretsManager, true, false, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, awsSecretsManager, true, false, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.Equal(suite.T(), awsSecretsManager, environmentSecret.Result.ConfigData[index].ExternalSecretType)
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[index].SubPath)
@@ -266,11 +267,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("C=1=AWSSecretsManagerAsDataVolumeHavingSubPathAndFilePermission", func() {
 		configNameStr := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, awsSecretsManager, true, true, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, awsSecretsManager, true, true, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[index].External)
 		assert.Equal(suite.T(), "0744", environmentSecret.Result.ConfigData[index].FilePermission)
@@ -278,11 +279,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("C=2=AddNewAWSSecretsManagerAsDataVolume", func() {
 		newConfigName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, awsSecretsManager, true, true, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, awsSecretsManager, true, true, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[index].External)
 		assert.Equal(suite.T(), awsSecretsManager+newConfigName, environmentSecret.Result.ConfigData[index].Name)
@@ -291,11 +292,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("C=3=HashiCorpVaultAsEnvVariable", func() {
 		newConfigName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, environment, hashiCorpVault, false, false, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, environment, hashiCorpVault, false, false, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.Equal(suite.T(), hashiCorpVault, environmentSecret.Result.ConfigData[index].ExternalSecretType)
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[index].External)
@@ -303,11 +304,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("C=4=HashiCorpVaultAsDataVolume", func() {
 		newConfigName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, hashiCorpVault, false, false, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, hashiCorpVault, false, false, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.Equal(suite.T(), volume, environmentSecret.Result.ConfigData[index].Type)
 		assert.Equal(suite.T(), hashiCorpVault, environmentSecret.Result.ConfigData[index].ExternalSecretType)
@@ -315,11 +316,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("C=5=HashiCorpVaultAsDataVolumeHavingSubPath", func() {
 		newConfigName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, hashiCorpVault, true, false, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, hashiCorpVault, true, false, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.Equal(suite.T(), hashiCorpVault, environmentSecret.Result.ConfigData[index].ExternalSecretType)
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[index].SubPath)
@@ -327,11 +328,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("C=6=HashiCorpVaultAsDataVolumeHavingSubPathAndFilePermission", func() {
 		newConfigName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, hashiCorpVault, true, true, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, newConfigName, createAppApiResponse.Id, volume, hashiCorpVault, true, true, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[index].External)
 		assert.Equal(suite.T(), "0744", environmentSecret.Result.ConfigData[index].FilePermission)
@@ -339,11 +340,11 @@ func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
 
 	suite.Run("C=7=AddNewHashiCorpVaultAsDataVolume", func() {
 		configNameStr := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
-		requestPayloadForSecret := GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, hashiCorpVault, true, true, true)
+		requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, configNameStr, createAppApiResponse.Id, volume, hashiCorpVault, true, true, true)
 		byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 		log.Println("=== Hitting the SaveGlobalSecret API ====")
-		HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-		environmentSecret := HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
+		HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+		environmentSecret := HelperRouter.HitGetEnvironmentSecretApi(createAppApiResponse.Id, 1, suite.authToken)
 		index := len(environmentSecret.Result.ConfigData) - 1
 		assert.True(suite.T(), environmentSecret.Result.ConfigData[index].External)
 		assert.Equal(suite.T(), hashiCorpVault+configNameStr, environmentSecret.Result.ConfigData[index].Name)

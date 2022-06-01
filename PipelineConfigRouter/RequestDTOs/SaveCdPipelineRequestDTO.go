@@ -1,10 +1,13 @@
 package RequestDTOs
 
 type Stage struct {
-	Config      string `json:"config"`
 	TriggerType string `json:"triggerType"`
+	Name        string `json:"name"`
+	Config      string `json:"config"`
 	Switch      string `json:"switch"`
+	IsCollapse  bool   `json:"isCollapse"`
 }
+
 type Rolling struct {
 	MaxSurge       string `json:"maxSurge"`
 	MaxUnavailable int    `json:"maxUnavailable"`
