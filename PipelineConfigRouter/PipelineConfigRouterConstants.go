@@ -38,6 +38,7 @@ const (
 	Automatic                                 string = "AUTOMATIC"
 	Manual                                    string = "MANUAL"
 	DeleteCdPipelineApiUrl                    string = "/orchestrator/app/cd-pipeline/patch"
+	ForceDeleteCdPipelineApiUrl               string = "/orchestrator/app/cd-pipeline/patch?force=true"
 	DeleteCdPipelineApi                       string = "DeleteCdPipelineApi"
 	GetAppCdPipelineApiUrl                    string = "/orchestrator/app/cd-pipeline/"
 	GetAppCdPipelineApi                       string = "GetAppCdPipelineApi"

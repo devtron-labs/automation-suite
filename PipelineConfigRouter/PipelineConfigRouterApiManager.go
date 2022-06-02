@@ -459,6 +459,14 @@ func HitDeleteCdPipelineApi(payload []byte, authToken string) RequestDTOs.Delete
 	return pipelineConfigRouter.deleteCdPipelineRequestDTO
 }
 
+func HitForceDeleteCdPipelineApi(payload []byte, authToken string) RequestDTOs.DeleteCdPipelineRequestDTO {
+	resp, err := Base.MakeApiCall(ForceDeleteCdPipelineApiUrl, http.MethodPost, string(payload), nil, authToken)
+	Base.HandleError(err, DeleteCdPipelineApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), DeleteCdPipelineApi)
+	return pipelineConfigRouter.deleteCdPipelineRequestDTO
+}
+
 func GetPayloadForDeleteCdPipeline(AppId int, pipelineId int) RequestDTOs.DeleteCdPipelineRequestDTO {
 	deleteRequest := RequestDTOs.DeleteCdPipelineRequestDTO{}
 	deleteRequest.Pipeline.Id = pipelineId
