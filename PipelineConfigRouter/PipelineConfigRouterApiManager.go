@@ -207,6 +207,7 @@ type StructPipelineConfigRouter struct {
 	saveCdPipelineRequestDTO           RequestDTOs.SaveCdPipelineRequestDTO
 	saveCdPipelineResponseDTO          ResponseDTOs.SaveCdPipelineResponseDTO
 	deleteCdPipelineRequestDTO         RequestDTOs.DeleteCdPipelineRequestDTO
+	getCdPipeResponseDTO               ResponseDTOs.GetCdPipeResponseDTO
 }
 
 type EnvironmentConfigPipelineConfigRouter struct {
@@ -466,6 +467,14 @@ func GetPayloadForDeleteCdPipeline(AppId int, pipelineId int) RequestDTOs.Delete
 	return deleteRequest
 }
 
+func HitGetAppCdPipeline(appId string, authToken string) ResponseDTOs.GetCdPipeResponseDTO {
+	resp, err := Base.MakeApiCall(GetAppCdPipelineApiUrl+appId, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetAppCdPipelineApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetAppCdPipelineApi)
+	return pipelineConfigRouter.getCdPipeResponseDTO
+}
+
 func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructPipelineConfigRouter {
 	switch apiName {
 	case DeleteAppMaterialApi:
@@ -507,6 +516,8 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.fetchAllAppWorkflowResponseDto)
 	case SaveCdPipelineApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.saveCdPipelineResponseDTO)
+	case GetAppCdPipelineApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.getCdPipeResponseDTO)
 	}
 	return structPipelineConfigRouter
 }
@@ -841,15 +852,15 @@ func getPostStage(triggerType string, script string) RequestDTOs.Stage {
 
 func getPreStageConfigMapSecretNames() RequestDTOs.StageConfigMapSecretNames {
 	preStageConfigMapSecretNames := RequestDTOs.StageConfigMapSecretNames{}
-	preStageConfigMapSecretNames.ConfigMaps = []string{"config1"}
-	preStageConfigMapSecretNames.Secrets = []string{"secret1"}
+	preStageConfigMapSecretNames.ConfigMaps = []string{"kubernetes-config1"}
+	preStageConfigMapSecretNames.Secrets = []string{"kubernetes-secret1"}
 	return preStageConfigMapSecretNames
 }
 
 func getPostStageConfigMapSecretNames() RequestDTOs.StageConfigMapSecretNames {
 	postStageConfigMapSecretNames := RequestDTOs.StageConfigMapSecretNames{}
-	postStageConfigMapSecretNames.ConfigMaps = []string{"config1"}
-	postStageConfigMapSecretNames.Secrets = []string{"secret1"}
+	postStageConfigMapSecretNames.ConfigMaps = []string{"kubernetes-config1"}
+	postStageConfigMapSecretNames.Secrets = []string{"kubernetes-secret1"}
 	return postStageConfigMapSecretNames
 }
 

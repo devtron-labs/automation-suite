@@ -4,11 +4,12 @@ import (
 	"automation-suite/HelperRouter"
 	Base "automation-suite/testUtils"
 	"encoding/json"
+	"github.com/stretchr/testify/assert"
 	"log"
 	"strconv"
 )
 
-func (suite *PipelinesConfigRouterTestSuite) TestClassB7SaveCdPipeline() {
+func (suite *PipelinesConfigRouterTestSuite) TestClassB8GetCdPipeline() {
 	config, _ := GetEnvironmentConfigPipelineConfigRouter()
 	var configId int
 	log.Println("=== Here we are creating a App ===")
@@ -42,8 +43,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassB7SaveCdPipeline() {
 	HitSaveDeploymentTemplateApi(byteValueOfSaveDeploymentTemplate, suite.authToken)
 
 	log.Println("=== Here we are saving Global Configmap ===")
-
-	requestPayloadForConfigMap := HelperRouter.GetRequestPayloadForSecretOrConfig(0, "config1", createAppApiResponse.Id, "environment", "kubernetes", false, false, false)
+	requestPayloadForConfigMap := HelperRouter.GetRequestPayloadForSecretOrConfig(0, "-config1", createAppApiResponse.Id, "environment", "kubernetes", false, false, false)
 	byteValueOfSaverConfigMap, _ := json.Marshal(requestPayloadForConfigMap)
 	globalConfigMap := HelperRouter.HitSaveGlobalConfigMap(byteValueOfSaverConfigMap, suite.authToken)
 	configId = globalConfigMap.Result.Id
@@ -59,19 +59,35 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassB7SaveCdPipeline() {
 	preStageScript, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/PipeLineConfigRouter/preStageScript.txt")
 	postStageScript, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/PipeLineConfigRouter/postStageScript.txt")
 
-	suite.Run("A=1=AutomaticStrategyWithGlobalSecretAndConfigMap", func() {
+	suite.Run("A=1=CdPipelineViaCorrectAppIdWithoutSavingCdPipeline", func() {
+		appCdPipelineResponse := HitGetAppCdPipeline(strconv.Itoa(createAppApiResponse.Id), suite.authToken)
+		assert.Nil(suite.T(), appCdPipelineResponse.Result.Pipelines)
+	})
+
+	suite.Run("A=2=CdPipelineViaCorrectAppId", func() {
 		payload := getRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Automatic, string(preStageScript), string(postStageScript), Automatic)
 		bytePayload, _ := json.Marshal(payload)
 		savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
+
+		appCdPipelineResponse := HitGetAppCdPipeline(strconv.Itoa(createAppApiResponse.Id), suite.authToken)
+		assert.Equal(suite.T(), savePipelineResponse.Result.Pipelines[0].Strategies, appCdPipelineResponse.Result.Pipelines[0].Strategies)
+		assert.Equal(suite.T(), savePipelineResponse.Result.Pipelines[0].PostStage.Config, appCdPipelineResponse.Result.Pipelines[0].PostStage.Config)
+		assert.Equal(suite.T(), savePipelineResponse.Result.Pipelines[0].PostStageConfigMapSecretNames, appCdPipelineResponse.Result.Pipelines[0].PostStageConfigMapSecretNames)
 		deletePipelinePayload := GetPayloadForDeleteCdPipeline(createAppApiResponse.Id, savePipelineResponse.Result.Pipelines[0].Id)
 		deletePipelineByteCode, _ := json.Marshal(deletePipelinePayload)
 		HitDeleteCdPipelineApi(deletePipelineByteCode, suite.authToken)
 	})
 
+	suite.Run("A=3=CdPipelineViaIncorrectAppId", func() {
+		randomAppId := Base.GetRandomNumberOf9Digit()
+		appCdPipelineResponse := HitGetAppCdPipeline(strconv.Itoa(randomAppId), suite.authToken)
+		assert.Equal(suite.T(), "pg: no rows in result set", appCdPipelineResponse.Errors[0].UserMessage)
+	})
+
 	log.Println("=== Here we are Deleting the Test CI pipeline ===")
 	DeleteWorkflow(createAppApiResponse.Id, workflowResponse.CiPipelines[0].Id, suite.authToken)
 
-	log.Println("=== Here we are Deleting the Test data created after verification ===")
+	log.Println("=== Here we Deleting the Test data created after verification ===")
 	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 
 }

@@ -30,6 +30,7 @@ type StageConfigMapSecretNames struct {
 }
 
 type Pipeline struct {
+	Id                            int                       `json:"id"`
 	AppWorkflowId                 int                       `json:"appWorkflowId"`
 	EnvironmentId                 int                       `json:"environmentId"`
 	CiPipelineId                  int                       `json:"ciPipelineId"`

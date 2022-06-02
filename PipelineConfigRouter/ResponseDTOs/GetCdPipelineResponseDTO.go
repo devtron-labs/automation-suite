@@ -5,7 +5,7 @@ import (
 	"automation-suite/testUtils"
 )
 
-type SaveCdPipelineResponseDTO struct {
+type GetCdPipeResponseDTO struct {
 	Code   int    `json:"code"`
 	Status string `json:"status"`
 	Result struct {

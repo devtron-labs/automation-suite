@@ -20,6 +20,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA8GetAppTemplate() {
 		getTemplateResponse := HitGetTemplateViaAppIdAndChartRefId(appId, invalidChartRefId, suite.authToken)
 		assert.Equal(suite.T(), "pg: no rows in result set", getTemplateResponse.Errors[0].UserMessage)
 	})
+	testUtils.DeleteFile("OutputDataGetChartReferenceViaAppId")
 }
 
 //todo need to add one more case for invalid AppId as well once dev will fix the issue for invalid app-id

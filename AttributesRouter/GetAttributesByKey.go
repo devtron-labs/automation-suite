@@ -1,18 +1,21 @@
 package AttributesRouter
 
 import (
+	Base "automation-suite/testUtils"
 	"github.com/stretchr/testify/assert"
 )
 
-func (suite AttributeRouterTestSuite) TestGetAttributesByKeyWithValidValue() {
-	queryParams := map[string]string{"key": "url"}
-	envConf, _ := GetEnvironmentConfigForHelmApp()
-	attributesApiResp := HitGetAttributesApi(queryParams, suite.authToken)
-	assert.Equal(suite.T(), envConf.ValueAttribute, attributesApiResp.Result.Value)
-}
+func (suite *AttributeRouterTestSuite) TestGetAttributesByKey() {
+	envConf, _ := Base.GetEnvironmentConfig()
+	suite.Run("A=1=AttributesWithValidValueOfKey", func() {
+		queryParams := map[string]string{"key": "url"}
+		attributesApiResp := HitGetAttributesApi(queryParams, suite.authToken)
+		assert.Equal(suite.T(), envConf.BaseServerUrl, attributesApiResp.Result.Value)
+	})
 
-func (suite AttributeRouterTestSuite) TestGetAttributesByKeyWithInvalidValue() {
-	queryParams := map[string]string{"key": "InvalidUrl"}
-	attributesApiResp := HitGetAttributesApi(queryParams, suite.authToken)
-	assert.Nil(suite.T(), attributesApiResp.Result)
+	suite.Run("A=2=AttributesWithInvalidValueOfKey", func() {
+		queryParams := map[string]string{"key": "InvalidUrl"}
+		attributesApiResp := HitGetAttributesApi(queryParams, suite.authToken)
+		assert.Equal(suite.T(), "", attributesApiResp.Result.Key)
+	})
 }

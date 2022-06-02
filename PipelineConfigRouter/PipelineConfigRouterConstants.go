@@ -39,4 +39,6 @@ const (
 	Manual                                    string = "MANUAL"
 	DeleteCdPipelineApiUrl                    string = "/orchestrator/app/cd-pipeline/patch"
 	DeleteCdPipelineApi                       string = "DeleteCdPipelineApi"
+	GetAppCdPipelineApiUrl                    string = "/orchestrator/app/cd-pipeline/"
+	GetAppCdPipelineApi                       string = "GetAppCdPipelineApi"
 )
