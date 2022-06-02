@@ -241,6 +241,7 @@ func ReadDataByFilenameAndKey(filename string, keys ...string) []string {
 				}
 			}
 		}
+
 		if flag == 1 {
 			log.Println("key NOT found")
 			output = append(output, "")

@@ -22,7 +22,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 	HitSaveAppCiPipeline(byteValueOfSaveAppCiPipeline, suite.authToken)
 
 	log.Println("Fetching suggested ci pipeline name ")
-	fetchSuggestedCiPipelineName := HitFetchSuggestedCiPipelineName(appId, suite.authToken)
+	fetchSuggestedCiPipelineName := HitGetPipelineSuggestedCiCd("ci", appId, suite.authToken)
 	log.Println("Fetching gitMaterialId ")
 	fetchAppGetResponseDto := HitGetMaterial(appId, suite.authToken)
 
@@ -40,8 +40,6 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 		createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, suite.authToken)
 		log.Println("Validating the Create Workflow Api response with with valid payload")
 		assert.Equal(suite.T(), createWorkflowRequestDto.AppId, createWorkflowResponseDto.Result.AppId)
-
-		// after creation call /orchestrator/app/ci-pipeline/app-id/wf-id get for delete ci-pipeline
 		log.Println("Hitting get workflow details api")
 
 		wfId := createWorkflowResponseDto.Result.AppWorkflowId
@@ -50,31 +48,9 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 	})
 
-	suite.Run("A=2=CreateWorkflowWithDockerArgs", func() {
-
-		// Pre-requirements end here
-
-		log.Println("Sending random key value to test")
-		key := testUtils.GetRandomStringOfGivenLength(10)
-		createWorkflowRequestDto.CiPipeline.DockerArgs = make(map[string]string)
-		createWorkflowRequestDto.CiPipeline.DockerArgs[key] = testUtils.GetRandomStringOfGivenLength(10)
-		byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
-		log.Println("Hitting the Create Workflow Api with valid payload")
-		createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, suite.authToken)
-
-		log.Println("Validating docker args")
-		assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.DockerArgs[key], createWorkflowResponseDto.Result.CiPipelines[0].DockerArgs[key])
-
-		log.Println("Validating appId")
-		assert.Equal(suite.T(), createWorkflowRequestDto.AppId, createWorkflowResponseDto.Result.AppId)
-		wfId := createWorkflowResponseDto.Result.AppWorkflowId
-
-		DeleteWorkflow(appId, wfId, suite.authToken)
-	})
-
 	/////////////////=== pre-build check with random task with scriptType SHELL====//////////////
 
-	suite.Run("A=3=CreateWorkflowWithBranchFixedWithPreBuildScriptTypeShell", func() {
+	suite.Run("A=2=CreateWorkflowWithBranchFixedWithPreBuildScriptTypeShell", func() {
 
 		// Pre-requirements end here
 
@@ -107,7 +83,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 	/////////////////=== pre-build check with random task with scriptType CONTAINER_IMAGE====//////////////
 
-	suite.Run("A=4=CreateWorkflowWithBranchFixedWithPreBuildScriptTypeContainerImage", func() {
+	suite.Run("A=3=CreateWorkflowWithBranchFixedWithPreBuildScriptTypeContainerImage", func() {
 
 		// Custom part - creating random number of tasks
 		numberOfTasks := rand.Intn(3-1) + 1
@@ -133,7 +109,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 	})
 
 	/////////////////=== pre-build check with random task with scriptType either SHELL or CONTAINER_IMAGE====//////////////
-	suite.Run("A=5=CreateWorkflowWithBranchFixedWithPreBuildScriptTypeEitherShellOrContainerImage", func() {
+	suite.Run("A=4=CreateWorkflowWithBranchFixedWithPreBuildScriptTypeEitherShellOrContainerImage", func() {
 
 		// Pre-requirements end here
 
@@ -162,7 +138,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 	/////////////////=== pre-build check with random task with scriptType SHELL with Input Variables====//////////////
 
-	suite.Run("A=6=CreateWorkflowWithBranchFixedWithPreBuildScriptTypeShellWithInputs", func() {
+	suite.Run("A=5=CreateWorkflowWithBranchFixedWithPreBuildScriptTypeShellWithInputs", func() {
 
 		// Pre-requirements end here
 
@@ -195,7 +171,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 	/////////////////=== Post-build check with scriptType SHELL====//////////////
 
-	suite.Run("A=7=CreateWorkflowWithBranchFixedWithPostBuildScriptTypeShell", func() {
+	suite.Run("A=6=CreateWorkflowWithBranchFixedWithPostBuildScriptTypeShell", func() {
 
 		// Pre-requirements end here
 
@@ -224,7 +200,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 	/////////////////=== post-build check with random task with scriptType CONTAINER_IMAGE====//////////////
 
-	suite.Run("A=8=CreateWorkflowWithBranchFixedWithPostBuildScriptTypeContainerImage", func() {
+	suite.Run("A=7=CreateWorkflowWithBranchFixedWithPostBuildScriptTypeContainerImage", func() {
 
 		// Pre-requirements end here
 
@@ -253,7 +229,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 	/////////////////=== post-build check with random task with scriptType either SHELL or CONTAINER_IMAGE====//////////////
 
-	suite.Run("A=9=CreateWorkflowWithBranchFixedWithPostBuildScriptTypeEitherShellOrContainerImage", func() {
+	suite.Run("A=8=CreateWorkflowWithBranchFixedWithPostBuildScriptTypeEitherShellOrContainerImage", func() {
 
 		// Pre-requirements end here
 
@@ -284,7 +260,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 	/////////////////=== post-build check with random task with scriptType SHELL with Input Variables====//////////////
 
-	suite.Run("A=10=CreateWorkflowWithBranchFixedWithPostBuildScriptTypeShellWithInputs", func() {
+	suite.Run("A=9=CreateWorkflowWithBranchFixedWithPostBuildScriptTypeShellWithInputs", func() {
 
 		// Pre-requirements end here
 
@@ -318,7 +294,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 	})
 
 	/////////////////=== pre-build check with random task with variable conditions====//////////////
-	suite.Run("A=11=CreateWorkflowBranchFixedPreBuildWithVariableConditions", func() {
+	suite.Run("A=10=CreateWorkflowBranchFixedPreBuildWithVariableConditions", func() {
 
 		// Pre-requirements end here
 
@@ -355,7 +331,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 	/////////////////=== post-build check with random task with variable conditions====//////////////
 
-	suite.Run("A=12=CreateWorkflowBranchFixedPostBuildWithVariableConditions", func() {
+	suite.Run("A=11=CreateWorkflowBranchFixedPostBuildWithVariableConditions", func() {
 
 		// Pre-requirements end here
 
@@ -389,7 +365,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 		DeleteWorkflow(appId, wfId, suite.authToken)
 	})
 
-	suite.Run("A=13=CreateWorkflowPreBuildOutoutDirectory", func() {
+	suite.Run("A=12=CreateWorkflowPreBuildOutoutDirectory", func() {
 
 		// Pre-requirements end here
 
@@ -418,7 +394,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 		DeleteWorkflow(appId, wfId, suite.authToken)
 	})
-	suite.Run("A=14=CreateWorkflowPostBuildOutoutDirectory", func() {
+	suite.Run("A=13=CreateWorkflowPostBuildOutoutDirectory", func() {
 
 		log.Println("Getting Post-build paload...")
 		numberOfTasks := rand.Intn(4-1) + 1
@@ -445,7 +421,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 		DeleteWorkflow(appId, wfId, suite.authToken)
 	})
 
-	suite.Run("A=15=CreateMaterialWithFullPayload", func() {
+	suite.Run("A=14=CreateMaterialWithFullPayload", func() {
 		createWorkflowResponseDto := HitCreateWorkflowApiWithFullPayload(appId, suite.authToken)
 
 		log.Println("Validating pre-build request payload")

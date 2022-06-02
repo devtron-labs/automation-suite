@@ -6,21 +6,25 @@ import (
 	"log"
 )
 
-func (suite *AppsListingRouterTestSuite) TestFetchAllStageStatusWithValidAppId() {
-	var slice []string
-	slice = append(slice, "app_id")
-	fetchAllLinkResponseDto := FetchAllStageStatus(Base.ReadDataByFilenameAndKey("", slice...), suite.authToken)
+func (suite *AppsListingRouterTestSuite) TestClassA1FetchAppStageStatus() {
+	appId := suite.createAppResponseDto.Result.Id
+	createAppApiResponse := suite.createAppResponseDto.Result
 
-	log.Println("Validating the response of FetchAllLink API")
-	assert.Equal(suite.T(), 200, fetchAllLinkResponseDto.Code)
-	assert.Equal(suite.T(), true, fetchAllLinkResponseDto.Result[len(fetchAllLinkResponseDto.Result)-1])
+	suite.Run("A=1=FetchAllStageStatusWithValidAppId", func() {
+		fetchAllLinkResponseDto := FetchAllStageStatus(appId, suite.authToken)
 
-}
-func (suite *AppsListingRouterTestSuite) TestFetchAllStageStatusWithInvalidAppId() {
+		log.Println("Validating the response of FetchAllLink API")
+		assert.Equal(suite.T(), 200, fetchAllLinkResponseDto.Code)
+		assert.Equal(suite.T(), true, fetchAllLinkResponseDto.Result[len(fetchAllLinkResponseDto.Result)-1].Required)
 
-	fetchAllLinkResponseDto := FetchAllStageStatus(Base.GetRandomStringOfGivenLength(10), suite.authToken)
+	})
+	suite.Run("A=2=FetchAllStageStatusWithInvalidAppId", func() {
+		fetchAllLinkResponseDto := FetchAllStageStatus(Base.GetRandomNumberOf9Digit(), suite.authToken)
 
-	log.Println("Validating the response of FetchAllLink API")
-	assert.Equal(suite.T(), 404, fetchAllLinkResponseDto.Code)
-	assert.Equal(suite.T(), "pg: no rows in result set", fetchAllLinkResponseDto.Errors[0].UserMessage)
+		log.Println("Validating the response of FetchAllLink API")
+		assert.Equal(suite.T(), 404, fetchAllLinkResponseDto.Code)
+		assert.Equal(suite.T(), "pg: no rows in result set", fetchAllLinkResponseDto.Errors[0].UserMessage)
+
+	})
+	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 }

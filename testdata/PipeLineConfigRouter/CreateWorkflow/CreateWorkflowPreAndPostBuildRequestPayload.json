@@ -1,15 +1,15 @@
 {
-  "appId": 418,
+  "appId": 0,
   "appWorkflowId": 0,
   "action": 0,
   "ciPipeline": {
-    "active": true,
+    "active": false,
     "ciMaterial": [
       {
-        "gitMaterialId": 171,
+        "gitMaterialId": 0,
         "id": 0,
         "source": {
-          "type": "SOURCE_TYPE_BRANCH_FIXED",
+          "type": "",
           "value": "main"
         }
       }
@@ -21,7 +21,7 @@
     "id": 0,
     "isExternal": false,
     "isManual": false,
-    "name": "ci-352-y1jq",
+    "name": "",
     "linkedCount": 0,
     "scanEnabled": false,
     "preBuildStage": {
@@ -256,7 +256,7 @@
                 "defaultValue": "",
                 "variableType": "NEW",
                 "variableStepIndexInPlugin": 1,
-                "value": "eyJrIjoiMjBhZGNlNzYwMzUyZGE5Nzc0YWUzZTFkMWY0MzlhNjZmN2ZkMTMzYyIsIm4iOiJkZXZ0cm9uLWFwaS1rZXkiLCJpZCI6NjQxMzkyfQ==",
+                "value": "",
                 "refVariableName": "",
                 "refVariableStage": ""
               },
@@ -270,7 +270,7 @@
                 "defaultValue": "",
                 "variableType": "NEW",
                 "variableStepIndexInPlugin": 1,
-                "value": "https://sonarqube.devtron.info:32443/",
+                "value": "",
                 "refVariableName": "",
                 "refVariableStage": ""
               },

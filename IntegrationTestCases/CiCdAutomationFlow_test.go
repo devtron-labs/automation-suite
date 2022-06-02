@@ -86,7 +86,7 @@ func TestFoo(t *testing.T) {
 		log.Println("Hitting the FetchForAutocomplete API again for verifying the functionality of it")
 		fetchAllTeamResponseDto := TeamRouter.HitFetchAllTeamApi(authToken)
 		log.Println("Validating the response of FetchForAutocomplete API")
-		noOfTeams, _ := strconv.Atoi(Base.ReadDataByFilenameAndKey("team", "noOfTeams"))
+		noOfTeams, _ := strconv.Atoi(Base.ReadDataByFilenameAndKey("team", "noOfTeams")[0])
 		assert.Equal(t, noOfTeams+1, len(fetchAllTeamResponseDto.Result))
 		assert.Equal(t, Base.ReadDataByFilenameAndKey("team", "teamName"), fetchAllTeamResponseDto.Result[len(fetchAllTeamResponseDto.Result)-1].Name)
 	})

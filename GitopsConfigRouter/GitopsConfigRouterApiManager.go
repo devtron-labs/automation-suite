@@ -6,7 +6,9 @@ import (
 	"errors"
 	"github.com/caarlos0/env"
 	"github.com/stretchr/testify/suite"
+	"log"
 	"net/http"
+	"time"
 )
 
 type FetchAllGitopsConfigResponseDto struct {
@@ -24,6 +26,8 @@ type StructGitopsConfigRouter struct {
 	createGitopsConfigResponseDto   CreateGitopsConfigResponseDto
 	fetchAllGitopsConfigResponseDto FetchAllGitopsConfigResponseDto
 	deleteResponseDto               DeleteResponseDto
+	checkGitopsExistsResponse       CheckGitopsExistsResponse
+	updateGitopsConfigResponseDto   UpdateGitopsConfigResponseDto
 }
 type CreateGitopsConfigRequestDto struct {
 	Id                   int    `json:"id"`
@@ -50,6 +54,22 @@ type CreateGitopsConfigResponseDto struct {
 		DeleteRepoFailed bool `json:"deleteRepoFailed"`
 	} `json:"result"`
 }
+type CheckGitopsExistsResponse struct {
+	Code   int    `json:"code"`
+	Status string `json:"status"`
+	Result struct {
+		Exists bool `json:"exists"`
+	} `json:"result"`
+}
+
+func HitGitopsConfigured(authToken string) CheckGitopsExistsResponse {
+	resp, err := Base.MakeApiCall(CheckGitopsConfigExistsApiUrl, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, CheckGitopsConfigExistsApi)
+
+	structGitopsConfigRouter := StructGitopsConfigRouter{}
+	gitopsConfigRouter := structGitopsConfigRouter.UnmarshalGivenResponseBody(resp.Body(), CheckGitopsConfigExistsApi)
+	return gitopsConfigRouter.checkGitopsExistsResponse
+}
 
 func (structGitopsConfigRouter StructGitopsConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructGitopsConfigRouter {
 	switch apiName {
@@ -57,6 +77,11 @@ func (structGitopsConfigRouter StructGitopsConfigRouter) UnmarshalGivenResponseB
 		json.Unmarshal(response, &structGitopsConfigRouter.fetchAllGitopsConfigResponseDto)
 	case CreateGitopsConfigApi:
 		json.Unmarshal(response, &structGitopsConfigRouter.createGitopsConfigResponseDto)
+	case CheckGitopsConfigExistsApi:
+		json.Unmarshal(response, &structGitopsConfigRouter.checkGitopsExistsResponse)
+	case UpdateGitopsConfigApi:
+		json.Unmarshal(response, &structGitopsConfigRouter.updateGitopsConfigResponseDto)
+
 	}
 	return structGitopsConfigRouter
 }
@@ -102,6 +127,45 @@ func HitCreateGitopsConfigApi(payload []byte, provider string, username string, 
 	structGitopsConfigRouter := StructGitopsConfigRouter{}
 	gitopsConfigRouter := structGitopsConfigRouter.UnmarshalGivenResponseBody(resp.Body(), CreateGitopsConfigApi)
 	return gitopsConfigRouter.createGitopsConfigResponseDto
+}
+
+func UpdateGitops(authToken string) CreateGitopsConfigRequestDto {
+	var createGitopsConfigRequestDto CreateGitopsConfigRequestDto
+	fetchAllLinkResponseDto := HitFetchAllGitopsConfigApi(authToken)
+
+	log.Println("Checking which is true")
+	for _, createGitopsConfigRequestDto = range fetchAllLinkResponseDto.Result {
+		if createGitopsConfigRequestDto.Active == true {
+			createGitopsConfigRequestDto.Active = false
+			byteValueOfCreateGitopsConfig, _ := json.Marshal(createGitopsConfigRequestDto)
+			log.Println("Updating gitops to false")
+			HitUpdateGitopsConfigApi(byteValueOfCreateGitopsConfig, authToken)
+			createGitopsConfigRequestDto.Active = true
+			return createGitopsConfigRequestDto
+		}
+	}
+	return createGitopsConfigRequestDto
+}
+
+type UpdateGitopsConfigResponseDto struct {
+	Code   int    `json:"code"`
+	Status string `json:"status"`
+	Result struct {
+		SuccessfulStages []string `json:"successfulStages"`
+		StageErrorMap    struct {
+		} `json:"stageErrorMap"`
+		ValidatedOn      time.Time `json:"validatedOn"`
+		DeleteRepoFailed bool      `json:"deleteRepoFailed"`
+	} `json:"result"`
+}
+
+func HitUpdateGitopsConfigApi(payload []byte, authToken string) UpdateGitopsConfigResponseDto {
+	resp, err := Base.MakeApiCall(SaveGitopsConfigApiUrl, http.MethodPut, string(payload), nil, authToken)
+	Base.HandleError(err, UpdateGitopsConfigApi)
+
+	structGitopsConfigRouter := StructGitopsConfigRouter{}
+	gitopsConfigRouter := structGitopsConfigRouter.UnmarshalGivenResponseBody(resp.Body(), UpdateGitopsConfigApi)
+	return gitopsConfigRouter.updateGitopsConfigResponseDto
 }
 
 type GitopsConfig struct {

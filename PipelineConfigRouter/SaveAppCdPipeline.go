@@ -1,11 +1,13 @@
 package PipelineConfigRouter
 
 import (
+	"automation-suite/ConfigMapRouter"
 	"automation-suite/HelperRouter"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"log"
 	"strconv"
+	"strings"
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassA5SaveAppCdPipeline() {
@@ -45,6 +47,8 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA5SaveAppCdPipeline() {
 
 	log.Println("=== Here we are saving Global Configmap ===")
 	requestPayloadForConfigMap := HelperRouter.GetRequestPayloadForSecretOrConfig(0, "config1", createAppApiResponse.Id, "environment", "kubernetes", false, false, false)
+	configName := strings.ToLower(Base.GetRandomStringOfGivenLength(6))
+	requestPayloadForConfigMap := ConfigMapRouter.GetRequestPayloadForSecretOrConfig(0, configName, createAppApiResponse.Id, "environment", "kubernetes", false, false, false)
 	byteValueOfSaverConfigMap, _ := json.Marshal(requestPayloadForConfigMap)
 	globalConfigMap := HelperRouter.HitSaveGlobalConfigMap(byteValueOfSaverConfigMap, suite.authToken)
 	configId = globalConfigMap.Result.Id
@@ -53,6 +57,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA5SaveAppCdPipeline() {
 	requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, "secret1", createAppApiResponse.Id, "environment", "kubernetes", false, false, true)
 	byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 	HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
+	ConfigMapRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
 
 	log.Println("=== Here we are saving workflow with Pre/Post CI ===")
 	workflowResponse := HitCreateWorkflowApiWithFullPayload(createAppApiResponse.Id, suite.authToken).Result

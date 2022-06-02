@@ -3,6 +3,10 @@ package PipelineConfigRouter
 import (
 	"automation-suite/PipelineConfigRouter/RequestDTOs"
 	"automation-suite/PipelineConfigRouter/ResponseDTOs"
+	"os"
+
+	//"automation-suite/PipelineConfigRouter/RequestDTOs"
+	//"automation-suite/PipelineConfigRouter/ResponseDTOs"
 	"automation-suite/dockerRegRouter"
 	Base "automation-suite/testUtils"
 	"encoding/json"
@@ -152,9 +156,9 @@ type GetCdPipelineStrategiesResponseDto struct {
 			Config             struct {
 				Deployment struct {
 					Strategy struct {
-						Rolling   RequestDTOs.Rolling `json:"rolling,omitempty"`
-						BlueGreen BlueGreen           `json:"blueGreen,omitempty"`
-						Canary    Canary              `json:"canary,omitempty"`
+						//						Rolling   RequestDTOs.Rolling `json:"rolling,omitempty"`
+						BlueGreen BlueGreen `json:"blueGreen,omitempty"`
+						Canary    Canary    `json:"canary,omitempty"`
 						Recreate  struct {
 						} `json:"recreate,omitempty"`
 					} `json:"strategy"`
@@ -163,13 +167,6 @@ type GetCdPipelineStrategiesResponseDto struct {
 			Default bool `json:"default"`
 		} `json:"pipelineStrategy"`
 	} `json:"result"`
-}
-
-type PipelineSuggestedCDResponseDTO struct {
-	Code   int           `json:"code"`
-	Status string        `json:"status"`
-	Result string        `json:"result"`
-	Errors []Base.Errors `json:"errors"`
 }
 
 type EnvironmentDetailsResponseDTO struct {
@@ -203,9 +200,10 @@ type StructPipelineConfigRouter struct {
 	pipelineSuggestedCDResponseDTO     PipelineSuggestedCDResponseDTO
 	environmentDetailsResponseDTO      EnvironmentDetailsResponseDTO
 	saveDeploymentTemplateResponseDTO  SaveDeploymentTemplateResponseDTO
-	getWorkflowDetails                 GetWorkflowDetails
-	createWorkflowResponseDto          CreateWorkflowResponseDto
+	getWorkflowDetails                 RequestDTOs.GetWorkflowDetails
+	createWorkflowResponseDto          ResponseDTOs.CreateWorkflowResponseDto
 	fetchSuggestedCiPipelineName       FetchSuggestedCiPipelineName
+	fetchAllAppWorkflowResponseDto     FetchAllAppWorkflowResponseDto
 	saveCdPipelineRequestDTO           RequestDTOs.SaveCdPipelineRequestDTO
 	saveCdPipelineResponseDTO          ResponseDTOs.SaveCdPipelineResponseDTO
 	deleteCdPipelineRequestDTO         RequestDTOs.DeleteCdPipelineRequestDTO
@@ -419,14 +417,6 @@ func HitGetCdPipelineStrategies(appId string, authToken string) GetCdPipelineStr
 	return pipelineConfigRouter.getCdPipelineStrategiesResponseDto
 }
 
-func HitGetPipelineSuggestedCD(appId string, authToken string) PipelineSuggestedCDResponseDTO {
-	resp, err := Base.MakeApiCall(GetPipelineSuggestedCDApiUrl+appId, http.MethodGet, "", nil, authToken)
-	Base.HandleError(err, GetPipelineSuggestedCDApi)
-	structPipelineConfigRouter := StructPipelineConfigRouter{}
-	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetPipelineSuggestedCDApi)
-	return pipelineConfigRouter.pipelineSuggestedCDResponseDTO
-}
-
 func HitGetAllEnvironmentDetails(queryParams map[string]string, authToken string) EnvironmentDetailsResponseDTO {
 	resp, err := Base.MakeApiCall(GetAllEnvironmentDetailsApiUrl, http.MethodGet, "", queryParams, authToken)
 	Base.HandleError(err, GetAllEnvironmentDetailsApi)
@@ -498,7 +488,7 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.getAppTemplateResponseDto)
 	case GetCdPipelineStrategiesApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.getCdPipelineStrategiesResponseDto)
-	case GetPipelineSuggestedCDApi:
+	case GetPipelineSuggestedCICDApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.pipelineSuggestedCDResponseDTO)
 	case GetAllEnvironmentDetailsApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.environmentDetailsResponseDTO)
@@ -512,6 +502,9 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.getWorkflowDetails)
 	case DeleteAppApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.deleteResponseDto)
+
+	case FetchAllAppWorkflowApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.fetchAllAppWorkflowResponseDto)
 	case SaveCdPipelineApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.saveCdPipelineResponseDTO)
 	}
@@ -551,346 +544,14 @@ func (suite *PipelinesConfigRouterTestSuite) CreateAppMaterial() CreateAppMateri
 
 func (suite *PipelinesConfigRouterTestSuite) TearDownSuite() {
 	log.Println("=== Running the after suite method for deleting the data created via automation ===")
-	//byteValueOfDeleteApp := GetPayLoadForDeleteAppAPI(suite.createAppResponseDto.Result.Id, suite.createAppResponseDto.Result.AppName, suite.createAppResponseDto.Result.TeamId, suite.createAppResponseDto.Result.TemplateId)
-	//HitDeleteAppApi(byteValueOfDeleteApp, suite.createAppResponseDto.Result.Id, suite.authToken)
-	//testUtils.DeleteFile("OutputDataGetChartReferenceViaAppId")
+	byteValueOfDeleteApp := GetPayLoadForDeleteAppAPI(suite.createAppResponseDto.Result.Id, suite.createAppResponseDto.Result.AppName, suite.createAppResponseDto.Result.TeamId, suite.createAppResponseDto.Result.TemplateId)
+	HitDeleteAppApi(byteValueOfDeleteApp, suite.createAppResponseDto.Result.Id, suite.authToken)
+	//Base.DeleteFile("OutputDataGetChartReferenceViaAppId")
 }
 
 /////////////////=== Create Workflow API ====//////////////
-type CiMaterial struct {
-	Source struct {
-		Type  string `json:"type"`
-		Value string `json:"value"`
-	} `json:"source"`
-	GitMaterialId   int    `json:"gitMaterialId"`
-	Id              int    `json:"id"`
-	GitMaterialName string `json:"gitMaterialName"`
-}
 
-type PreBuildStage struct {
-	Id    int    `json:"id"`
-	Type  string `json:"type"`
-	Steps []struct {
-		Id                  int      `json:"id"`
-		Name                string   `json:"name"`
-		Description         string   `json:"description"`
-		Index               int      `json:"index"`
-		StepType            string   `json:"stepType"`
-		OutputDirectoryPath []string `json:"outputDirectoryPath"`
-		InlineStepDetail    struct {
-			ScriptType             string `json:"scriptType"`
-			Script                 string `json:"script"`
-			StoreScriptAt          string `json:"storeScriptAt"`
-			MountDirectoryFromHost bool   `json:"mountDirectoryFromHost"`
-			CommandArgsMap         []struct {
-				Command string   `json:"command"`
-				Args    []string `json:"args"`
-			} `json:"commandArgsMap"`
-			InputVariables []struct {
-				Id                   int    `json:"id"`
-				Name                 string `json:"name"`
-				Format               string `json:"format"`
-				Description          string `json:"description"`
-				Value                string `json:"value"`
-				VariableType         string `json:"variableType"`
-				RefVariableName      string `json:"refVariableName,omitempty"`
-				RefVariableStage     string `json:"refVariableStage"`
-				RefVariableStepIndex int    `json:"refVariableStepIndex,omitempty"`
-			} `json:"inputVariables"`
-			OutputVariables []struct {
-				Id               int    `json:"id"`
-				Name             string `json:"name"`
-				Format           string `json:"format"`
-				Description      string `json:"description"`
-				Value            string `json:"value"`
-				VariableType     string `json:"variableType"`
-				RefVariableStage string `json:"refVariableStage"`
-			} `json:"outputVariables"`
-			ConditionDetails []struct {
-				Id                  int    `json:"id"`
-				ConditionOnVariable string `json:"conditionOnVariable"`
-				ConditionType       string `json:"conditionType"`
-				ConditionOperator   string `json:"conditionOperator"`
-				ConditionalValue    string `json:"conditionalValue"`
-			} `json:"conditionDetails"`
-			MountCodeToContainer     bool   `json:"mountCodeToContainer,omitempty"`
-			MountCodeToContainerPath string `json:"mountCodeToContainerPath,omitempty"`
-			ContainerImagePath       string `json:"containerImagePath,omitempty"`
-			MountPathMap             []struct {
-				FilePathOnDisk      string `json:"filePathOnDisk"`
-				FilePathOnContainer string `json:"filePathOnContainer"`
-			} `json:"mountPathMap,omitempty"`
-			PortMap []struct {
-				PortOnLocal     int `json:"portOnLocal"`
-				PortOnContainer int `json:"portOnContainer"`
-			} `json:"portMap,omitempty"`
-			IsMountCustomScript bool `json:"isMountCustomScript,omitempty"`
-		} `json:"inlineStepDetail"`
-		PluginRefStepDetail interface{} `json:"pluginRefStepDetail"`
-	} `json:"steps"`
-}
-type Step struct {
-	Id                  int      `json:"id"`
-	Name                string   `json:"name"`
-	Description         string   `json:"description"`
-	Index               int      `json:"index"`
-	StepType            string   `json:"stepType"`
-	OutputDirectoryPath []string `json:"outputDirectoryPath"`
-	InlineStepDetail    struct {
-		ScriptType       string           `json:"scriptType"`
-		Script           string           `json:"script"`
-		StoreScriptAt    string           `json:"storeScriptAt"`
-		CommandArgsMap   []CommandArgsMap `json:"commandArgsMap"`
-		InputVariables   []InputVariables `json:"inputVariables"`
-		OutputVariables  []InputVariables `json:"outputVariables"`
-		ConditionDetails []struct {
-			Id                  int    `json:"id"`
-			ConditionOnVariable string `json:"conditionOnVariable"`
-			ConditionType       string `json:"conditionType"`
-			ConditionOperator   string `json:"conditionOperator"`
-			ConditionalValue    string `json:"conditionalValue"`
-		} `json:"conditionDetails"`
-		MountCodeToContainer     bool   `json:"mountCodeToContainer,omitempty"`
-		MountCodeToContainerPath string `json:"mountCodeToContainerPath,omitempty"`
-		MountDirectoryFromHost   bool   `json:"mountDirectoryFromHost"`
-		ContainerImagePath       string `json:"containerImagePath,omitempty"`
-		MountPathMap             []struct {
-			FilePathOnDisk      string `json:"filePathOnDisk"`
-			FilePathOnContainer string `json:"filePathOnContainer"`
-		} `json:"mountPathMap,omitempty"`
-		PortMap []struct {
-			PortOnLocal     int `json:"portOnLocal"`
-			PortOnContainer int `json:"portOnContainer"`
-		} `json:"portMap,omitempty"`
-		IsMountCustomScript bool `json:"isMountCustomScript,omitempty"`
-	} `json:"inlineStepDetail"`
-	PluginRefStepDetail interface{} `json:"pluginRefStepDetail"`
-}
-type CiPipeline struct {
-	IsManual         bool              `json:"isManual"`
-	DockerArgs       map[string]string `json:"dockerArgs"`
-	IsExternal       bool              `json:"isExternal"`
-	ParentCiPipeline int               `json:"parentCiPipeline"`
-	ParentAppId      int               `json:"parentAppId"`
-	ExternalCiConfig struct {
-		Id         int    `json:"id"`
-		WebhookUrl string `json:"webhookUrl"`
-		Payload    string `json:"payload"`
-		AccessKey  string `json:"accessKey"`
-	} `json:"externalCiConfig"`
-	CiMaterial    []CiMaterial `json:"ciMaterial"`
-	Name          string       `json:"name"`
-	Id            int          `json:"id"`
-	Active        bool         `json:"active"`
-	LinkedCount   int          `json:"linkedCount"`
-	ScanEnabled   bool         `json:"scanEnabled"`
-	AppWorkflowId int          `json:"appWorkflowId"`
-	PreBuildStage struct {
-		Id    int    `json:"id"`
-		Type  string `json:"type"`
-		Steps []Step `json:"steps"`
-	} `json:"preBuildStage"`
-	PostBuildStage struct {
-		Id    int    `json:"id"`
-		Type  string `json:"type"`
-		Steps []Step `json:"steps"`
-	} `json:"postBuildStage"`
-}
-type GetWorkflowDetails struct {
-	Code   int        `json:"code"`
-	Status string     `json:"status"`
-	Result CiPipeline `json:"result"`
-}
-type ConditionDetails struct {
-	Id                  int    `json:"id"`
-	ConditionOnVariable string `json:"conditionOnVariable"`
-	ConditionType       string `json:"conditionType"`
-	ConditionOperator   string `json:"conditionOperator"`
-	ConditionalValue    string `json:"conditionalValue"`
-}
-
-// Payload with added missing fields
-type CreateWorkflowRequestDto struct {
-	AppId         int        `json:"appId"`
-	AppWorkflowId int        `json:"appWorkflowId"`
-	Action        int        `json:"action"`
-	CiPipeline    CiPipeline `json:"ciPipeline"`
-}
-type CreateWorkflowResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result struct {
-		Id                int    `json:"id"`
-		AppId             int    `json:"appId"`
-		DockerRegistry    string `json:"dockerRegistry"`
-		DockerRepository  string `json:"dockerRepository"`
-		DockerBuildConfig struct {
-			GitMaterialId          int    `json:"gitMaterialId"`
-			DockerfileRelativePath string `json:"dockerfileRelativePath"`
-		} `json:"dockerBuildConfig"`
-		CiPipelines []struct {
-			IsManual         bool              `json:"isManual"`
-			DockerArgs       map[string]string `json:"dockerArgs"`
-			IsExternal       bool              `json:"isExternal"`
-			ParentCiPipeline int               `json:"parentCiPipeline"`
-			ParentAppId      int               `json:"parentAppId"`
-			ExternalCiConfig struct {
-				Id         int    `json:"id"`
-				WebhookUrl string `json:"webhookUrl"`
-				Payload    string `json:"payload"`
-				AccessKey  string `json:"accessKey"`
-			} `json:"externalCiConfig"`
-			CiMaterial []struct {
-				Source struct {
-					Type  string `json:"type"`
-					Value string `json:"value"`
-				} `json:"source"`
-				GitMaterialId   int    `json:"gitMaterialId"`
-				Id              int    `json:"id"`
-				GitMaterialName string `json:"gitMaterialName"`
-			} `json:"ciMaterial"`
-
-			Name          string `json:"name"`
-			Id            int    `json:"id"`
-			Active        bool   `json:"active"`
-			LinkedCount   int    `json:"linkedCount"`
-			ScanEnabled   bool   `json:"scanEnabled"`
-			PreBuildStage struct {
-				Id    int    `json:"id"`
-				Type  string `json:"type"`
-				Steps []struct {
-					Id                  int      `json:"id"`
-					Name                string   `json:"name"`
-					Description         string   `json:"description"`
-					Index               int      `json:"index"`
-					StepType            string   `json:"stepType"`
-					OutputDirectoryPath []string `json:"outputDirectoryPath"`
-					InlineStepDetail    struct {
-						ScriptType             string `json:"scriptType"`
-						Script                 string `json:"script"`
-						StoreScriptAt          string `json:"storeScriptAt"`
-						MountDirectoryFromHost bool   `json:"mountDirectoryFromHost"`
-						CommandArgsMap         []struct {
-							Command string   `json:"command"`
-							Args    []string `json:"args"`
-						} `json:"commandArgsMap"`
-						InputVariables []struct {
-							Id                   int    `json:"id"`
-							Name                 string `json:"name"`
-							Format               string `json:"format"`
-							Description          string `json:"description"`
-							Value                string `json:"value"`
-							VariableType         string `json:"variableType"`
-							RefVariableName      string `json:"refVariableName,omitempty"`
-							RefVariableStage     string `json:"refVariableStage"`
-							RefVariableStepIndex int    `json:"refVariableStepIndex,omitempty"`
-						} `json:"inputVariables"`
-						OutputVariables []struct {
-							Id               int    `json:"id"`
-							Name             string `json:"name"`
-							Format           string `json:"format"`
-							Description      string `json:"description"`
-							Value            string `json:"value"`
-							VariableType     string `json:"variableType"`
-							RefVariableStage string `json:"refVariableStage"`
-						} `json:"outputVariables"`
-						ConditionDetails []struct {
-							Id                  int    `json:"id"`
-							ConditionOnVariable string `json:"conditionOnVariable"`
-							ConditionType       string `json:"conditionType"`
-							ConditionOperator   string `json:"conditionOperator"`
-							ConditionalValue    string `json:"conditionalValue"`
-						} `json:"conditionDetails"`
-						MountCodeToContainer     bool   `json:"mountCodeToContainer,omitempty"`
-						MountCodeToContainerPath string `json:"mountCodeToContainerPath,omitempty"`
-						ContainerImagePath       string `json:"containerImagePath,omitempty"`
-						MountPathMap             []struct {
-							FilePathOnDisk      string `json:"filePathOnDisk"`
-							FilePathOnContainer string `json:"filePathOnContainer"`
-						} `json:"mountPathMap,omitempty"`
-						PortMap []struct {
-							PortOnLocal     int `json:"portOnLocal"`
-							PortOnContainer int `json:"portOnContainer"`
-						} `json:"portMap,omitempty"`
-						IsMountCustomScript bool `json:"isMountCustomScript,omitempty"`
-					} `json:"inlineStepDetail"`
-					PluginRefStepDetail interface{} `json:"pluginRefStepDetail"`
-				} `json:"steps"`
-			} `json:"preBuildStage"`
-			PostBuildStage struct {
-				Id    int    `json:"id"`
-				Type  string `json:"type"`
-				Steps []struct {
-					Id                  int      `json:"id"`
-					Name                string   `json:"name"`
-					Description         string   `json:"description"`
-					Index               int      `json:"index"`
-					StepType            string   `json:"stepType"`
-					OutputDirectoryPath []string `json:"outputDirectoryPath"`
-					InlineStepDetail    struct {
-						ScriptType             string `json:"scriptType"`
-						Script                 string `json:"script"`
-						StoreScriptAt          string `json:"storeScriptAt"`
-						MountDirectoryFromHost bool   `json:"mountDirectoryFromHost"`
-						CommandArgsMap         []struct {
-							Command string   `json:"command"`
-							Args    []string `json:"args"`
-						} `json:"commandArgsMap"`
-						InputVariables []struct {
-							Id                   int    `json:"id"`
-							Name                 string `json:"name"`
-							Format               string `json:"format"`
-							Description          string `json:"description"`
-							Value                string `json:"value"`
-							VariableType         string `json:"variableType"`
-							RefVariableName      string `json:"refVariableName,omitempty"`
-							RefVariableStage     string `json:"refVariableStage"`
-							RefVariableStepIndex int    `json:"refVariableStepIndex,omitempty"`
-						} `json:"inputVariables"`
-						OutputVariables []struct {
-							Id               int    `json:"id"`
-							Name             string `json:"name"`
-							Format           string `json:"format"`
-							Description      string `json:"description"`
-							Value            string `json:"value"`
-							VariableType     string `json:"variableType"`
-							RefVariableStage string `json:"refVariableStage"`
-						} `json:"outputVariables"`
-						ConditionDetails []struct {
-							Id                  int    `json:"id"`
-							ConditionOnVariable string `json:"conditionOnVariable"`
-							ConditionType       string `json:"conditionType"`
-							ConditionOperator   string `json:"conditionOperator"`
-							ConditionalValue    string `json:"conditionalValue"`
-						} `json:"conditionDetails"`
-						MountCodeToContainer     bool   `json:"mountCodeToContainer,omitempty"`
-						MountCodeToContainerPath string `json:"mountCodeToContainerPath,omitempty"`
-						ContainerImagePath       string `json:"containerImagePath,omitempty"`
-						MountPathMap             []struct {
-							FilePathOnDisk      string `json:"filePathOnDisk"`
-							FilePathOnContainer string `json:"filePathOnContainer"`
-						} `json:"mountPathMap,omitempty"`
-						PortMap []struct {
-							PortOnLocal     int `json:"portOnLocal"`
-							PortOnContainer int `json:"portOnContainer"`
-						} `json:"portMap,omitempty"`
-						IsMountCustomScript bool `json:"isMountCustomScript,omitempty"`
-					} `json:"inlineStepDetail"`
-					PluginRefStepDetail interface{} `json:"pluginRefStepDetail"`
-				} `json:"steps"`
-			} `json:"postBuildStage"`
-		} `json:"ciPipelines"`
-		AppName   string `json:"appName"`
-		Materials []struct {
-			GitMaterialId int    `json:"gitMaterialId"`
-			MaterialName  string `json:"materialName"`
-		} `json:"materials"`
-		AppWorkflowId int  `json:"appWorkflowId"`
-		ScanEnabled   bool `json:"scanEnabled"`
-	} `json:"result"`
-}
-
-func HitCreateWorkflowApi(payload []byte, authToken string) CreateWorkflowResponseDto {
+func HitCreateWorkflowApi(payload []byte, authToken string) ResponseDTOs.CreateWorkflowResponseDto {
 	resp, err := Base.MakeApiCall(CreateWorkflowApiUrl, http.MethodPost, string(payload), nil, authToken)
 	Base.HandleError(err, CreateWorkflowApi)
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
@@ -909,8 +570,8 @@ func worflowTypeProvider(temp string) string {
 	}
 	return str
 }
-func getRequestPayloadForCreateWorkflow(forDelete bool, wfTypeId string, appId int, wfId int) CreateWorkflowRequestDto {
-	var createWorkflowRequestDto CreateWorkflowRequestDto
+func getRequestPayloadForCreateWorkflow(forDelete bool, wfTypeId string, appId int, wfId int) RequestDTOs.CreateWorkflowRequestDto {
+	var createWorkflowRequestDto RequestDTOs.CreateWorkflowRequestDto
 
 	if forDelete == true {
 		createWorkflowRequestDto.AppWorkflowId = wfId
@@ -919,14 +580,14 @@ func getRequestPayloadForCreateWorkflow(forDelete bool, wfTypeId string, appId i
 		return createWorkflowRequestDto
 	}
 	wfTypeStr := worflowTypeProvider(wfTypeId)
-	var CiMaterial CiMaterial
+	var CiMaterial RequestDTOs.CiMaterial
 	CiMaterial.Source.Type = wfTypeStr
 	createWorkflowRequestDto.CiPipeline.Active = true
 	createWorkflowRequestDto.AppId = appId
 	createWorkflowRequestDto.CiPipeline.CiMaterial = append(createWorkflowRequestDto.CiPipeline.CiMaterial, CiMaterial)
 	return createWorkflowRequestDto
 }
-func HitGetWorkflowGetailsApi(appId int, wfId int, authToken string) GetWorkflowDetails {
+func HitGetWorkflowGetailsApi(appId int, wfId int, authToken string) RequestDTOs.GetWorkflowDetails {
 	resp, err := Base.MakeApiCall(GetCiPipelineViaIdApiUrl+strconv.Itoa(appId)+"/"+strconv.Itoa(wfId), http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, GetWorkflowDetailsApi)
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
@@ -934,7 +595,7 @@ func HitGetWorkflowGetailsApi(appId int, wfId int, authToken string) GetWorkflow
 	return pipelineConfigRouter.getWorkflowDetails
 }
 func HitDeleteWorkflowApi(appId int, wfId int, authToken string) DeleteResponseDto {
-	resp, err := Base.MakeApiCall(DeleteWorkflowApiUrl+strconv.Itoa(appId)+"/"+strconv.Itoa(wfId), http.MethodDelete, "", nil, authToken)
+	resp, err := Base.MakeApiCall(GetWorkflowApiUrl+strconv.Itoa(appId)+"/"+strconv.Itoa(wfId), http.MethodDelete, "", nil, authToken)
 	Base.HandleError(err, DeleteAppApi)
 
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
@@ -948,30 +609,23 @@ type FetchSuggestedCiPipelineName struct {
 	Result string `json:"result"`
 }
 
-func HitFetchSuggestedCiPipelineName(appId int, authToken string) FetchSuggestedCiPipelineName {
-	resp, err := Base.MakeApiCall(FetchSuggestedCiPipelineNameApiUrl+strconv.Itoa(appId), http.MethodGet, "", nil, authToken)
-	Base.HandleError(err, FetchSuggestedCiPipelineNameApi)
+type PipelineSuggestedCDResponseDTO struct {
+	Code   int           `json:"code"`
+	Status string        `json:"status"`
+	Result string        `json:"result"`
+	Errors []Base.Errors `json:"errors"`
+}
+
+func HitGetPipelineSuggestedCiCd(pipelineType string, appId int, authToken string) PipelineSuggestedCDResponseDTO {
+	resp, err := Base.MakeApiCall(GetPipelineSuggestedCICDApiUrl+pipelineType+"/"+strconv.Itoa(appId), http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetPipelineSuggestedCICDApi)
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
-	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), FetchSuggestedCiPipelineNameApi)
-	return pipelineConfigRouter.fetchSuggestedCiPipelineName
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetPipelineSuggestedCICDApi)
+	return pipelineConfigRouter.pipelineSuggestedCDResponseDTO
 }
 
-type InputVariables struct {
-	Id                        int    `json:"id"`
-	Name                      string `json:"name"`
-	Format                    string `json:"format"`
-	Description               string `json:"description"`
-	IsExposed                 bool   `json:"isExposed"`
-	AllowEmptyValue           bool   `json:"allowEmptyValue"`
-	Value                     string `json:"value"`
-	VariableType              string `json:"variableType"`
-	VariableStepIndexInPlugin int    `json:"variableStepIndexInPlugin"`
-	RefVariableStage          string `json:"refVariableStage"`
-	RefVariableName           string `json:"refVariableName"`
-}
-
-func inputVariablesSelector(inputType int) []InputVariables {
-	var inputVariable InputVariables
+func inputVariablesSelector(inputType int) []RequestDTOs.InputVariables {
+	var inputVariable RequestDTOs.InputVariables
 	switch inputType {
 	case 1:
 		inputVariable.Format = "STRING"
@@ -1001,12 +655,12 @@ func inputVariablesSelector(inputType int) []InputVariables {
 	}
 	inputVariable.Name = Base.GetRandomStringOfGivenLength(5) + "_" + inputVariable.Format
 	inputVariable.Description = inputVariable.Name + "_Desc_" + Base.GetRandomStringOfGivenLength(10)
-	var input []InputVariables
+	var input []RequestDTOs.InputVariables
 	input = append(input, inputVariable)
 	return input
 }
-func getConditionDetails(id int) []ConditionDetails {
-	var conditionDetails ConditionDetails
+func getConditionDetails(id int) []RequestDTOs.ConditionDetails {
+	var conditionDetails RequestDTOs.ConditionDetails
 	conditionDetails.ConditionType = "TRIGGER"
 	switch id {
 	case 1:
@@ -1028,21 +682,13 @@ func getConditionDetails(id int) []ConditionDetails {
 		conditionDetails.ConditionOperator = ">="
 		break
 	}
-	var input []ConditionDetails
+	var input []RequestDTOs.ConditionDetails
 	input = append(input, conditionDetails)
 	return input
 }
 
-type CommandArgsMap struct {
-	Command string `json:"command"`
-	Args    []Args `json:"args"`
-}
-type Args struct {
-	Arg string `json:"args"`
-}
-
-func getPreBuildStepRequestPayloadDto(scriptType int) []Step {
-	var step Step
+func getPreBuildStepRequestPayloadDto(scriptType int) []RequestDTOs.Step {
+	var step RequestDTOs.Step
 	step.Name = Base.GetRandomStringOfGivenLength(10)
 	step.Description = Base.GetRandomStringOfGivenLength(20)
 	step.StepType = "INLINE"
@@ -1061,20 +707,6 @@ func getPreBuildStepRequestPayloadDto(scriptType int) []Step {
 		{
 			step.InlineStepDetail.ScriptType = "CONTAINER_IMAGE"
 			step.InlineStepDetail.ContainerImagePath = "alpine:latest"
-			/*
-				var arg Args
-				arg.Arg = "/" + Base.GetRandomStringOfGivenLength(5) + ".sh"
-				var args []Args
-				args = append(args, arg)
-				var commandArgsMap CommandArgsMap
-				commandArgsMap.Command = "sh"
-				commandArgsMap.Args = args
-
-				var commandArgsMap2 []CommandArgsMap
-				commandArgsMap2 = append(commandArgsMap2, commandArgsMap)
-				step.InlineStepDetail.CommandArgsMap = append(step.InlineStepDetail.CommandArgsMap, commandArgsMap2[0])
-
-			*/
 			break
 		}
 
@@ -1092,37 +724,38 @@ func getPreBuildStepRequestPayloadDto(scriptType int) []Step {
 	}
 	step.InlineStepDetail.MountCodeToContainer = false
 	step.InlineStepDetail.MountDirectoryFromHost = false
-	var steps []Step
+	var steps []RequestDTOs.Step
 	steps = append(steps, step)
 	return steps
 }
 
-func HitCreateWorkflowApiWithFullPayload(appId int, authToken string) CreateWorkflowResponseDto {
-	createWorkflowRequestDto := getRequestPayloadForCreateWorkflow(false, "1", appId, 0)
-	key := Base.GetRandomStringOfGivenLength(10)
-	createWorkflowRequestDto.CiPipeline.DockerArgs = make(map[string]string)
-	createWorkflowRequestDto.CiPipeline.DockerArgs[key] = Base.GetRandomStringOfGivenLength(10)
-	fetchSuggestedCiPipelineName := HitFetchSuggestedCiPipelineName(appId, authToken)
+func HitCreateWorkflowApiWithFullPayload(appId int, authToken string) ResponseDTOs.CreateWorkflowResponseDto {
+
+	var createWorkflowRequestDto RequestDTOs.CreateWorkflowRequestDto
+	configFile, err := os.Open("../testdata/PipeLineConfigRouter/CreateWorkflow/CreateWorkflowPreAndPostBuildRequestPayload.json")
+	if err != nil {
+		panic(err)
+	}
+	jsonParser := json.NewDecoder(configFile)
+	if err = jsonParser.Decode(&createWorkflowRequestDto); err != nil {
+		panic(err)
+	}
+
+	expectedPayload := getRequestPayloadForCreateWorkflow(false, "1", appId, 0)
+
+	createWorkflowRequestDto.AppId = appId
+	createWorkflowRequestDto.CiPipeline.Active = expectedPayload.CiPipeline.Active
+	createWorkflowRequestDto.CiPipeline.CiMaterial[0].Source.Type = expectedPayload.CiPipeline.CiMaterial[0].Source.Type
+	fetchSuggestedCiPipelineName := HitGetPipelineSuggestedCiCd("ci", appId, authToken)
 	createWorkflowRequestDto.CiPipeline.Name = fetchSuggestedCiPipelineName.Result
 	fetchAppGetResponseDto := HitGetMaterial(appId, authToken)
 	createWorkflowRequestDto.CiPipeline.CiMaterial[0].GitMaterialId = fetchAppGetResponseDto.Result.Material[0].Id
-	createWorkflowRequestDto.CiPipeline.CiMaterial[0].Source.Value = strings.ToLower(Base.GetRandomStringOfGivenLength(10))
-
-	i := 0
-	for i = 1; i < 3; i++ {
-		preBuildStepRequestPayload := getPreBuildStepRequestPayloadDto(i)
-		postBuildStepRequestPayload := getPreBuildStepRequestPayloadDto(i)
-
-		createWorkflowRequestDto.CiPipeline.PreBuildStage.Steps = append(createWorkflowRequestDto.CiPipeline.PreBuildStage.Steps, preBuildStepRequestPayload[0])
-		createWorkflowRequestDto.CiPipeline.PostBuildStage.Steps = append(createWorkflowRequestDto.CiPipeline.PostBuildStage.Steps, postBuildStepRequestPayload[0])
-	}
 
 	byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
 	log.Println("Hitting the Create Workflow Api with valid payload")
 	createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, authToken)
 	return createWorkflowResponseDto
 }
-
 func DeleteWorkflow(appId int, wfId int, authToken string) {
 	getWorkflowDetailsResponseDto := HitGetWorkflowGetailsApi(appId, wfId, authToken)
 	log.Println("Validating get workflow details api")
@@ -1134,16 +767,10 @@ func DeleteWorkflow(appId int, wfId int, authToken string) {
 	byteValueOfDeleteCiPipeline, _ := json.Marshal(deleteCiPipelineRequestDto)
 
 	log.Println("Hitting the Create Workflow Api with action=2 for delete ci-pipeline")
-	//deleteCiPipelineResponseDto := HitCreateWorkflowApi(byteValueOfDeleteCiPipeline, authToken)
 	HitCreateWorkflowApi(byteValueOfDeleteCiPipeline, authToken)
 
-	log.Println("Validating delete ci-pipeline")
-	//assert.Equal(suite.T(), deleteCiPipelineResponseDto.Result.AppId, appId)
-
 	log.Println("Deleting workflow")
-	//respOfDeleteWorkflowApi := HitDeleteWorkflowApi(appId, wfId, authToken)
 	HitDeleteWorkflowApi(appId, wfId, authToken)
-	//assert.Equal(suite.T(), 200, respOfDeleteWorkflowApi.Code)
 	return
 }
 
@@ -1224,4 +851,36 @@ func getPostStageConfigMapSecretNames() RequestDTOs.StageConfigMapSecretNames {
 	postStageConfigMapSecretNames.ConfigMaps = []string{"config1"}
 	postStageConfigMapSecretNames.Secrets = []string{"secret1"}
 	return postStageConfigMapSecretNames
+}
+
+type FetchAllAppWorkflowResponseDto struct {
+	Code   int    `json:"code"`
+	Status string `json:"status"`
+	Result struct {
+		AppId     int    `json:"appId"`
+		AppName   string `json:"appName"`
+		Workflows []struct {
+			Id    int    `json:"id"`
+			Name  string `json:"name"`
+			AppId int    `json:"appId"`
+			Tree  []struct {
+				Id            int    `json:"id"`
+				AppWorkflowId int    `json:"appWorkflowId"`
+				Type          string `json:"type"`
+				ComponentId   int    `json:"componentId"`
+				ParentId      int    `json:"parentId"`
+				ParentType    string `json:"parentType"`
+			} `json:"tree"`
+		} `json:"workflows"`
+	} `json:"result"`
+	Error []Base.Errors `json:"errors"`
+}
+
+func FetchAllAppWorkflow(id int, authToken string) FetchAllAppWorkflowResponseDto {
+	resp, err := Base.MakeApiCall(GetWorkflowApiUrl+strconv.Itoa(id), http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, FetchAllAppWorkflowApi)
+
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), FetchAllAppWorkflowApi)
+	return pipelineConfigRouter.fetchAllAppWorkflowResponseDto
 }
