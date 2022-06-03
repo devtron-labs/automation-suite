@@ -1,66 +1,22 @@
 package TeamRouter
 
 import (
+	"automation-suite/TeamRouter/RequestDTOs"
+	"automation-suite/TeamRouter/ResponseDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 )
 
-type SaveTeamResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Errors []struct {
-		InternalMessage string `json:"internalMessage"`
-		UserMessage     string `json:"userMessage"`
-	} `json:"errors"`
-	Result struct {
-		Id     int    `json:"id"`
-		Name   string `json:"name"`
-		Active bool   `json:"active"`
-	} `json:"result"`
+type TeamsRouterStruct struct {
+	saveTeamResponseDto     ResponseDTOs.SaveTeamResponseDTO
+	deleteTeamResponseDto   ResponseDTOs.DeleteTeamResponseDto
+	fetchAllTeamResponseDto ResponseDTOs.FetchAllTeamResponseDTO
+	getTeamByIdResponseDto  ResponseDTOs.GetTeamByIdResponseDTO
 }
 
-type GetTeamByIdResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result struct {
-		Id     int    `json:"id"`
-		Name   string `json:"name"`
-		Active bool   `json:"active"`
-	} `json:"result"`
-}
-
-type SaveTeamRequestDto struct {
-	Id     int    `json:"id"`
-	Name   string `json:"name"`
-	Active bool   `json:"active"`
-}
-
-type DeleteTeamResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result string `json:"result"`
-}
-
-type FetchAllTeamResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result []struct {
-		Id     int    `json:"id"`
-		Name   string `json:"name"`
-		Active bool   `json:"active"`
-	} `json:"result"`
-}
-
-type TeamRouterStruct struct {
-	saveTeamResponseDto     SaveTeamResponseDto
-	deleteTeamResponseDto   DeleteTeamResponseDto
-	fetchAllTeamResponseDto FetchAllTeamResponseDto
-	getTeamByIdResponseDto  GetTeamByIdResponseDto
-}
-
-func (teamRouterStruct TeamRouterStruct) UnmarshalGivenResponseBody(response []byte, apiName string) TeamRouterStruct {
+func (teamRouterStruct TeamsRouterStruct) UnmarshalGivenResponseBody(response []byte, apiName string) TeamsRouterStruct {
 	switch apiName {
 	case FetchAllTeamApi:
 		json.Unmarshal(response, &teamRouterStruct.fetchAllTeamResponseDto)
@@ -74,7 +30,7 @@ func (teamRouterStruct TeamRouterStruct) UnmarshalGivenResponseBody(response []b
 	return teamRouterStruct
 }
 
-func HitSaveTeamApi(payload []byte, authToken string) SaveTeamResponseDto {
+func HitSaveTeamApi(payload []byte, authToken string) ResponseDTOs.SaveTeamResponseDTO {
 	var payloadOfApi string
 	if payload != nil {
 		payloadOfApi = string(payload)
@@ -87,66 +43,66 @@ func HitSaveTeamApi(payload []byte, authToken string) SaveTeamResponseDto {
 	resp, err := Base.MakeApiCall(SaveTeamApiUrl, http.MethodPost, payloadOfApi, nil, authToken)
 	Base.HandleError(err, SaveTeamApi)
 
-	teamRouterStruct := TeamRouterStruct{}
+	teamRouterStruct := TeamsRouterStruct{}
 	teamRouter := teamRouterStruct.UnmarshalGivenResponseBody(resp.Body(), SaveTeamApi)
 	return teamRouter.saveTeamResponseDto
 }
 
-func GetSaveTeamRequestDto() SaveTeamRequestDto {
-	var saveTeamRequestDto SaveTeamRequestDto
+func GetSaveTeamRequestDto() RequestDTOs.SaveTeamRequestDto {
+	var saveTeamRequestDto RequestDTOs.SaveTeamRequestDto
 	teamName := Base.GetRandomStringOfGivenLength(10)
 	saveTeamRequestDto.Name = teamName
 	saveTeamRequestDto.Active = true
 	return saveTeamRequestDto
 }
 
-func HitFetchAllTeamApi(authToken string) FetchAllTeamResponseDto {
+func HitFetchAllTeamApi(authToken string) ResponseDTOs.FetchAllTeamResponseDTO {
 	resp, err := Base.MakeApiCall(SaveTeamApiUrl, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, FetchAllTeamApi)
 
-	teamRouterStruct := TeamRouterStruct{}
+	teamRouterStruct := TeamsRouterStruct{}
 	teamRouter := teamRouterStruct.UnmarshalGivenResponseBody(resp.Body(), FetchAllTeamApi)
 	return teamRouter.fetchAllTeamResponseDto
 }
 
-func HitDeleteTeamApi(byteValueOfStruct []byte, authToken string) DeleteTeamResponseDto {
+func HitDeleteTeamApi(byteValueOfStruct []byte, authToken string) ResponseDTOs.DeleteTeamResponseDto {
 	resp, err := Base.MakeApiCall(SaveTeamApiUrl, http.MethodDelete, string(byteValueOfStruct), nil, authToken)
 	Base.HandleError(err, DeleteTeamApi)
 
-	teamRouterStruct := TeamRouterStruct{}
+	teamRouterStruct := TeamsRouterStruct{}
 	teamRouter := teamRouterStruct.UnmarshalGivenResponseBody(resp.Body(), DeleteTeamApi)
 	return teamRouter.deleteTeamResponseDto
 }
 
-func HitGetTeamByIdApi(id string, authToken string) GetTeamByIdResponseDto {
+func HitGetTeamByIdApi(id string, authToken string) ResponseDTOs.GetTeamByIdResponseDTO {
 	resp, err := Base.MakeApiCall(SaveTeamApiUrl+"/"+id, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, GetTeamByIdApi)
 
-	teamRouterStruct := TeamRouterStruct{}
+	teamRouterStruct := TeamsRouterStruct{}
 	teamRouter := teamRouterStruct.UnmarshalGivenResponseBody(resp.Body(), GetTeamByIdApi)
 	return teamRouter.getTeamByIdResponseDto
 }
 
-func HitUpdateTeamApi(byteValueOfStruct []byte, authToken string) SaveTeamResponseDto {
+func HitUpdateTeamApi(byteValueOfStruct []byte, authToken string) ResponseDTOs.SaveTeamResponseDTO {
 	resp, err := Base.MakeApiCall(SaveTeamApiUrl, http.MethodPut, string(byteValueOfStruct), nil, authToken)
 	Base.HandleError(err, UpdateTeamApi)
 
-	teamRouterStruct := TeamRouterStruct{}
+	teamRouterStruct := TeamsRouterStruct{}
 	teamRouter := teamRouterStruct.UnmarshalGivenResponseBody(resp.Body(), SaveTeamApi)
 	return teamRouter.saveTeamResponseDto
 }
 
-func HitFetchForAutocompleteApi(authToken string) FetchAllTeamResponseDto {
+func HitFetchForAutocompleteApi(authToken string) ResponseDTOs.FetchAllTeamResponseDTO {
 	resp, err := Base.MakeApiCall(FetchForAutocompleteApiUrl, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, FetchForAutocompleteApi)
 
-	teamRouterStruct := TeamRouterStruct{}
+	teamRouterStruct := TeamsRouterStruct{}
 	teamRouter := teamRouterStruct.UnmarshalGivenResponseBody(resp.Body(), FetchAllTeamApi)
 	return teamRouter.fetchAllTeamResponseDto
 }
 
 func GetPayLoadForDeleteAPI(id int, name string, isActive bool) []byte {
-	var updateTeamDto SaveTeamRequestDto
+	var updateTeamDto RequestDTOs.SaveTeamRequestDto
 	updateTeamDto.Id = id
 	updateTeamDto.Name = name
 	updateTeamDto.Active = isActive
@@ -155,7 +111,7 @@ func GetPayLoadForDeleteAPI(id int, name string, isActive bool) []byte {
 }
 
 func GetUpdateTeamRequestPayload(id int, teamName string) []byte {
-	var updateTeamRequestDto SaveTeamRequestDto
+	var updateTeamRequestDto RequestDTOs.SaveTeamRequestDto
 	updateTeamRequestDto.Name = teamName
 	updateTeamRequestDto.Id = id
 	updateTeamRequestDto.Active = true

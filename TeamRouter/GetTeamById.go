@@ -25,7 +25,7 @@ func (suite *TeamTestSuite) TestClass4GetTeamById() {
 		HitDeleteTeamApi(byteValueOfStruct, suite.authToken)
 	})
 
-	suite.Run("A=1=GetTeamByIdWithInvalidId", func() {
+	suite.Run("A=2=GetTeamByIdWithInvalidId", func() {
 		randomId := Base.GetRandomNumberOf9Digit()
 		log.Println("Hitting the GetTeamById API with Invalid Random Id")
 		resp := HitGetTeamByIdApi(strconv.Itoa(randomId), suite.authToken)
