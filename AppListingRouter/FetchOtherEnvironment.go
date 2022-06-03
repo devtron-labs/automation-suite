@@ -8,8 +8,8 @@ import (
 )
 
 func (suite *AppsListingRouterTestSuite) TestClassA2FetchOtherEnvironment() {
-	appId := suite.createAppResponseDto.Result.Id
-	createAppApiResponse := suite.createAppResponseDto.Result
+	createAppApiResponse := Base.CreateApp(suite.authToken).Result
+	appId := createAppApiResponse.Id
 
 	suite.Run("A=1=FetchOtherEnvWithValidAppId", func() {
 		fetchOtherEnvResponseDto := FetchOtherEnv(appId, suite.authToken)

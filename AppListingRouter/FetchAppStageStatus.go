@@ -7,9 +7,8 @@ import (
 )
 
 func (suite *AppsListingRouterTestSuite) TestClassA1FetchAppStageStatus() {
-	appId := suite.createAppResponseDto.Result.Id
-	createAppApiResponse := suite.createAppResponseDto.Result
-
+	createAppApiResponse := Base.CreateApp(suite.authToken).Result
+	appId := createAppApiResponse.Id
 	suite.Run("A=1=FetchAllStageStatusWithValidAppId", func() {
 		fetchAllLinkResponseDto := FetchAllStageStatus(appId, suite.authToken)
 
