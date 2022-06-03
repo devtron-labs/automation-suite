@@ -5,6 +5,6 @@ import (
 	"testing"
 )
 
-func bTestConfigMapSuite(t *testing.T) {
+func TestConfigMapSuite(t *testing.T) {
 	suite.Run(t, new(ConfigsMapRouterTestSuite))
 }

@@ -12,8 +12,6 @@ const (
 	awsSecretsManager             string = "awsSecretsManager"
 	kubernetes                    string = "kubernetes"
 	externalKubernetes            string = "externalKubernetes"
-	environment                   string = "environment"
 	volume                        string = "volume"
 	GetEnvSecretApiUrl            string = "/orchestrator/config/environment/cs/"
-	GetEnvSecretApi               string = "GetEnvSecretApi"
 )

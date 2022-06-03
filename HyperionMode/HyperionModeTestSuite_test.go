@@ -8,7 +8,6 @@ import (
 	"automation-suite/ChartRepositoryRouter"
 	"automation-suite/GitopsConfigRouter"
 	"automation-suite/HelmAppRouter"
-	"automation-suite/PipelineConfigRouter"
 	"automation-suite/SSOLoginRouter"
 	"automation-suite/TeamRouter"
 	"automation-suite/UserRouter"
@@ -64,8 +63,4 @@ func TestLinkOutRouterSuite(t *testing.T) {
 
 func TestGitOpsRouterSuite(t *testing.T) {
 	suite.Run(t, new(GitopsConfigRouter.GitOpsRouterTestSuite))
-}
-
-func TestPipelineConfigSuite(t *testing.T) {
-	suite.Run(t, new(PipelineConfigRouter.PipelinesConfigRouterTestSuite))
 }

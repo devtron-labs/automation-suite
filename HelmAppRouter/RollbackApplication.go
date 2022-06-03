@@ -1,6 +1,7 @@
 package HelmAppRouter
 
 import (
+	"automation-suite/HelmAppRouter/RequestDTOs"
 	"automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
@@ -11,31 +12,33 @@ import (
 var HAppId string
 var version, installedAppId, installedVersionId int
 
-var dataProviderForRollbackAppApiHavingInvalidArgs = []RollbackApplicationApiRequestDto{
+var dataProviderForRollbackAppApiHavingInvalidArgs = []RequestDTOs.RollbackApplicationApiRequestDto{
 	{strconv.Itoa(testUtils.GetRandomNumberOf9Digit()), version},
 	{HAppId, testUtils.GetRandomNumberOf9Digit()},
 	{strconv.Itoa(testUtils.GetRandomNumberOf9Digit()), testUtils.GetRandomNumberOf9Digit()},
 }
 
-func (suite *HelmAppTestSuite) TestRollBackApplicationApiWithValidPayload() {
-	envConf, _ := GetEnvironmentConfigForHelmApp()
-	HAppId = envConf.HAppId
-	queryParams := map[string]string{"appId": envConf.HAppId}
-	resp := HitGetDeploymentHistoryById(queryParams, suite.authToken)
-	totalNoDeploymentHistory := len(resp.Result.DeploymentHistory)
+func (suite *HelmAppTestSuite) TestRollBackApplicationApi() {
+	suite.Run("A=1=RollBackApplicationApiWithValidPayload", func() {
+		envConf, _ := GetEnvironmentConfigForHelmApp()
+		HAppId = envConf.HAppId
+		queryParams := map[string]string{"appId": envConf.HAppId}
+		resp := HitGetDeploymentHistoryById(queryParams, suite.authToken)
+		totalNoDeploymentHistory := len(resp.Result.DeploymentHistory)
 
-	version = resp.Result.DeploymentHistory[totalNoDeploymentHistory-1].Version
-	installedAppId = resp.Result.InstalledAppInfo.AppId
-	installedVersionId = resp.Result.InstalledAppInfo.InstalledAppVersionId
+		version = resp.Result.DeploymentHistory[totalNoDeploymentHistory-1].Version
+		installedAppId = resp.Result.InstalledAppInfo.AppId
+		installedVersionId = resp.Result.InstalledAppInfo.InstalledAppVersionId
 
-	rollbackApiRequestDto := GetRollbackAppApiRequestDto(envConf.HAppId, version)
-	payloadForRollbackApi, _ := json.Marshal(rollbackApiRequestDto)
-	log.Println("Hitting Rollback Application ")
-	rollbackApiRespDto := HitRollbackApplicationApi(string(payloadForRollbackApi), suite.authToken)
-	assert.Equal(suite.T(), 200, rollbackApiRespDto.Code)
-	resp = HitGetDeploymentHistoryById(queryParams, suite.authToken)
-	log.Println("Verifying the response of Rollback Application API")
-	assert.Equal(suite.T(), totalNoDeploymentHistory+1, len(resp.Result.DeploymentHistory))
+		rollbackApiRequestDto := GetRollbackAppApiRequestDto(envConf.HAppId, version)
+		payloadForRollbackApi, _ := json.Marshal(rollbackApiRequestDto)
+		log.Println("Hitting Rollback Application ")
+		rollbackApiRespDto := HitRollbackApplicationApi(string(payloadForRollbackApi), suite.authToken)
+		assert.Equal(suite.T(), 200, rollbackApiRespDto.Code)
+		resp = HitGetDeploymentHistoryById(queryParams, suite.authToken)
+		log.Println("Verifying the response of Rollback Application API")
+		assert.Equal(suite.T(), totalNoDeploymentHistory+1, len(resp.Result.DeploymentHistory))
+	})
 }
 
 //todo failing as we are getting invalid json in API Response, so commenting as of now
