@@ -1,13 +1,11 @@
-package externalLinkout
+package externalLinkoutRouter
 
 const (
-	CreateLinkApiUrl      string = "/orchestrator/external-links"
+	SaveLinkApiUrl        string = "/orchestrator/external-links"
 	CreateLinkApi         string = "CreateLinkApi"
-	SaveLinkApiUrl        string = "/orchestrator/external-linkout"
 	SaveToolApi           string = "SaveToolApi"
-	SaveToolApiUrl        string = "/orchestrator/tools"
+	SaveToolApiUrl        string = "/orchestrator/external-links/tools"
 	FetchAllLinkApi       string = "FetchAllLinkApi"
-	DeleteLinkApi         string = "DeleteLinkApi"
 	DeleteToolApi         string = "DeleteLinkApi"
 	GetLinkByClusterIdApi string = "GetLinkByClusterIdApi"
 	GetLinkByIdApi        string = "GetLinkByIdApi"

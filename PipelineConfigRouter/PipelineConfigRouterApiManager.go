@@ -5,18 +5,16 @@ import (
 	"automation-suite/PipelineConfigRouter/ResponseDTOs"
 	"os"
 
-	//"automation-suite/PipelineConfigRouter/RequestDTOs"
-	//"automation-suite/PipelineConfigRouter/ResponseDTOs"
-	"automation-suite/dockerRegRouter"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"errors"
-	"github.com/caarlos0/env"
-	"github.com/stretchr/testify/suite"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/caarlos0/env"
+	"github.com/stretchr/testify/suite"
 )
 
 type DeleteResponseDto struct {
@@ -106,11 +104,23 @@ type GetCiPipelineViaIdResponseDTO struct {
 		ScanEnabled       bool              `json:"scanEnabled"`
 	} `json:"result"`
 }
+type SaveDockerRegistryRequestDto struct {
+	Id           string `json:"id"`
+	PluginId     string `json:"pluginId"`
+	RegistryUrl  string `json:"registryUrl"`
+	RegistryType string `json:"registryType"`
+	Username     string `json:"username"`
+	Password     string `json:"password"`
+	IsDefault    bool   `json:"isDefault"`
+	Connection   string `json:"connection"`
+	Cert         string `json:"cert"`
+	Active       bool   `json:"active"`
+}
 
 type GetContainerRegistryResponseDTO struct {
-	Code   int                                             `json:"code"`
-	Status string                                          `json:"status"`
-	Result []*dockerRegRouter.SaveDockerRegistryRequestDto `json:"result"`
+	Code   int                            `json:"code"`
+	Status string                         `json:"status"`
+	Result []SaveDockerRegistryRequestDto `json:"result"`
 }
 
 type GetChartReferenceResponseDTO struct {
@@ -280,7 +290,7 @@ func GetAppMaterialRequestDto(appId int, gitProviderId int, fetchSubmodules bool
 	slice.Url = pipelineConfig.GitHubProjectUrl
 	slice.GitProviderId = gitProviderId
 	slice.FetchSubmodules = fetchSubmodules
-	slice.CheckoutPath = "./" + Base.GetRandomStringOfGivenLength(5)
+	slice.CheckoutPath = "./"
 	var createAppMaterialRequestDto CreateAppMaterialRequestDto
 	createAppMaterialRequestDto.AppId = appId
 	createAppMaterialRequestDto.Materials = append(createAppMaterialRequestDto.Materials, slice)
@@ -764,10 +774,20 @@ func HitCreateWorkflowApiWithFullPayload(appId int, authToken string) ResponseDT
 
 	createWorkflowRequestDto.AppId = appId
 	createWorkflowRequestDto.CiPipeline.Active = expectedPayload.CiPipeline.Active
-	createWorkflowRequestDto.CiPipeline.CiMaterial[0].Source.Type = expectedPayload.CiPipeline.CiMaterial[0].Source.Type
+	//createWorkflowRequestDto.CiPipeline.CiMaterial[0].Source.Type = expectedPayload.CiPipeline.CiMaterial[0].Source.Type
 	fetchSuggestedCiPipelineName := HitGetPipelineSuggestedCiCd("ci", appId, authToken)
 	createWorkflowRequestDto.CiPipeline.Name = fetchSuggestedCiPipelineName.Result
+
 	fetchAppGetResponseDto := HitGetMaterial(appId, authToken)
+
+	for i, j := range fetchAppGetResponseDto.Result.Material {
+
+		var CiMaterial RequestDTOs.CiMaterial
+		CiMaterial.GitMaterialId = j.Id
+		CiMaterial.Source.Type = expectedPayload.CiPipeline.CiMaterial[0].Source.Type
+		CiMaterial.Source.Value = "main" + strconv.Itoa(fetchAppGetResponseDto.Result.Material[i].GitProviderId)
+
+	}
 	createWorkflowRequestDto.CiPipeline.CiMaterial[0].GitMaterialId = fetchAppGetResponseDto.Result.Material[0].Id
 
 	byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)

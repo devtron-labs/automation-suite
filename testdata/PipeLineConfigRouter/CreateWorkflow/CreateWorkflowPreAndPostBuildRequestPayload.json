@@ -36,7 +36,7 @@
           "directoryPath": "",
           "inlineStepDetail": {
             "scriptType": "SHELL",
-            "script": "#!/bin/sh \nset -eo pipefail \n#set -v  ## uncomment this to debug the script \necho \"====Value of variable1====\"\necho $varibale1\necho \"===exporting OutVariable1===\"\nexport OutVariable1=OutValue1",
+            "script": "#!/bin/sh \nset -eo pipefail \n#set -v  ## uncomment this to debug the script \necho \"====Value of variable1====\"\necho $variable1\necho \"===exporting OutVariable1===\"\nexport OutVariable1=OutValue1\necho $OutVariable1",
             "conditionDetails": [
               {
                 "id": 0,

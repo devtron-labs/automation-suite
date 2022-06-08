@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/caarlos0/env"
-	"github.com/go-resty/resty/v2"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -15,6 +13,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/caarlos0/env"
+	"github.com/go-resty/resty/v2"
 )
 
 const createSessionApiUrl string = "/orchestrator/api/v1/session"
@@ -64,10 +65,10 @@ type DeleteResponseDto struct {
 }
 
 type EnvironmentConfig struct {
-	BaseServerUrl   string `env:"BASE_SERVER_URL" envDefault:""`
-	LogInUserName   string `env:"LOGIN_USERNAME" envDefault:""`
-	LogInUserPwd    string `env:"LOGIN_PASSWORD" envDefault:""`
-	SSOClientSecret string `env:"CLIENT_SECRET" envDefault:""`
+	BaseServerUrl   string `env:"BASE_SERVER_URL" envDefault:"https://staging.devtron.info"`
+	LogInUserName   string `env:"LOGIN_USERNAME" envDefault:"admin"`
+	LogInUserPwd    string `env:"LOGIN_PASSWORD" envDefault:"argocd-server-5495f64f7-8z8kx"`
+	SSOClientSecret string `env:"CLIENT_SECRET" envDefault:"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"`
 }
 
 func getRestyClient() *resty.Client {
