@@ -42,4 +42,9 @@ const (
 	DeleteCdPipelineApi                       string = "DeleteCdPipelineApi"
 	GetAppCdPipelineApiUrl                    string = "/orchestrator/app/cd-pipeline/"
 	GetAppCdPipelineApi                       string = "GetAppCdPipelineApi"
+	GetWorkflowStatusApi                      string = "GetWorkflowStatusApi"
+	GetWorkflowStatusApiUrl                   string = "/orchestrator/app/workflow/status/"
+	GetCiPipelineMaterialApi                  string = "GetCiPipelineMaterialApi"
+	TriggerCiPipelineApiUrl                   string = "/orchestrator/app/ci-pipeline/trigger"
+	TriggerCiPipelineApi                      string = "TriggerCiPipelineApi"
 )

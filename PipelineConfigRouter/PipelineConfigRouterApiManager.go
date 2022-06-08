@@ -218,6 +218,9 @@ type StructPipelineConfigRouter struct {
 	saveCdPipelineResponseDTO          ResponseDTOs.SaveCdPipelineResponseDTO
 	deleteCdPipelineRequestDTO         RequestDTOs.DeleteCdPipelineRequestDTO
 	getCdPipeResponseDTO               ResponseDTOs.GetCdPipeResponseDTO
+	getWorkflowStatusResponseDTO       ResponseDTOs.GetWorkflowStatusResponseDTO
+	getCiPipelineMaterialResponseDTO   ResponseDTOs.GetCiPipelineMaterialResponseDTO
+	triggerCiPipelineResponseDTO       ResponseDTOs.TriggerCiPipelineResponseDTO
 }
 
 type EnvironmentConfigPipelineConfigRouter struct {
@@ -321,7 +324,7 @@ type GetAppDetailsResponseDto struct {
 		AppName    string      `json:"appName"`
 		TeamId     int         `json:"teamId"`
 		TemplateId int         `json:"templateId"`
-		Material   []Materials `json:"material""`
+		Material   []Materials `json:"material"`
 	} `json:"result"`
 	Errors []Base.Errors `json:"errors"`
 }
@@ -493,6 +496,53 @@ func HitGetAppCdPipeline(appId string, authToken string) ResponseDTOs.GetCdPipeR
 	return pipelineConfigRouter.getCdPipeResponseDTO
 }
 
+func HitGetWorkflowStatus(appId int, authToken string) ResponseDTOs.GetWorkflowStatusResponseDTO {
+	id := strconv.Itoa(appId)
+	resp, err := Base.MakeApiCall(GetWorkflowStatusApiUrl+"/"+id, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetWorkflowStatusApi)
+
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetWorkflowStatusApi)
+	return pipelineConfigRouter.getWorkflowStatusResponseDTO
+}
+
+func HitGetCiPipelineMaterial(ciPipelineId int, authToken string) ResponseDTOs.GetCiPipelineMaterialResponseDTO {
+	pipelineId := strconv.Itoa(ciPipelineId)
+	resp, err := Base.MakeApiCall(GetCiPipelineViaIdApiUrl+pipelineId+"/material", http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetCiPipelineMaterialApi)
+
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetCiPipelineMaterialApi)
+	return pipelineConfigRouter.getCiPipelineMaterialResponseDTO
+}
+
+func HitTriggerCiPipelineApi(payload []byte, authToken string) ResponseDTOs.TriggerCiPipelineResponseDTO {
+	resp, err := Base.MakeApiCall(TriggerCiPipelineApiUrl, http.MethodPost, string(payload), nil, authToken)
+	Base.HandleError(err, TriggerCiPipelineApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), TriggerCiPipelineApi)
+	return pipelineConfigRouter.triggerCiPipelineResponseDTO
+}
+
+func createPayloadForTriggerCiPipeline(commit string, PipelineId int, ciPipelineMaterialId int) RequestDTOs.TriggerCiPipelineRequestDTO {
+	var listOfCiPipelineMaterials []RequestDTOs.CiPipelineMaterials
+	listOfCiPipelineMaterials = append(listOfCiPipelineMaterials, getCiPipelineMaterials(commit, ciPipelineMaterialId))
+	TriggerCiPipelineRequestDTO := RequestDTOs.TriggerCiPipelineRequestDTO{}
+	TriggerCiPipelineRequestDTO.PipelineId = PipelineId
+	TriggerCiPipelineRequestDTO.CiPipelineMaterials = listOfCiPipelineMaterials
+	TriggerCiPipelineRequestDTO.InvalidateCache = true
+	return TriggerCiPipelineRequestDTO
+}
+
+func getCiPipelineMaterials(commit string, ciPipelineMaterialId int) RequestDTOs.CiPipelineMaterials {
+	gitCommit := RequestDTOs.GitCommit{}
+	gitCommit.Commit = commit
+	CiPipelineMaterial := RequestDTOs.CiPipelineMaterials{}
+	CiPipelineMaterial.Id = ciPipelineMaterialId
+	CiPipelineMaterial.GitCommit = gitCommit
+	return CiPipelineMaterial
+}
+
 func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructPipelineConfigRouter {
 	switch apiName {
 	case DeleteAppMaterialApi:
@@ -529,13 +579,16 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.getWorkflowDetails)
 	case DeleteAppApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.deleteResponseDto)
-
 	case FetchAllAppWorkflowApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.fetchAllAppWorkflowResponseDto)
 	case SaveCdPipelineApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.saveCdPipelineResponseDTO)
 	case GetAppCdPipelineApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.getCdPipeResponseDTO)
+	case GetWorkflowStatusApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.getWorkflowStatusResponseDTO)
+	case GetCiPipelineMaterialApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.getCiPipelineMaterialResponseDTO)
 	}
 	return structPipelineConfigRouter
 }
@@ -786,7 +839,7 @@ func HitCreateWorkflowApiWithFullPayload(appId int, authToken string) ResponseDT
 		CiMaterial.GitMaterialId = j.Id
 		CiMaterial.Source.Type = expectedPayload.CiPipeline.CiMaterial[0].Source.Type
 		CiMaterial.Source.Value = "main" + strconv.Itoa(fetchAppGetResponseDto.Result.Material[i].GitProviderId)
-
+		createWorkflowRequestDto.CiPipeline.CiMaterial = append(createWorkflowRequestDto.CiPipeline.CiMaterial, CiMaterial)
 	}
 	createWorkflowRequestDto.CiPipeline.CiMaterial[0].GitMaterialId = fetchAppGetResponseDto.Result.Material[0].Id
 
