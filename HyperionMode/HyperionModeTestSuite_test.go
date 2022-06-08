@@ -12,7 +12,7 @@ import (
 	"automation-suite/TeamRouter"
 	"automation-suite/UserRouter"
 	"automation-suite/dockerRegRouter"
-	"automation-suite/externalLinkout"
+	"automation-suite/externalLinkoutRouter"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
@@ -58,7 +58,7 @@ func TestDockerRegRouterSuite(t *testing.T) {
 }
 
 func TestLinkOutRouterSuite(t *testing.T) {
-	suite.Run(t, new(externalLinkout.LinkOutRouterTestSuite))
+	suite.Run(t, new(externalLinkoutRouter.LinkOutRouterTestSuite))
 }
 
 func TestGitOpsRouterSuite(t *testing.T) {

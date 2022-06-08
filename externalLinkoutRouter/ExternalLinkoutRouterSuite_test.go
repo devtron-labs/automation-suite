@@ -1,4 +1,4 @@
-package externalLinkout
+package externalLinkoutRouter
 
 import (
 	"github.com/stretchr/testify/suite"
@@ -6,5 +6,5 @@ import (
 )
 
 func TestLinkOutRouterSuite(t *testing.T) {
-	suite.Run(t, new(LinkOutRouterTestSuite))
+	suite.Run(t, new(ExternalLinkOutRouterTestSuite))
 }

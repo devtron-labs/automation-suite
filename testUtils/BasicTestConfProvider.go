@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/caarlos0/env"
-	"github.com/go-resty/resty/v2"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -15,6 +13,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/caarlos0/env"
+	"github.com/go-resty/resty/v2"
 )
 
 const createSessionApiUrl string = "/orchestrator/api/v1/session"

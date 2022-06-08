@@ -4,10 +4,11 @@ import (
 	"automation-suite/testUtils"
 	Base "automation-suite/testUtils"
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"log"
 	"math/rand"
 	"strings"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixedWithoutBuilds() {
@@ -421,7 +422,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 		DeleteWorkflow(appId, wfId, suite.authToken)
 	})
 
-	suite.Run("A=14=CreateMaterialWithFullPayload", func() {
+	suite.Run("A=14=CreateWorkflowWithFullPayload", func() {
 		createWorkflowResponseDto := HitCreateWorkflowApiWithFullPayload(appId, suite.authToken)
 
 		log.Println("Validating pre-build request payload")
@@ -434,3 +435,23 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 
 }
+
+/*
+func TestCreateMaterialWithMultipleMaterial(t *testing.T) {
+	appId := 1205
+	authToken := "eyJhbGciOiJSUzI1NiIsImtpZCI6ImQwNzg1NmMyMjA5YTlmYzk2ZTIzNDBhYzZlYmZhODMxYjUwZGFjZGIifQ.eyJpc3MiOiJodHRwczovL3N0YWdpbmcuZGV2dHJvbi5pbmZvL29yY2hlc3RyYXRvci9hcGkvZGV4Iiwic3ViIjoiQ2hVeE1ESTJPVEk1TmpBd056RXhNekU0TVRFMU5qY1NCbWR2YjJkc1pRIiwiYXVkIjoiYXJnby1jZCIsImV4cCI6MTY1NDc0NjcyMiwiaWF0IjoxNjU0NjYwMzIyLCJhdF9oYXNoIjoiU3h2TlEwY0ZZZUR5YklkQWtuNTE1USIsImVtYWlsIjoibmlrZXNoQGRldnRyb24uYWkiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6Ik5pa2VzaCBSYXRob2QifQ.O4klGQkFzO8tB8ZtChFMi_EBq7GQyzqXuWAq1QeWk8u3EeFd8euQzF1TDExkDPrvKF3W_5-5sMH-hTiN0s7J1rje2GsZZPEY148CL0MSdkRgiqG-zV1ZFXbLcemxu9cnc22XQNvsC7NtKGbUuJaNEuyVlVIC-9HJoiLuexR12aGJEs3CWb2-AZkqb5Y8rzd097kuautuKuRPHTSqDzLv4B-vnpbLMLxz6cYhgALnu2XK6ansLOMS8jdNGFsIfPwml90D6D41u7G3wyzxVdL8nlrt_rCskJOJeF9UsYKJM0lq5J5Df-UBwmzEQAZI1hPnY0gBadBr48LrcBBQBZDwBA"
+	createAppMaterialRequestDto := GetAppMaterialRequestDto(appId, 2, false)
+	createAppMaterialRequestDto.Materials[0].CheckoutPath = "./" + Base.GetRandomStringOfGivenLength(3)
+	appMaterialByteValue, _ := json.Marshal(createAppMaterialRequestDto)
+	HitCreateAppMaterialApi(appMaterialByteValue, appId, 1, false, authToken)
+
+	createWorkflowResponseDto := HitCreateWorkflowApiWithFullPayload(appId, authToken)
+
+	log.Println("Validating pre-build request payload")
+	assert.Equal(t, appId, createWorkflowResponseDto.Result.AppId)
+
+	wfId := createWorkflowResponseDto.Result.AppWorkflowId
+
+	DeleteWorkflow(appId, wfId, authToken)
+}
+*/

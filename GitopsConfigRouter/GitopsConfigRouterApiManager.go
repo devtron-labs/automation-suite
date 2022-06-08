@@ -4,65 +4,24 @@ import (
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"errors"
-	"github.com/caarlos0/env"
-	"github.com/stretchr/testify/suite"
 	"log"
 	"net/http"
-	"time"
+
+	"automation-suite/GitopsConfigRouter/RequestDTOs"
+	"automation-suite/GitopsConfigRouter/ResponseDTOs"
+
+	"github.com/caarlos0/env"
+	"github.com/stretchr/testify/suite"
 )
 
-type FetchAllGitopsConfigResponseDto struct {
-	Code   int                            `json:"code"`
-	Status string                         `json:"status"`
-	Result []CreateGitopsConfigRequestDto `json:"result"`
-}
-
-type DeleteResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result string `json:"result"`
-}
 type StructGitopsConfigRouter struct {
-	createGitopsConfigResponseDto   CreateGitopsConfigResponseDto
-	fetchAllGitopsConfigResponseDto FetchAllGitopsConfigResponseDto
-	deleteResponseDto               DeleteResponseDto
-	checkGitopsExistsResponse       CheckGitopsExistsResponse
-	updateGitopsConfigResponseDto   UpdateGitopsConfigResponseDto
-}
-type CreateGitopsConfigRequestDto struct {
-	Id                   int    `json:"id"`
-	Provider             string `json:"provider"`
-	Username             string `json:"username"`
-	Token                string `json:"token"`
-	GitLabGroupId        string `json:"gitLabGroupId"`
-	GitHubOrgId          string `json:"gitHubOrgId"`
-	Host                 string `json:"host"`
-	Active               bool   `json:"active"`
-	AzureProjectName     string `json:"azureProjectName"`
-	BitBucketWorkspaceId string `json:"bitBucketWorkspaceId"`
-	BitBucketProjectKey  string `json:"bitBucketProjectKey"`
+	createGitopsConfigResponseDto   ResponseDTOs.CreateGitopsConfigResponseDto
+	fetchAllGitopsConfigResponseDto ResponseDTOs.FetchAllGitopsConfigResponseDto
+	checkGitopsExistsResponse       ResponseDTOs.CheckGitopsExistsResponse
+	updateGitopsConfigResponseDto   ResponseDTOs.UpdateGitopsConfigResponseDto
 }
 
-type CreateGitopsConfigResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result struct {
-		SuccessfulStages []string "successfulStages"
-		StageErrorMap    struct {
-			ErrorInConnectingWithGITHUB string `json:"error in connecting with GITHUB"`
-		} `json:"stageErrorMap"`
-		DeleteRepoFailed bool `json:"deleteRepoFailed"`
-	} `json:"result"`
-}
-type CheckGitopsExistsResponse struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result struct {
-		Exists bool `json:"exists"`
-	} `json:"result"`
-}
-
-func HitGitopsConfigured(authToken string) CheckGitopsExistsResponse {
+func HitGitopsConfigured(authToken string) ResponseDTOs.CheckGitopsExistsResponse {
 	resp, err := Base.MakeApiCall(CheckGitopsConfigExistsApiUrl, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, CheckGitopsConfigExistsApi)
 
@@ -86,7 +45,7 @@ func (structGitopsConfigRouter StructGitopsConfigRouter) UnmarshalGivenResponseB
 	return structGitopsConfigRouter
 }
 
-func HitFetchAllGitopsConfigApi(authToken string) FetchAllGitopsConfigResponseDto {
+func HitFetchAllGitopsConfigApi(authToken string) ResponseDTOs.FetchAllGitopsConfigResponseDto {
 	resp, err := Base.MakeApiCall(SaveGitopsConfigApiUrl, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, FetchAllGitopsConfigApi)
 
@@ -95,8 +54,8 @@ func HitFetchAllGitopsConfigApi(authToken string) FetchAllGitopsConfigResponseDt
 	return gitopsConfigRouter.fetchAllGitopsConfigResponseDto
 }
 
-func GetGitopsConfigRequestDto(provider string, username string, host string, token string, githuborgid string) CreateGitopsConfigRequestDto {
-	var createGitopsConfigRequestDto CreateGitopsConfigRequestDto
+func GetGitopsConfigRequestDto(provider string, username string, host string, token string, githuborgid string) RequestDTOs.CreateGitopsConfigRequestDto {
+	var createGitopsConfigRequestDto RequestDTOs.CreateGitopsConfigRequestDto
 	createGitopsConfigRequestDto.Provider = provider
 	createGitopsConfigRequestDto.Username = username
 	createGitopsConfigRequestDto.Host = host
@@ -105,12 +64,12 @@ func GetGitopsConfigRequestDto(provider string, username string, host string, to
 	createGitopsConfigRequestDto.Active = true
 	return createGitopsConfigRequestDto
 }
-func HitCreateGitopsConfigApi(payload []byte, provider string, username string, host string, token string, githuborgid string, authToken string) CreateGitopsConfigResponseDto {
+func HitCreateGitopsConfigApi(payload []byte, provider string, username string, host string, token string, githuborgid string, authToken string) ResponseDTOs.CreateGitopsConfigResponseDto {
 	var payloadOfApi string
 	if payload != nil {
 		payloadOfApi = string(payload)
 	} else {
-		var createGitopsConfigRequestDto CreateGitopsConfigRequestDto
+		var createGitopsConfigRequestDto RequestDTOs.CreateGitopsConfigRequestDto
 		createGitopsConfigRequestDto.Provider = provider
 		createGitopsConfigRequestDto.Username = username
 		createGitopsConfigRequestDto.Host = host
@@ -129,13 +88,13 @@ func HitCreateGitopsConfigApi(payload []byte, provider string, username string, 
 	return gitopsConfigRouter.createGitopsConfigResponseDto
 }
 
-func UpdateGitops(authToken string) CreateGitopsConfigRequestDto {
-	var createGitopsConfigRequestDto CreateGitopsConfigRequestDto
+func UpdateGitops(authToken string) RequestDTOs.CreateGitopsConfigRequestDto {
+	var createGitopsConfigRequestDto RequestDTOs.CreateGitopsConfigRequestDto
 	fetchAllLinkResponseDto := HitFetchAllGitopsConfigApi(authToken)
 
 	log.Println("Checking which is true")
 	for _, createGitopsConfigRequestDto = range fetchAllLinkResponseDto.Result {
-		if createGitopsConfigRequestDto.Active == true {
+		if createGitopsConfigRequestDto.Active {
 			createGitopsConfigRequestDto.Active = false
 			byteValueOfCreateGitopsConfig, _ := json.Marshal(createGitopsConfigRequestDto)
 			log.Println("Updating gitops to false")
@@ -147,19 +106,7 @@ func UpdateGitops(authToken string) CreateGitopsConfigRequestDto {
 	return createGitopsConfigRequestDto
 }
 
-type UpdateGitopsConfigResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result struct {
-		SuccessfulStages []string `json:"successfulStages"`
-		StageErrorMap    struct {
-		} `json:"stageErrorMap"`
-		ValidatedOn      time.Time `json:"validatedOn"`
-		DeleteRepoFailed bool      `json:"deleteRepoFailed"`
-	} `json:"result"`
-}
-
-func HitUpdateGitopsConfigApi(payload []byte, authToken string) UpdateGitopsConfigResponseDto {
+func HitUpdateGitopsConfigApi(payload []byte, authToken string) ResponseDTOs.UpdateGitopsConfigResponseDto {
 	resp, err := Base.MakeApiCall(SaveGitopsConfigApiUrl, http.MethodPut, string(payload), nil, authToken)
 	Base.HandleError(err, UpdateGitopsConfigApi)
 
