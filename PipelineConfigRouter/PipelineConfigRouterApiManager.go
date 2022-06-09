@@ -589,6 +589,8 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.getWorkflowStatusResponseDTO)
 	case GetCiPipelineMaterialApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.getCiPipelineMaterialResponseDTO)
+	case TriggerCiPipelineApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.triggerCiPipelineResponseDTO)
 	}
 	return structPipelineConfigRouter
 }

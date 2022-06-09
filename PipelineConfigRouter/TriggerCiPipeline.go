@@ -29,7 +29,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 	getChartReferenceResponse := HitGetChartReferenceViaAppId(strconv.Itoa(createAppApiResponse.Id), suite.authToken)
 	latestChartRef := getChartReferenceResponse.Result.LatestChartRef
 
-	log.Println("=== Here we are fetching DefaultAppOverride using getAppTemplateAPI ===")
+	log.Println("=== Here we are fetching Template using getAppTemplateAPI ===")
 	getTemplateResponse := HitGetTemplateViaAppIdAndChartRefId(strconv.Itoa(createAppApiResponse.Id), strconv.Itoa(latestChartRef), suite.authToken)
 
 	log.Println("=== Here we are fetching DefaultAppOverride using getAppTemplateAPI ===")
@@ -74,9 +74,9 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 		triggerCiPipelineResponse := HitTriggerCiPipelineApi(bytePayloadForTriggerCiPipeline, suite.authToken)
 		assert.Equal(suite.T(), "allowed for all pipelines", triggerCiPipelineResponse.Result.AuthStatus)
 		assert.NotNil(suite.T(), triggerCiPipelineResponse.Result.ApiResponse)
-		log.Println("=== Here we are getting workflow status after 2 minutes again ===")
+		log.Println("=== Here we are getting workflow after triggering ===")
 		workflowStatus := HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
-		assert.Equal(suite.T(), "Not Triggered", workflowStatus.Result.CiWorkflowStatus[0].CiStatus)
+		assert.Equal(suite.T(), "Running", workflowStatus.Result.CiWorkflowStatus[0].CiStatus)
 	})
 
 	suite.Run("A=2=TriggerCiPipelineWithInvalidateCacheAsFalse", func() {

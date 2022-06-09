@@ -27,6 +27,7 @@ type InputVariables struct {
 	DefaultValue              string `json:"defaultValue"`
 	VariableType              string `json:"variableType"`
 	VariableStepIndexInPlugin int    `json:"variableStepIndexInPlugin"`
+	RefVariableStepIndex      int    `json:"refVariableStepIndex"`
 	Value                     string `json:"value"`
 	RefVariableName           string `json:"refVariableName"`
 	RefVariableStage          string `json:"refVariableStage"`

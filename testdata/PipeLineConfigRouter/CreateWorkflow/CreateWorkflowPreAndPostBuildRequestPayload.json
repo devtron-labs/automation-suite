@@ -20,7 +20,6 @@
       "id": 0,
       "steps": [
         {
-          "id": 1,
           "index": 1,
           "name": "Task 1",
           "description": "Pre-build-task1",
@@ -31,14 +30,14 @@
             "script": "#!/bin/sh \nset -eo pipefail \n#set -v  ## uncomment this to debug the script \necho \"====Value of variable1====\"\necho $variable1\necho \"===exporting OutVariable1===\"\nexport OutVariable1=OutValue1\necho $OutVariable1",
             "conditionDetails": [
               {
-                "id": 0,
+
                 "conditionOnVariable": "IsVariable1Present",
                 "conditionOperator": "==",
                 "conditionType": "TRIGGER",
                 "conditionalValue": "true"
               },
               {
-                "id": 1,
+
                 "conditionOnVariable": "OutVariable1",
                 "conditionOperator": "==",
                 "conditionType": "PASS",
@@ -47,7 +46,6 @@
             ],
             "inputVariables": [
               {
-                "id": 5,
                 "name": "DOCKER_IMAGE_TAG",
                 "value": "",
                 "format": "STRING",
@@ -59,7 +57,6 @@
                 "refVariableStage": ""
               },
               {
-                "id": 4,
                 "name": "variableDate",
                 "value": "Friday, 20 May 2022",
                 "format": "DATE",
@@ -71,7 +68,6 @@
                 "refVariableStage": ""
               },
               {
-                "id": 3,
                 "name": "variableNumber",
                 "value": "10",
                 "format": "NUMBER",
@@ -83,7 +79,6 @@
                 "refVariableStage": ""
               },
               {
-                "id": 2,
                 "name": "IsVariable1Present",
                 "value": "true",
                 "format": "BOOL",
@@ -95,7 +90,6 @@
                 "refVariableStage": ""
               },
               {
-                "id": 1,
                 "name": "variable1",
                 "value": "value1",
                 "format": "STRING",
@@ -109,7 +103,6 @@
             ],
             "outputVariables": [
               {
-                "id": 1,
                 "name": "OutVariable1",
                 "value": "",
                 "format": "STRING",
@@ -135,7 +128,6 @@
           ]
         },
         {
-          "id": 2,
           "index": 2,
           "name": "Task 2",
           "description": "Task2 description",
@@ -146,7 +138,7 @@
             "script": "echo \"hello World\"\necho \"Printing host bin directory\"\nls /host/bin\necho \"Printing source code directory\"\nls /sourcecode",
             "conditionDetails": [
               {
-                "id": 0,
+
                 "conditionOnVariable": "outVariable1FromTask1",
                 "conditionOperator": "!=",
                 "conditionType": "SKIP",
@@ -155,7 +147,6 @@
             ],
             "inputVariables": [
               {
-                "id": 1,
                 "name": "outVariable1FromTask1",
                 "value": "",
                 "format": "STRING",
@@ -216,7 +207,6 @@
             "pluginId": 2,
             "conditionDetails": [
               {
-                "id": 0,
                 "conditionOnVariable": "SonarqubeProjectKey",
                 "conditionOperator": "==",
                 "conditionType": "TRIGGER",
@@ -225,7 +215,6 @@
             ],
             "inputVariables": [
               {
-                "id": 6,
                 "name": "SonarqubeProjectKey",
                 "format": "STRING",
                 "description": "project key of grafana sonarqube account",
@@ -239,7 +228,6 @@
                 "refVariableStage": ""
               },
               {
-                "id": 7,
                 "name": "SonarqubeApiKey",
                 "format": "STRING",
                 "description": "api key of sonarqube account",
@@ -253,7 +241,6 @@
                 "refVariableStage": ""
               },
               {
-                "id": 8,
                 "name": "SonarqubeEndpoint",
                 "format": "STRING",
                 "description": "api endpoint of sonarqube account",
@@ -267,7 +254,6 @@
                 "refVariableStage": ""
               },
               {
-                "id": 9,
                 "name": "CheckoutPath",
                 "format": "STRING",
                 "description": "checkout path of git material",
