@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"log"
 	"strconv"
+	"time"
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
@@ -26,13 +27,14 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 	HitSaveAppCiPipeline(byteValueOfSaveAppCiPipeline, suite.authToken)
 
 	log.Println("=== Here we are fetching latestChartReferenceId ===")
+	time.Sleep(2 * time.Second)
 	getChartReferenceResponse := HitGetChartReferenceViaAppId(strconv.Itoa(createAppApiResponse.Id), suite.authToken)
 	latestChartRef := getChartReferenceResponse.Result.LatestChartRef
 
 	log.Println("=== Here we are fetching Template using getAppTemplateAPI ===")
 	getTemplateResponse := HitGetTemplateViaAppIdAndChartRefId(strconv.Itoa(createAppApiResponse.Id), strconv.Itoa(latestChartRef), suite.authToken)
 
-	log.Println("=== Here we are fetching DefaultAppOverride using getAppTemplateAPI ===")
+	log.Println("=== Here we are fetching DefaultAppOverride from template response ===")
 	defaultAppOverride := getTemplateResponse.Result.GlobalConfig.DefaultAppOverride
 
 	log.Println("=== Here we are creating payload for SaveTemplate API ===")
@@ -68,6 +70,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 	log.Println("=== Here we are getting pipeline material ===")
 	pipelineMaterial := HitGetCiPipelineMaterial(workflowResponse.CiPipelines[0].Id, suite.authToken)
 
+	//here we are hitting GetWorkFlow API 2 time one just after the triggerCiPipeline and one after 4 minutes of triggering
 	suite.Run("A=1=TriggerCiPipelineWithValidPayload", func() {
 		payloadForTriggerCiPipeline := createPayloadForTriggerCiPipeline(pipelineMaterial.Result[0].History[0].Commit, workflowResponse.CiPipelines[0].Id, pipelineMaterial.Result[0].Id, true)
 		bytePayloadForTriggerCiPipeline, _ := json.Marshal(payloadForTriggerCiPipeline)
@@ -77,6 +80,11 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 		log.Println("=== Here we are getting workflow after triggering ===")
 		workflowStatus := HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
 		assert.Equal(suite.T(), "Running", workflowStatus.Result.CiWorkflowStatus[0].CiStatus)
+		log.Println("=== Here we are getting workflow after 4 minutes of triggering ===")
+		time.Sleep(240 * time.Second)
+		updatedWorkflowStatus := HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
+		assert.Equal(suite.T(), "Succeeded", updatedWorkflowStatus.Result.CiWorkflowStatus[0].CiStatus)
+		assert.Equal(suite.T(), "Healthy", updatedWorkflowStatus.Result.CdWorkflowStatus[0].DeployStatus)
 	})
 
 	suite.Run("A=2=TriggerCiPipelineWithInvalidateCacheAsFalse", func() {

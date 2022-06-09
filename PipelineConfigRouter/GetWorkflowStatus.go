@@ -95,4 +95,4 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD1GetWorkflowStatus() {
 	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 }
 
-//todo for test cases of getWorkFlow after triggering the Workflow I have added them in TriggerCiPipeline Class
+//todo test cases of getWorkFlow API after triggering the Workflow, I have added them in TriggerCiPipeline Class

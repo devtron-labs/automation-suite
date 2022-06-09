@@ -93,5 +93,3 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD2GetCiPipelineMaterial() 
 	log.Println("=== Here we are Deleting the app after all verifications ===")
 	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 }
-
-//todo need to add test cases after automation of TriggerPipeline Api
