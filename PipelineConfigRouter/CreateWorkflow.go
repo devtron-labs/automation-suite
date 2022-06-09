@@ -334,9 +334,6 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 	suite.Run("A=11=CreateWorkflowBranchFixedPostBuildWithVariableConditions", func() {
 
-		// Pre-requirements end here
-
-		// Custom part - creating random number of tasks
 		log.Println("Getting Post-build paload...")
 		numberOfTasks := rand.Intn(4-1) + 1
 		i := 0
@@ -344,7 +341,6 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 			postBuildStepRequestPayload := getPreBuildStepRequestPayloadDto(rand.Intn(2-1) + 1)
 			createWorkflowRequestDto.CiPipeline.PostBuildStage.Steps = append(createWorkflowRequestDto.CiPipeline.PostBuildStage.Steps, postBuildStepRequestPayload[0])
 		}
-		// Custom part end here
 
 		byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
 		log.Println("Hitting the Create Workflow Api with valid payload")
@@ -368,9 +364,6 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 	suite.Run("A=12=CreateWorkflowPreBuildOutoutDirectory", func() {
 
-		// Pre-requirements end here
-
-		// Custom part - creating random number of tasks
 		log.Println("Getting Post-build paload...")
 		numberOfTasks := rand.Intn(4-1) + 1
 		i := 0
@@ -384,9 +377,6 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 		log.Println("Hitting the Create Workflow Api with valid payload")
 		createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, suite.authToken)
 
-		log.Println("Validating pre-build request payload")
-
-		// Add assert conditions here
 		log.Println("Checking output directory")
 		for i = 0; i < numberOfTasks; i++ {
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PreBuildStage.Steps[i].OutputDirectoryPath, createWorkflowResponseDto.Result.CiPipelines[0].PreBuildStage.Steps[i].OutputDirectoryPath)
@@ -432,26 +422,34 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 		DeleteWorkflow(appId, wfId, suite.authToken)
 	})
+
+	suite.Run("A=15=CreateWorkflowWithTwoMaterials", func() {
+		createAppMaterialRequestDto := GetAppMaterialRequestDto(appId, 1, false)
+
+		secondBranchValue := "./repo-two"
+		createAppMaterialRequestDto.Materials[0].CheckoutPath = secondBranchValue
+		byteValueOfStruct2, _ := json.Marshal(createAppMaterialRequestDto)
+		log.Println("Hitting The create material API")
+		createAppMaterialResponseDto := HitCreateAppMaterialApi(byteValueOfStruct2, appId, 1, false, suite.authToken)
+
+		assert.Equal(suite.T(), 200, createAppMaterialResponseDto.Code)
+		createWorkflowResponseDto := HitCreateWorkflowApiWithFullPayload(appId, suite.authToken)
+
+		log.Println("Validating material request payload")
+		noOfMaterials := len(createWorkflowResponseDto.Result.CiPipelines[0].CiMaterial)
+		assert.Equal(suite.T(), createAppMaterialResponseDto.Result.Material[0].Id, createWorkflowResponseDto.Result.CiPipelines[0].CiMaterial[noOfMaterials-1].GitMaterialId)
+		assert.Equal(suite.T(), appId, createWorkflowResponseDto.Result.AppId)
+
+		wfId := createWorkflowResponseDto.Result.AppWorkflowId
+
+		DeleteWorkflow(appId, wfId, suite.authToken)
+
+		log.Println("getting payload for Delete material API")
+		byteValueOfDeleteApp := GetPayLoadForDeleteAppMaterialAPI(createAppMaterialResponseDto.Result.AppId, createAppMaterialResponseDto.Result.Material[0])
+		log.Println("Hitting the Delete material API for Removing the data created via automation")
+		HitDeleteAppMaterialApi(byteValueOfDeleteApp, suite.authToken)
+
+	})
 	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 
 }
-
-/*
-func TestCreateMaterialWithMultipleMaterial(t *testing.T) {
-	appId := 1205
-	authToken := "eyJhbGciOiJSUzI1NiIsImtpZCI6ImQwNzg1NmMyMjA5YTlmYzk2ZTIzNDBhYzZlYmZhODMxYjUwZGFjZGIifQ.eyJpc3MiOiJodHRwczovL3N0YWdpbmcuZGV2dHJvbi5pbmZvL29yY2hlc3RyYXRvci9hcGkvZGV4Iiwic3ViIjoiQ2hVeE1ESTJPVEk1TmpBd056RXhNekU0TVRFMU5qY1NCbWR2YjJkc1pRIiwiYXVkIjoiYXJnby1jZCIsImV4cCI6MTY1NDc0NjcyMiwiaWF0IjoxNjU0NjYwMzIyLCJhdF9oYXNoIjoiU3h2TlEwY0ZZZUR5YklkQWtuNTE1USIsImVtYWlsIjoibmlrZXNoQGRldnRyb24uYWkiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6Ik5pa2VzaCBSYXRob2QifQ.O4klGQkFzO8tB8ZtChFMi_EBq7GQyzqXuWAq1QeWk8u3EeFd8euQzF1TDExkDPrvKF3W_5-5sMH-hTiN0s7J1rje2GsZZPEY148CL0MSdkRgiqG-zV1ZFXbLcemxu9cnc22XQNvsC7NtKGbUuJaNEuyVlVIC-9HJoiLuexR12aGJEs3CWb2-AZkqb5Y8rzd097kuautuKuRPHTSqDzLv4B-vnpbLMLxz6cYhgALnu2XK6ansLOMS8jdNGFsIfPwml90D6D41u7G3wyzxVdL8nlrt_rCskJOJeF9UsYKJM0lq5J5Df-UBwmzEQAZI1hPnY0gBadBr48LrcBBQBZDwBA"
-	createAppMaterialRequestDto := GetAppMaterialRequestDto(appId, 2, false)
-	createAppMaterialRequestDto.Materials[0].CheckoutPath = "./" + Base.GetRandomStringOfGivenLength(3)
-	appMaterialByteValue, _ := json.Marshal(createAppMaterialRequestDto)
-	HitCreateAppMaterialApi(appMaterialByteValue, appId, 1, false, authToken)
-
-	createWorkflowResponseDto := HitCreateWorkflowApiWithFullPayload(appId, authToken)
-
-	log.Println("Validating pre-build request payload")
-	assert.Equal(t, appId, createWorkflowResponseDto.Result.AppId)
-
-	wfId := createWorkflowResponseDto.Result.AppWorkflowId
-
-	DeleteWorkflow(appId, wfId, authToken)
-}
-*/

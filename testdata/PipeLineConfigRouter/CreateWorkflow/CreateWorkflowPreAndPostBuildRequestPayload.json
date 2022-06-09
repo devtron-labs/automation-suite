@@ -5,14 +5,6 @@
   "ciPipeline": {
     "active": false,
     "ciMaterial": [
-      {
-        "gitMaterialId": 0,
-        "id": 0,
-        "source": {
-          "type": "",
-          "value": "main"
-        }
-      }
     ],
     "dockerArgs": {
       "--progress": "auto"

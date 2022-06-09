@@ -713,27 +713,22 @@ func inputVariablesSelector(inputType int) []RequestDTOs.InputVariables {
 		inputVariable.Format = "STRING"
 		inputVariable.Value = Base.GetRandomStringOfGivenLength(5)
 		inputVariable.VariableType = "NEW"
-		break
 	case 2:
 		inputVariable.Format = "BOOL"
 		inputVariable.Value = "true"
 		inputVariable.VariableType = "NEW"
-		break
 	case 3:
 		inputVariable.Format = "NUMBER"
 		inputVariable.Value = strconv.Itoa(Base.GetRandomNumberOf9Digit())
 		inputVariable.VariableType = "NEW"
-		break
 	case 4:
 		inputVariable.Format = "DATE"
 		inputVariable.Value = "2006-01-02"
 		inputVariable.VariableType = "NEW"
-		break
 	case 5:
 		inputVariable.Format = "STRING"
 		inputVariable.VariableType = "GLOBAL"
 		inputVariable.RefVariableName = "DOCKER_IMAGE_TAG"
-		break
 	}
 	inputVariable.Name = Base.GetRandomStringOfGivenLength(5) + "_" + inputVariable.Format
 	inputVariable.Description = inputVariable.Name + "_Desc_" + Base.GetRandomStringOfGivenLength(10)
@@ -747,22 +742,17 @@ func getConditionDetails(id int) []RequestDTOs.ConditionDetails {
 	switch id {
 	case 1:
 		conditionDetails.ConditionOperator = "=="
-		break
 	case 2:
 		conditionDetails.ConditionOperator = "!="
-		break
 	case 3:
 		conditionDetails.ConditionOperator = ">"
-		break
 	case 4:
 		conditionDetails.ConditionOperator = "<"
-		break
 	case 5:
 		conditionDetails.ConditionOperator = "<="
-		break
+
 	case 6:
 		conditionDetails.ConditionOperator = ">="
-		break
 	}
 	var input []RequestDTOs.ConditionDetails
 	input = append(input, conditionDetails)
@@ -827,19 +817,21 @@ func HitCreateWorkflowApiWithFullPayload(appId int, authToken string) ResponseDT
 
 	createWorkflowRequestDto.AppId = appId
 	createWorkflowRequestDto.CiPipeline.Active = expectedPayload.CiPipeline.Active
-	//createWorkflowRequestDto.CiPipeline.CiMaterial[0].Source.Type = expectedPayload.CiPipeline.CiMaterial[0].Source.Type
 	fetchSuggestedCiPipelineName := HitGetPipelineSuggestedCiCd("ci", appId, authToken)
 	createWorkflowRequestDto.CiPipeline.Name = fetchSuggestedCiPipelineName.Result
 
 	fetchAppGetResponseDto := HitGetMaterial(appId, authToken)
 
-	for i, j := range fetchAppGetResponseDto.Result.Material {
+	branchValue := "main"
+
+	for _, j := range fetchAppGetResponseDto.Result.Material {
 
 		var CiMaterial RequestDTOs.CiMaterial
 		CiMaterial.GitMaterialId = j.Id
 		CiMaterial.Source.Type = expectedPayload.CiPipeline.CiMaterial[0].Source.Type
-		CiMaterial.Source.Value = "main" + strconv.Itoa(fetchAppGetResponseDto.Result.Material[i].GitProviderId)
+		CiMaterial.Source.Value = branchValue
 		createWorkflowRequestDto.CiPipeline.CiMaterial = append(createWorkflowRequestDto.CiPipeline.CiMaterial, CiMaterial)
+
 	}
 	createWorkflowRequestDto.CiPipeline.CiMaterial[0].GitMaterialId = fetchAppGetResponseDto.Result.Material[0].Id
 
