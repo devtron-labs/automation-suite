@@ -4,6 +4,7 @@ import (
 	"automation-suite/HelperRouter"
 	Base "automation-suite/testUtils"
 	"encoding/json"
+	"github.com/stretchr/testify/assert"
 	"log"
 	"strconv"
 )
@@ -67,19 +68,40 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 	log.Println("=== Here we are getting pipeline material ===")
 	pipelineMaterial := HitGetCiPipelineMaterial(workflowResponse.CiPipelines[0].Id, suite.authToken)
 
-	suite.Run("A=1=GetWorkflowStatusWithoutTriggering", func() {
-		payloadForTriggerCiPipeline := createPayloadForTriggerCiPipeline(pipelineMaterial.Result[0].History[0].Commit, workflowResponse.CiPipelines[0].Id, pipelineMaterial.Result[0].Id)
+	suite.Run("A=1=TriggerCiPipelineWithValidPayload", func() {
+		payloadForTriggerCiPipeline := createPayloadForTriggerCiPipeline(pipelineMaterial.Result[0].History[0].Commit, workflowResponse.CiPipelines[0].Id, pipelineMaterial.Result[0].Id, true)
 		bytePayloadForTriggerCiPipeline, _ := json.Marshal(payloadForTriggerCiPipeline)
 		triggerCiPipelineResponse := HitTriggerCiPipelineApi(bytePayloadForTriggerCiPipeline, suite.authToken)
-		log.Println(triggerCiPipelineResponse)
+		assert.Equal(suite.T(), "allowed for all pipelines", triggerCiPipelineResponse.Result.AuthStatus)
+		assert.NotNil(suite.T(), triggerCiPipelineResponse.Result.ApiResponse)
+		log.Println("=== Here we are getting workflow status after 2 minutes again ===")
+		workflowStatus := HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
+		assert.Equal(suite.T(), "Not Triggered", workflowStatus.Result.CiWorkflowStatus[0].CiStatus)
 	})
 
-	/*suite.Run("A=2=GetWorkflowStatusWithInvalidAppId", func() {
-		randomAppId := Base.GetRandomNumberOf9Digit()
-		workflowStatus := HitGetWorkflowStatus(randomAppId, suite.authToken)
-		assert.Nil(suite.T(), workflowStatus.Result.CiWorkflowStatus)
-		assert.Nil(suite.T(), workflowStatus.Result.CdWorkflowStatus)
-	})*/
+	suite.Run("A=2=TriggerCiPipelineWithInvalidateCacheAsFalse", func() {
+		payloadForTriggerCiPipeline := createPayloadForTriggerCiPipeline(pipelineMaterial.Result[0].History[0].Commit, workflowResponse.CiPipelines[0].Id, pipelineMaterial.Result[0].Id, true)
+		bytePayloadForTriggerCiPipeline, _ := json.Marshal(payloadForTriggerCiPipeline)
+		triggerCiPipelineResponse := HitTriggerCiPipelineApi(bytePayloadForTriggerCiPipeline, suite.authToken)
+		assert.Equal(suite.T(), "allowed for all pipelines", triggerCiPipelineResponse.Result.AuthStatus)
+		assert.NotNil(suite.T(), triggerCiPipelineResponse.Result.ApiResponse)
+	})
+
+	suite.Run("A=3=TriggerCiPipelineWithInvalidPipelineId", func() {
+		invalidPipeLineId := Base.GetRandomNumberOf9Digit()
+		payloadForTriggerCiPipeline := createPayloadForTriggerCiPipeline(pipelineMaterial.Result[0].History[0].Commit, invalidPipeLineId, pipelineMaterial.Result[0].Id, true)
+		bytePayloadForTriggerCiPipeline, _ := json.Marshal(payloadForTriggerCiPipeline)
+		triggerCiPipelineResponse := HitTriggerCiPipelineApi(bytePayloadForTriggerCiPipeline, suite.authToken)
+		assert.Equal(suite.T(), "pg: no rows in result set", triggerCiPipelineResponse.Errors[0].UserMessage)
+	})
+
+	suite.Run("A=4=TriggerCiPipelineWithInvalidPipelineId", func() {
+		invalidMaterialId := Base.GetRandomNumberOf9Digit()
+		payloadForTriggerCiPipeline := createPayloadForTriggerCiPipeline(pipelineMaterial.Result[0].History[0].Commit, workflowResponse.CiPipelines[0].Id, invalidMaterialId, true)
+		bytePayloadForTriggerCiPipeline, _ := json.Marshal(payloadForTriggerCiPipeline)
+		triggerCiPipelineResponse := HitTriggerCiPipelineApi(bytePayloadForTriggerCiPipeline, suite.authToken)
+		assert.Equal(suite.T(), "[{pg: no rows in result set}]", triggerCiPipelineResponse.Errors[0].InternalMessage)
+	})
 
 	log.Println("=== Here we are Deleting the CD pipeline ===")
 	deletePipelinePayload := GetPayloadForDeleteCdPipeline(createAppApiResponse.Id, savePipelineResponse.Result.Pipelines[0].Id)

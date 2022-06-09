@@ -1,5 +1,7 @@
 package ResponseDTOs
 
+import "automation-suite/testUtils"
+
 type TriggerCiPipelineResponseDTO struct {
 	Code   int    `json:"code"`
 	Status string `json:"status"`
@@ -7,4 +9,5 @@ type TriggerCiPipelineResponseDTO struct {
 		ApiResponse string `json:"apiResponse"`
 		AuthStatus  string `json:"authStatus"`
 	} `json:"result"`
+	Errors []testUtils.Errors `json:"errors"`
 }

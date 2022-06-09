@@ -94,3 +94,5 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD1GetWorkflowStatus() {
 	log.Println("=== Here we are Deleting the app after all verifications ===")
 	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 }
+
+//todo for test cases of getWorkFlow after triggering the Workflow I have added them in TriggerCiPipeline Class

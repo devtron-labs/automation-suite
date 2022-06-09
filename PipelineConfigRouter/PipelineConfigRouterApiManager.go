@@ -524,13 +524,13 @@ func HitTriggerCiPipelineApi(payload []byte, authToken string) ResponseDTOs.Trig
 	return pipelineConfigRouter.triggerCiPipelineResponseDTO
 }
 
-func createPayloadForTriggerCiPipeline(commit string, PipelineId int, ciPipelineMaterialId int) RequestDTOs.TriggerCiPipelineRequestDTO {
+func createPayloadForTriggerCiPipeline(commit string, PipelineId int, ciPipelineMaterialId int, invalidateCache bool) RequestDTOs.TriggerCiPipelineRequestDTO {
 	var listOfCiPipelineMaterials []RequestDTOs.CiPipelineMaterials
 	listOfCiPipelineMaterials = append(listOfCiPipelineMaterials, getCiPipelineMaterials(commit, ciPipelineMaterialId))
 	TriggerCiPipelineRequestDTO := RequestDTOs.TriggerCiPipelineRequestDTO{}
 	TriggerCiPipelineRequestDTO.PipelineId = PipelineId
 	TriggerCiPipelineRequestDTO.CiPipelineMaterials = listOfCiPipelineMaterials
-	TriggerCiPipelineRequestDTO.InvalidateCache = true
+	TriggerCiPipelineRequestDTO.InvalidateCache = invalidateCache
 	return TriggerCiPipelineRequestDTO
 }
 
@@ -802,7 +802,6 @@ func getPreBuildStepRequestPayloadDto(scriptType int) []RequestDTOs.Step {
 }
 
 func HitCreateWorkflowApiWithFullPayload(appId int, authToken string) ResponseDTOs.CreateWorkflowResponseDto {
-
 	var createWorkflowRequestDto RequestDTOs.CreateWorkflowRequestDto
 	configFile, err := os.Open("../testdata/PipeLineConfigRouter/CreateWorkflow/CreateWorkflowPreAndPostBuildRequestPayload.json")
 	if err != nil {
