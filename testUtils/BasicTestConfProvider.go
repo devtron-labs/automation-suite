@@ -75,7 +75,9 @@ func getRestyClient() *resty.Client {
 	fileData := ReadAnyJsonFile(baseConfig.BaseCredentialsFile)
 	client := resty.New()
 	client.SetBaseURL(fileData.BaseServerUrl)
+	log.Println("=========================Base URL==============", client.BaseURL)
 	return client
+
 }
 
 // MakeApiCall make the api call to the requested url based on http method requested
