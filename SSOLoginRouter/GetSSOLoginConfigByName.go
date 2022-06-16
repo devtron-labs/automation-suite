@@ -8,7 +8,7 @@ import (
 
 //Todo this test case is failing as we are not trimming white spaces in given query params
 /*func (suite *SSOLoginTestSuite) TestGetSsoLoginConfigWithCorrectNameHavingWhiteSpace() {
-	envConf, _ := Base.GetEnvironmentConfig()
+	envConf, _ := Base.ReadAnyJsonFile()
 	queryParams := map[string]string{"name": "  google  "}
 	log.Println("Hitting the Get SSO login config by Name API")
 	actualSSODetailsResponse := HitGetLoginConfigByNameApi(queryParams)
@@ -23,7 +23,7 @@ import (
 //disabling the above test case for sometime until we fix it
 
 func (suite *SSOLoginTestSuite) TestClass1GetSsoLoginConfig() {
-	envConf, _ := Base.GetEnvironmentConfig()
+	envConf, _ := Base.ReadAnyJsonFile()
 	suite.Run("A=1=SsoLoginConfigWithCorrectName", func() {
 		queryParams := map[string]string{"name": "google"}
 		log.Println("Hitting the Get SSO login config by Name API")

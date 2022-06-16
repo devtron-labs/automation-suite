@@ -6,11 +6,11 @@ import (
 )
 
 func (suite *AttributeRouterTestSuite) TestGetAttributesByKey() {
-	envConf, _ := Base.GetEnvironmentConfig()
+	fileData := Base.ReadAnyJsonFile("../testUtils/credentials.json")
 	suite.Run("A=1=AttributesWithValidValueOfKey", func() {
 		queryParams := map[string]string{"key": "url"}
 		attributesApiResp := HitGetAttributesApi(queryParams, suite.authToken)
-		assert.Equal(suite.T(), envConf.BaseServerUrl, attributesApiResp.Result.Value)
+		assert.Equal(suite.T(), fileData.BaseServerUrl, attributesApiResp.Result.Value)
 	})
 
 	suite.Run("A=2=AttributesWithInvalidValueOfKey", func() {

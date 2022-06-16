@@ -9,7 +9,7 @@ import (
 //todo will add assertion on name once issue resolved for "updating the name"
 
 func (suite *SSOLoginTestSuite) TestClass4UpdateSsoLogin() {
-	envConf, _ := Base.GetEnvironmentConfig()
+	envConf, _ := Base.ReadAnyJsonFile()
 	suite.Run("A=1=UpdateSsoLoginWithCorrectArgs", func() {
 		byteValue, err := Base.GetByteArrayOfGivenJsonFile("../testdata/SSOLoginTestData/updateSSODetailsPayload.json")
 		if nil != err {

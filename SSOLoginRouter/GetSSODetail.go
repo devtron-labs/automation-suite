@@ -7,7 +7,7 @@ import (
 )
 
 func (suite *SSOLoginTestSuite) TestClass3GetSsoLogin() {
-	envConf, _ := Base.GetEnvironmentConfig()
+	envConf, _ := Base.ReadAnyJsonFile()
 
 	suite.Run("A=1=GetSsoLoginWithCorrectId", func() {
 		log.Println("Hitting the Get SSO Details API")

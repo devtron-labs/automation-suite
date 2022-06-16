@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/caarlos0/env"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -14,7 +15,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/caarlos0/env"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -65,16 +65,16 @@ type DeleteResponseDto struct {
 }
 
 type EnvironmentConfig struct {
-	BaseServerUrl   string `env:"BASE_SERVER_URL" envDefault:""`
-	LogInUserName   string `env:"LOGIN_USERNAME" envDefault:""`
-	LogInUserPwd    string `env:"LOGIN_PASSWORD" envDefault:""`
-	SSOClientSecret string `env:"CLIENT_SECRET" envDefault:""`
+	BaseServerUrl   string `json:"BASE_SERVER_URL"`
+	LogInUserName   string `json:"LOGIN_USERNAME"`
+	LogInUserPwd    string `json:"LOGIN_PASSWORD"`
+	SSOClientSecret string `json:"CLIENT_SECRET"`
 }
 
 func getRestyClient() *resty.Client {
-	envConf, _ := GetEnvironmentConfig()
+	fileData := ReadAnyJsonFile("../testUtils/credentials.json")
 	client := resty.New()
-	client.SetBaseURL(envConf.BaseServerUrl)
+	client.SetBaseURL(fileData.BaseServerUrl)
 	return client
 }
 
@@ -117,24 +117,16 @@ func GetByteArrayOfGivenJsonFile(filePath string) ([]byte, error) {
 	return byteValue, err
 }
 
-//support function to return auth token after log in
+// GetAuthToken support function to return auth token after log in
 func GetAuthToken() string {
-	envConf, _ := GetEnvironmentConfig()
-	jsonString := fmt.Sprintf(`{"username": "%s", "password": "%s"}`, envConf.LogInUserName, envConf.LogInUserPwd)
+	envConf, _ := BaseEnvConfigReader()
+	file := ReadAnyJsonFile(envConf.BaseCredentialsFile)
+	jsonString := fmt.Sprintf(`{"username": "%s", "password": "%s"}`, file.LogInUserName, file.LogInUserPwd)
 	resp, err := MakeApiCall(createSessionApiUrl, http.MethodPost, jsonString, nil, "")
 	HandleError(err, "getAuthToken")
 	var logInResponse LogInResponse
 	json.Unmarshal(resp.Body(), &logInResponse)
 	return logInResponse.Result.Token
-}
-
-func GetEnvironmentConfig() (*EnvironmentConfig, error) {
-	cfg := &EnvironmentConfig{}
-	err := env.Parse(cfg)
-	if err != nil {
-		return nil, errors.New("could not get config from environment")
-	}
-	return cfg, err
 }
 
 const charset = "abcdefghijklmnopqrstuvwxyz" +
@@ -155,7 +147,7 @@ func GetRandomNumberOf9Digit() int {
 	return 100000000 + rand.Intn(999999999-100000000)
 }
 
-// Create File, Pass "example.txt"
+// CreateFile Create File, Pass "example.txt"
 func CreateFile(fileName string) {
 	f, err := os.Create(fileName)
 	defer f.Close()
@@ -164,7 +156,7 @@ func CreateFile(fileName string) {
 	}
 }
 
-// Delete File, Pass "example.txt"
+// DeleteFile Delete File, Pass "example.txt"
 func DeleteFile(fileName string) {
 	fmt.Println("Removing File : ", fileName)
 	f := os.Remove(fileName)
@@ -173,7 +165,7 @@ func DeleteFile(fileName string) {
 	}
 }
 
-// Create (if not present) & add properties to file
+// CreateFileAndEnterData Create (if not present) & add properties to file
 // Pass ("example.txt","key","value")
 func CreateFileAndEnterData(filename string, key string, value string) {
 	file, err := os.Open(filename)
@@ -213,7 +205,7 @@ func CreateFileAndEnterData(filename string, key string, value string) {
 	defer f.Close()
 }
 
-// Return []values
+// ReadDataByFilenameAndKey Return []values
 // Pass comma-seperated keys ("example.txt",key1, key2, key3,...)
 func ReadDataByFilenameAndKey(filename string, keys ...string) []string {
 	var output []string
@@ -316,4 +308,27 @@ func DeleteApp(appId int, appName string, TeamId int, TemplateId int, authToken 
 	baseConfigRouter := BaseConfigRouter{}
 	apiRouter := baseConfigRouter.UnmarshalGivenResponseBody(resp.Body(), "DeleteAppApi")
 	return apiRouter.deleteResponseDto
+}
+
+func ReadAnyJsonFile(filename string) EnvironmentConfig {
+	file, err := ioutil.ReadFile(filename)
+	if err != nil {
+		log.Panicf("failed reading data from file: %s", err)
+	}
+	data := EnvironmentConfig{}
+	_ = json.Unmarshal([]byte(file), &data)
+	return data
+}
+
+type BaseEnvConfigStruct struct {
+	BaseCredentialsFile string `env:"BASE_CREDENTIALS_FILE" envDefault:"../testUtils/credentials.json"`
+}
+
+func BaseEnvConfigReader() (*BaseEnvConfigStruct, error) {
+	cfg := &BaseEnvConfigStruct{}
+	err := env.Parse(cfg)
+	if err != nil {
+		return nil, errors.New("could not get config from environment")
+	}
+	return cfg, err
 }
