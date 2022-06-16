@@ -1,15 +1,7 @@
 package externalLinkoutRouter
 
-import (
-	"encoding/json"
-	"log"
-	"strconv"
-
-	"github.com/stretchr/testify/assert"
-)
-
 func (suite *ExternalLinkOutRouterTestSuite) TestClassA3GetExternalLink() {
-	suite.Run("A=1=FetchAllLinkouts", func() {
+	/*suite.Run("A=1=FetchAllLinkouts", func() {
 		log.Println("Hitting the 'FetchAllLink' Api before creating any new entry")
 		fetchAllLinkResponseDto := HitFetchAllLinkApi(suite.authToken)
 		noOfLinks := len(fetchAllLinkResponseDto.Result)
@@ -52,5 +44,5 @@ func (suite *ExternalLinkOutRouterTestSuite) TestClassA3GetExternalLink() {
 		log.Println("Hitting the Delete link API for Removing the data created via automation")
 		HitDeleteLinkApi(getAllExternalLinksAgainResponseDto.Result[noOfLinksAfterCreation-1].Id, suite.authToken)
 
-	})
+	})*/
 }

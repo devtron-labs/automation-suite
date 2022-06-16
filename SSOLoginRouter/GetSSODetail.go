@@ -7,16 +7,16 @@ import (
 )
 
 func (suite *SSOLoginTestSuite) TestClass3GetSsoLogin() {
-	envConf, _ := Base.ReadAnyJsonFile()
-
+	envConfig := Base.ReadBaseEnvConfig()
+	baseCredentials := Base.ReadAnyJsonFile(envConfig.BaseCredentialsFile)
 	suite.Run("A=1=GetSsoLoginWithCorrectId", func() {
 		log.Println("Hitting the Get SSO Details API")
 		actualSSODetailsResponse := HitGetSSODetailsApi("1", suite.authToken)
 
 		log.Println("Asserting the API Response...")
-		assert.Equal(suite.T(), envConf.BaseServerUrl+"/orchestrator", actualSSODetailsResponse.CreateSSODetailsRequestDto.Url)
-		assert.Equal(suite.T(), envConf.SSOClientSecret, actualSSODetailsResponse.CreateSSODetailsRequestDto.Config.Config.ClientSecret)
-		assert.Equal(suite.T(), envConf.BaseServerUrl+"/orchestrator/api/dex/callback", actualSSODetailsResponse.CreateSSODetailsRequestDto.Config.Config.RedirectURI)
+		assert.Equal(suite.T(), baseCredentials.BaseServerUrl+"/orchestrator", actualSSODetailsResponse.CreateSSODetailsRequestDto.Url)
+		assert.Equal(suite.T(), baseCredentials.SSOClientSecret, actualSSODetailsResponse.CreateSSODetailsRequestDto.Config.Config.ClientSecret)
+		assert.Equal(suite.T(), baseCredentials.BaseServerUrl+"/orchestrator/api/dex/callback", actualSSODetailsResponse.CreateSSODetailsRequestDto.Config.Config.RedirectURI)
 	})
 
 	suite.Run("A=2=GetSsoLoginWithIncorrectId", func() {

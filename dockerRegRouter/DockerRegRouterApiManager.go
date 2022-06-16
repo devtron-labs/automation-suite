@@ -1,7 +1,7 @@
 package dockerRegRouter
 
 import (
-	RequestDTOs "automation-suite/dockerRegRouter/DockerRequestDTOs"
+	"automation-suite/dockerRegRouter/RequestDTOs"
 	"automation-suite/dockerRegRouter/ResponseDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
@@ -15,6 +15,7 @@ import (
 type StructDockerRegRouter struct {
 	saveDockerRegistryResponseDto ResponseDTOs.SaveDockerRegistryResponseDto
 	deleteDockerRegistryResponse  ResponseDTOs.DeleteDockerRegistryResponse
+	dockerRequestDTOs             RequestDTOs.SaveDockerRegistryRequestDto
 }
 
 func (structDockerRegRouter StructDockerRegRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructDockerRegRouter {

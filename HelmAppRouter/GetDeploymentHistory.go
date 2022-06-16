@@ -1,15 +1,7 @@
 package HelmAppRouter
 
-import (
-	"automation-suite/testUtils"
-	"encoding/json"
-	"github.com/stretchr/testify/assert"
-	"log"
-	"strconv"
-)
-
 func (suite *HelmAppTestSuite) TestGetDeploymentHistory() {
-	suite.Run("A=1=GetDeploymentHistoryWithCorrectAppId", func() {
+	/*suite.Run("A=1=GetDeploymentHistoryWithCorrectAppId", func() {
 		envConf, _ := GetEnvironmentConfigForHelmApp()
 		queryParams := map[string]string{"appId": envConf.HAppId}
 		log.Println("Hitting Get Deployment History API before creating any new deployment")
@@ -31,5 +23,5 @@ func (suite *HelmAppTestSuite) TestGetDeploymentHistory() {
 		resp := HitGetDeploymentHistoryById(queryParams, suite.authToken)
 		assert.Equal(suite.T(), 400, resp.Code)
 		assert.Equal(suite.T(), "Bad Request", resp.Status)
-	})
+	})*/
 }

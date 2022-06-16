@@ -9,7 +9,7 @@ import (
 )
 
 func (suite *ExternalLinkOutRouterTestSuite) TestClassA1CreateExternalLink() {
-	suite.Run("A=1=CreateLinkoutWithValidPayload", func() {
+	/*suite.Run("A=1=CreateLinkoutWithValidPayload", func() {
 		log.Println("Fetching links before creating new")
 		getAllExternalLinksResponseDto := HitFetchAllLinkApi(suite.authToken)
 		noOfLinks := len(getAllExternalLinksResponseDto.Result)
@@ -30,7 +30,7 @@ func (suite *ExternalLinkOutRouterTestSuite) TestClassA1CreateExternalLink() {
 		log.Println("Hitting the Delete link API for Removing the data created via automation")
 		HitDeleteLinkApi(getAllExternalLinksAgainResponseDto.Result[noOfLinksAfterCreation-1].Id, suite.authToken)
 
-	})
+	})*/
 	suite.Run("A=2=CreateLinkoutWithInvalidToolId", func() {
 		log.Println("Getting random monitoring tool id")
 		monitoringToolId := testUtils.GetRandomNumberOf9Digit()

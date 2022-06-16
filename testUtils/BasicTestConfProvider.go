@@ -3,7 +3,6 @@ package testUtils
 import (
 	"bufio"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/caarlos0/env"
 	"io/ioutil"
@@ -72,7 +71,7 @@ type BaseClassEnvironmentConfig struct {
 }
 
 func getRestyClient() *resty.Client {
-	baseConfig, _ := ReadBaseEnvConfig()
+	baseConfig := ReadBaseEnvConfig()
 	fileData := ReadAnyJsonFile(baseConfig.BaseCredentialsFile)
 	client := resty.New()
 	client.SetBaseURL(fileData.BaseServerUrl)
@@ -120,7 +119,7 @@ func GetByteArrayOfGivenJsonFile(filePath string) ([]byte, error) {
 
 // GetAuthToken support function to return auth token after log in
 func GetAuthToken() string {
-	envConf, _ := ReadBaseEnvConfig()
+	envConf := ReadBaseEnvConfig()
 	file := ReadAnyJsonFile(envConf.BaseCredentialsFile)
 	jsonString := fmt.Sprintf(`{"username": "%s", "password": "%s"}`, file.LogInUserName, file.LogInUserPwd)
 	resp, err := MakeApiCall(createSessionApiUrl, http.MethodPost, jsonString, nil, "")
@@ -325,11 +324,11 @@ type BaseEnvConfigStruct struct {
 	BaseCredentialsFile string `env:"BASE_CREDENTIALS_FILE" envDefault:"../testUtils/credentials.json"`
 }
 
-func ReadBaseEnvConfig() (*BaseEnvConfigStruct, error) {
+func ReadBaseEnvConfig() *BaseEnvConfigStruct {
 	cfg := &BaseEnvConfigStruct{}
 	err := env.Parse(cfg)
 	if err != nil {
-		return nil, errors.New("could not get config from environment")
+		return nil
 	}
-	return cfg, err
+	return cfg
 }

@@ -1,15 +1,7 @@
 package externalLinkoutRouter
 
-import (
-	"automation-suite/testUtils"
-	"encoding/json"
-	"log"
-
-	"github.com/stretchr/testify/assert"
-)
-
 func (suite *ExternalLinkOutRouterTestSuite) TestClassA5UpdateExternalLink() {
-	suite.Run("A=1=UpdateTeamWithValidPayload", func() {
+	/*suite.Run("A=1=UpdateTeamWithValidPayload", func() {
 		createLinkRequestDto := GetSaveLinkRequestDto(1, nil)
 		byteValueOfCreateLink, _ := json.Marshal(createLinkRequestDto)
 		log.Println("Hitting The Save Link API")
@@ -76,5 +68,5 @@ func (suite *ExternalLinkOutRouterTestSuite) TestClassA5UpdateExternalLink() {
 		assert.Equal(suite.T(), "cluster id failed to create in db", updateLinkResponseDto.Errors[0].UserMessage)
 		HitDeleteLinkApi(id, suite.authToken)
 	})
-
+	*/
 }

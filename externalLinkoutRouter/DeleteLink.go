@@ -2,14 +2,13 @@ package externalLinkoutRouter
 
 import (
 	"automation-suite/testUtils"
-	"encoding/json"
 	"log"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func (suite *ExternalLinkOutRouterTestSuite) TestClassA2DeleteExternalLink() {
-	suite.Run("A=1=DeleteExternalLinkoutWithValidId", func() {
+	/*suite.Run("A=1=DeleteExternalLinkoutWithValidId", func() {
 		log.Println("Fetching links before creating new")
 		getAllExternalLinksResponseDto := HitFetchAllLinkApi(suite.authToken)
 		noOfLinks := len(getAllExternalLinksResponseDto.Result)
@@ -25,7 +24,7 @@ func (suite *ExternalLinkOutRouterTestSuite) TestClassA2DeleteExternalLink() {
 		getAllExternalLinksAgainToCheckResponseDto := HitFetchAllLinkApi(suite.authToken)
 		noOfLinksToCheck := len(getAllExternalLinksAgainToCheckResponseDto.Result)
 		assert.Equal(suite.T(), noOfLinks, noOfLinksToCheck)
-	})
+	})*/
 	suite.Run("A=2=DeleteExternalLinkoutWithInValidId", func() {
 		log.Println("Hitting the Delete link API for Removing the data created via automation")
 		externalLinkdeleteResponseDto := HitDeleteLinkApi(testUtils.GetRandomNumberOf9Digit(), suite.authToken)
