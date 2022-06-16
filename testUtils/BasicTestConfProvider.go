@@ -64,7 +64,7 @@ type DeleteResponseDto struct {
 	Result string `json:"result"`
 }
 
-type EnvironmentConfig struct {
+type BaseClassEnvironmentConfig struct {
 	BaseServerUrl   string `json:"BASE_SERVER_URL"`
 	LogInUserName   string `json:"LOGIN_USERNAME"`
 	LogInUserPwd    string `json:"LOGIN_PASSWORD"`
@@ -72,7 +72,8 @@ type EnvironmentConfig struct {
 }
 
 func getRestyClient() *resty.Client {
-	fileData := ReadAnyJsonFile("../testUtils/credentials.json")
+	baseConfig, _ := ReadBaseEnvConfig()
+	fileData := ReadAnyJsonFile(baseConfig.BaseCredentialsFile)
 	client := resty.New()
 	client.SetBaseURL(fileData.BaseServerUrl)
 	return client
@@ -119,7 +120,7 @@ func GetByteArrayOfGivenJsonFile(filePath string) ([]byte, error) {
 
 // GetAuthToken support function to return auth token after log in
 func GetAuthToken() string {
-	envConf, _ := BaseEnvConfigReader()
+	envConf, _ := ReadBaseEnvConfig()
 	file := ReadAnyJsonFile(envConf.BaseCredentialsFile)
 	jsonString := fmt.Sprintf(`{"username": "%s", "password": "%s"}`, file.LogInUserName, file.LogInUserPwd)
 	resp, err := MakeApiCall(createSessionApiUrl, http.MethodPost, jsonString, nil, "")
@@ -310,12 +311,12 @@ func DeleteApp(appId int, appName string, TeamId int, TemplateId int, authToken 
 	return apiRouter.deleteResponseDto
 }
 
-func ReadAnyJsonFile(filename string) EnvironmentConfig {
+func ReadAnyJsonFile(filename string) BaseClassEnvironmentConfig {
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {
 		log.Panicf("failed reading data from file: %s", err)
 	}
-	data := EnvironmentConfig{}
+	data := BaseClassEnvironmentConfig{}
 	_ = json.Unmarshal([]byte(file), &data)
 	return data
 }
@@ -324,7 +325,7 @@ type BaseEnvConfigStruct struct {
 	BaseCredentialsFile string `env:"BASE_CREDENTIALS_FILE" envDefault:"../testUtils/credentials.json"`
 }
 
-func BaseEnvConfigReader() (*BaseEnvConfigStruct, error) {
+func ReadBaseEnvConfig() (*BaseEnvConfigStruct, error) {
 	cfg := &BaseEnvConfigStruct{}
 	err := env.Parse(cfg)
 	if err != nil {
