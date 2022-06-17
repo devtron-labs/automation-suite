@@ -75,9 +75,7 @@ func getRestyClient() *resty.Client {
 	fileData := ReadAnyJsonFile(baseConfig.BaseCredentialsFile)
 	client := resty.New()
 	client.SetBaseURL(fileData.BaseServerUrl)
-	log.Println("=========================Base URL==============", client.BaseURL)
 	return client
-
 }
 
 // MakeApiCall make the api call to the requested url based on http method requested
@@ -122,8 +120,6 @@ func GetByteArrayOfGivenJsonFile(filePath string) ([]byte, error) {
 // GetAuthToken support function to return auth token after log in
 func GetAuthToken() string {
 	envConf := ReadBaseEnvConfig()
-	log.Println("========Here we are printing the file path after reading from the env variables======", envConf.BaseCredentialsFile)
-
 	file := ReadAnyJsonFile(envConf.BaseCredentialsFile)
 	jsonString := fmt.Sprintf(`{"username": "%s", "password": "%s"}`, file.LogInUserName, file.LogInUserPwd)
 	resp, err := MakeApiCall(createSessionApiUrl, http.MethodPost, jsonString, nil, "")
