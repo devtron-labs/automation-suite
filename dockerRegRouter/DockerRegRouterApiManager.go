@@ -48,7 +48,7 @@ func GetDockerRegistry() (*DockerRegistry, error) {
 func GetDockerRegistryRequestDto(isDefault bool) RequestDTOs.SaveDockerRegistryRequestDto {
 	var saveDockerRegistryRequestDto RequestDTOs.SaveDockerRegistryRequestDto
 	dockerRegistry, _ := GetDockerRegistry()
-	saveDockerRegistryRequestDto.Id = Base.GetRandomStringOfGivenLength(10)
+	saveDockerRegistryRequestDto.Id = dockerRegistry.Username
 	saveDockerRegistryRequestDto.PluginId = dockerRegistry.PluginId
 	saveDockerRegistryRequestDto.RegistryType = dockerRegistry.RegistryType
 	saveDockerRegistryRequestDto.RegistryUrl = dockerRegistry.RegistryUrl
