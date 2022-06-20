@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func (suite *UserTestSuite) TestGetUserById() {
+func (suite *UserTestSuite) TestClassB7GetUserById() {
 
 	suite.Run("A=1=GetUserByIdWithValidArg", func() {
 		createUserDto, _ := CreateUserRequestPayload(SuperAdmin, suite.authToken)

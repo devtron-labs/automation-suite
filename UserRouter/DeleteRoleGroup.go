@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func (suite *UserTestSuite) TestDeleteRoleGroup() {
+func (suite *UserTestSuite) TestClassB8DeleteRoleGroup() {
 
 	suite.Run("A=1=DeleteRoleGroupHavingAllRoleFilters", func() {
 		createRoleGroupPayload := CreateRoleGroupPayload(WithAllFilter)
@@ -71,7 +71,7 @@ func (suite *UserTestSuite) TestDeleteRoleGroup() {
 		assert.Equal(suite.T(), "Failed to get by id", getRoleGroupByIdResponse.Errors[0].UserMessage)
 		assert.Equal(suite.T(), "[{pg: no rows in result set}]", getRoleGroupByIdResponse.Errors[0].InternalMessage)
 	})
-	
+
 	suite.Run("A=5=DeleteRoleApiWithInvalidId", func() {
 		log.Println("Hitting the getRoleGroupById with invalid argument")
 		randomId := testUtils.GetRandomNumberOf9Digit()

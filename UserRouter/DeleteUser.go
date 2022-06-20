@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func (suite *UserTestSuite) TestDeleteUser() {
+func (suite *UserTestSuite) TestClassB9DeleteUser() {
 
 	suite.Run("A=1=DeleteSuperAdminUser", func() {
 		createUserDto, _ := CreateUserRequestPayload("SuperAdmin", suite.authToken)

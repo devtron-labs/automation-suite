@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (suite *ChartRepoTestSuite) TestUpdateChartRepo() {
+func (suite *ChartRepoTestSuite) TestClassC2UpdateChartRepo() {
 
 	suite.Run("A=1=UpdateAuthFromAnonymousToAccessToken", func() {
 		chartRepoConfig, _ := GetChartRepoRouterConfig()

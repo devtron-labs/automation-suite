@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (suite *ChartRepoTestSuite) TestDeleteChartRepo() {
+func (suite *ChartRepoTestSuite) TestClassC7DeleteChartRepo() {
 
 	suite.Run("A=1=DeleteRepoHavingAnonymousAuthMode", func() {
 		chartRepoConfig, _ := GetChartRepoRouterConfig()

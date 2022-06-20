@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func (suite *UserTestSuite) TestCreateUser() {
+func (suite *UserTestSuite) TestClassB3CreateUser() {
 
 	suite.Run("A=1=CreateUserAsSuperAdmin", func() {
 		createUserDto, _ := CreateUserRequestPayload(SuperAdmin, suite.authToken)
@@ -51,7 +51,7 @@ func (suite *UserTestSuite) TestCreateUser() {
 		HitDeleteUserApi(strconv.Itoa(responseOfCreateUserApi.Result[0].Id), suite.authToken)
 		HitDeleteRoleGroupByIdApi(strconv.Itoa(roleGroupId), suite.authToken)
 	})
-	
+
 	suite.Run("A=4=CreateUserWithValidFiltersOnly", func() {
 		createUserDto, roleGroupId := CreateUserRequestPayload(RoleFilterOnly, suite.authToken)
 		byteValueOfStruct, _ := json.Marshal(createUserDto)

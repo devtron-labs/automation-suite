@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func (suite *TeamTestSuite) TestClass1SaveTeam() {
+func (suite *TeamTestSuite) TestClassA6SaveTeam() {
 
 	suite.Run("A=1=SaveTeamWithValidPayload", func() {
 		saveTeamRequestDto := GetSaveTeamRequestDto()

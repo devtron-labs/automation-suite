@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func (suite *TeamTestSuite) TestClass4GetTeamById() {
+func (suite *TeamTestSuite) TestClassA9GetTeamById() {
 	suite.Run("A=1=GetTeamByIdWithValidId", func() {
 		log.Println("Hitting the 'Save Team' Api for creating a new entry")
 		saveTeamResponseDto := HitSaveTeamApi(nil, suite.authToken)

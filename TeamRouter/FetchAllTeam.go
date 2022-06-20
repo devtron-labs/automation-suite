@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-func (suite *TeamTestSuite) TestClass2FetchAllTeam() {
+func (suite *TeamTestSuite) TestClassA7FetchAllTeam() {
 
 	suite.Run("A=1=FetchAllTeamWithValidPayload", func() {
 		log.Println("Hitting the 'FetchAllTeam' Api before creating any new entry")

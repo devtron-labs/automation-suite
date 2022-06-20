@@ -10,7 +10,7 @@ import (
 
 //todo need to add more assert once order of RoleFilters data in response will fix (currently coming randomly)
 
-func (suite *UserTestSuite) TestGetRoleGroupById() {
+func (suite *UserTestSuite) TestClassB6GetRoleGroupById() {
 
 	suite.Run("A=1=GetRoleGroupHavingAllFiltersWithValidId", func() {
 		createRoleGroupPayload := CreateRoleGroupPayload(WithAllFilter)

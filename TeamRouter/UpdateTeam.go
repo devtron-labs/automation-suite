@@ -9,7 +9,7 @@ import (
 
 //todo there are some doubt as well ,will add other test cases after the clarification
 
-func (suite *TeamTestSuite) TestClass5UpdateTeam() {
+func (suite *TeamTestSuite) TestClassB1UpdateTeam() {
 	suite.Run("A=1=UpdateTeamWithValidPayload", func() {
 		saveTeamRequestDto := GetSaveTeamRequestDto()
 		byteValueOfStruct, _ := json.Marshal(saveTeamRequestDto)

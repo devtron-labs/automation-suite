@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-func (suite *TeamTestSuite) TestClass3FetchForAutoComplete() {
+func (suite *TeamTestSuite) TestClassA8FetchForAutoComplete() {
 	suite.Run("A=1=AutocompleteApiWithValidPayload", func() {
 		log.Println("Hitting the 'FetchForAutocomplete' Api before creating any new entry")
 		fetchAllTeamResponseDto := HitFetchForAutocompleteApi(suite.authToken)

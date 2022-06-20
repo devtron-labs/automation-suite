@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func (suite *UserTestSuite) TestUpdateUser() {
+func (suite *UserTestSuite) TestClassB4UpdateUser() {
 
 	suite.Run("A=1=UpdateUserWithGroupsAndRoleFilters", func() {
 		createUserDto, _ := CreateUserRequestPayload(SuperAdmin, suite.authToken)

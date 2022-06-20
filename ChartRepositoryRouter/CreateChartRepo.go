@@ -26,7 +26,7 @@ import (
 
 //todo need to add test cases for ssh and username password auth type once issue resolved from backend
 
-func (suite *ChartRepoTestSuite) TestCreateChartRepo() {
+func (suite *ChartRepoTestSuite) TestClassC1CreateChartRepo() {
 
 	suite.Run("A=1=CreateRepoWithValidArgsOnly", func() {
 		chartRepoConfig, _ := GetChartRepoRouterConfig()

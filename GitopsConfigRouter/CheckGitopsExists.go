@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (suite *GitOpsRouterTestSuite) TestClassA1CheckGitopsExists() {
+func (suite *GitOpsRouterTestSuite) TestClassA5CheckGitopsExists() {
 
 	suite.Run("A=1=CheckGitopsExistsIsTrue", func() {
 		checkGitopsExistsResponseDto := HitGitopsConfigured(suite.authToken)

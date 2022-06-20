@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (suite *ChartRepoTestSuite) TestGetRepoList() {
+func (suite *ChartRepoTestSuite) TestClassC4GetRepoList() {
 
 	suite.Run("A=1=GetRepoList", func() {
 		respGetRepoListApi := HitGetChartRepoList(suite.authToken)

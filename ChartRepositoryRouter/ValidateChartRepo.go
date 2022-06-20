@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (suite *ChartRepoTestSuite) TestValidateChartRepo() {
+func (suite *ChartRepoTestSuite) TestClassC5ValidateChartRepo() {
 
 	suite.Run("A=1=ValidateChartRepoWithValidPayload", func() {
 		chartRepoConfig, _ := GetChartRepoRouterConfig()

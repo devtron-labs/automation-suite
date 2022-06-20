@@ -2,7 +2,7 @@ package ChartRepositoryRouter
 
 import "github.com/stretchr/testify/assert"
 
-func (suite *ChartRepoTestSuite) TestTriggerChartSyncManual() {
+func (suite *ChartRepoTestSuite) TestClassC6TriggerChartSyncManual() {
 
 	suite.Run("A=1=TriggerChartSyncManual", func() {
 		triggerChartSyncApiResponse := HitTriggerChartSyncManualApi(suite.authToken)

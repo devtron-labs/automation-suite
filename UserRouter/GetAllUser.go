@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func (suite *UserTestSuite) TestGetAllUser() {
+func (suite *UserTestSuite) TestClassB5GetAllUser() {
 
 	suite.Run("A=1=GetAllUsers", func() {
 		log.Println("Getting All the Users before creation any new user")

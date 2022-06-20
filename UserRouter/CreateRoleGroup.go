@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func (suite *UserTestSuite) TestCreateRoleGroup() {
+func (suite *UserTestSuite) TestClassB2CreateRoleGroup() {
 
 	suite.Run("A=1=CreateRoleGroupForDevtronAppsOnly", func() {
 		createRoleGroupPayload := CreateRoleGroupPayload("WithDevtronAppsOnly")

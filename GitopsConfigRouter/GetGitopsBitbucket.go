@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (suite *GitOpsRouterTestSuite) TestClassA2FetchAllGitopsConfig() {
+func (suite *GitOpsRouterTestSuite) TestClassA4FetchAllGitopsConfig() {
 
 	suite.Run("A=1=FetchAllGitopsConfig", func() {
 		log.Println("Hitting GET api for Gitops config")

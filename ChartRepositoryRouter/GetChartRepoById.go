@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func (suite *ChartRepoTestSuite) TestGetChartRepoById() {
+func (suite *ChartRepoTestSuite) TestClassC3GetChartRepoById() {
 
 	suite.Run("A=1=GetRepoByValidId", func() {
 		chartRepoConfig, _ := GetChartRepoRouterConfig()
