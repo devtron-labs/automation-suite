@@ -5,6 +5,7 @@ import (
 	"automation-suite/AppListingRouter"
 	"automation-suite/AttributesRouter"
 	"automation-suite/ChartRepositoryRouter"
+	"automation-suite/GitopsConfigRouter"
 	"automation-suite/PipelineConfigRouter"
 	"automation-suite/TeamRouter"
 	"automation-suite/UserRouter"
@@ -14,6 +15,14 @@ import (
 
 	"github.com/stretchr/testify/suite"
 )
+
+func TestAttributeRouterSuite(t *testing.T) {
+	suite.Run(t, new(AttributesRouter.AttributeRouterTestSuite))
+}
+
+func TestGitOpsRouterSuite(t *testing.T) {
+	suite.Run(t, new(GitopsConfigRouter.GitOpsRouterTestSuite))
+}
 
 func TestTeamRouterSuite(t *testing.T) {
 	suite.Run(t, new(TeamRouter.TeamTestSuite))
@@ -25,10 +34,6 @@ func TestUserRouterSuite(t *testing.T) {
 
 func TestChartRepoRouterSuite(t *testing.T) {
 	suite.Run(t, new(ChartRepositoryRouter.ChartRepoTestSuite))
-}
-
-func TestAttributeRouterSuite(t *testing.T) {
-	suite.Run(t, new(AttributesRouter.AttributeRouterTestSuite))
 }
 
 func TestAppLabelsRouterSuite(t *testing.T) {

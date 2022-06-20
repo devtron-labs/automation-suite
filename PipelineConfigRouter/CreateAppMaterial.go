@@ -8,8 +8,7 @@ import (
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassA2CreateMaterial() {
-	appId := suite.createAppResponseDto.Result.Id
-
+	appId := suite.CreateApp().Result.Id
 	suite.Run("A=1=CreateAppMaterialWithValidPayloadAndFetchSubmodulesFalse", func() {
 		createAppMaterialRequestDto := GetAppMaterialRequestDto(appId, 1, false)
 		byteValueOfStruct2, _ := json.Marshal(createAppMaterialRequestDto)

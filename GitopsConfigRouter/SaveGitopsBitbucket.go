@@ -4,6 +4,7 @@ import (
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"log"
+	"strings"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -47,7 +48,6 @@ func (suite *GitOpsRouterTestSuite) TestClassA3SaveGitopsConfig() {
 
 		log.Println("Validating the Response of the Create Gitops Config API...")
 		assert.Equal(suite.T(), 0, len(createLinkResponseDto.Result.SuccessfulStages))
-		assert.Equal(suite.T(), "401 Bad credentials []", createLinkResponseDto.Result.StageErrorMap.ErrorInConnectingWithGITHUB[80:102])
-
+		assert.True(suite.T(), strings.Contains(createLinkResponseDto.Result.StageErrorMap.ErrorInConnectingWithGITHUB, "401 Bad credentials []"))
 	})
 }

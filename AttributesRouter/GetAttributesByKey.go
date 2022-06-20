@@ -5,7 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (suite *AttributeRouterTestSuite) TestGetAttributesByKey() {
+func (suite *AttributeRouterTestSuite) TestClassA2GetAttributesByKey() {
 	fileData := Base.ReadAnyJsonFile("../testUtils/credentials.json")
 	suite.Run("A=1=AttributesWithValidValueOfKey", func() {
 		queryParams := map[string]string{"key": "url"}

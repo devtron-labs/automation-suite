@@ -20,6 +20,22 @@ func HitGetAttributesApi(queryParams map[string]string, authToken string) Respon
 	return chartRepoRouter.getAttributesRespDto
 }
 
+func HitAddAttributesApi(payloadOfApi []byte, authToken string) ResponseDTOs.GetAttributesResponseDTO {
+	resp, err := Base.MakeApiCall(AddAttributesApiUrl, http.MethodPost, string(payloadOfApi), nil, authToken)
+	Base.HandleError(err, AddAttributesApi)
+	structAttributesRouter := StructAttributesRouter{}
+	chartRepoRouter := structAttributesRouter.UnmarshalGivenResponseBody(resp.Body(), GetAttributesApi)
+	return chartRepoRouter.getAttributesRespDto
+}
+
+func GetPayloadForAddAttributes(value string) ResponseDTOs.AttributesDTO {
+	var attributesDTO ResponseDTOs.AttributesDTO
+	attributesDTO.Key = "url"
+	attributesDTO.Value = value
+	attributesDTO.Active = true
+	return attributesDTO
+}
+
 func (structAttributesRouter StructAttributesRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructAttributesRouter {
 	switch apiName {
 	case GetAttributesApi:
