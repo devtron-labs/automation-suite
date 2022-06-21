@@ -32,8 +32,8 @@ type DockerRegistry struct {
 	PluginId     string `env:"PLUGINID" envDefault:"cd.go.artifact.docker.registry"`
 	RegistryType string `env:"REGISTRYTYPE" envDefault:"docker-hub"`
 	RegistryUrl  string `env:"REGISTRYURL" envDefault:"docker.io"`
-	Username     string `env:"USERNAME" envDefault:"erdipak"`
-	Password     string `env:"PASSWORD" envDefault:""`
+	Username     string `env:"DOCKER_USERNAME" envDefault:""`
+	Password     string `env:"DOCKER_PASSWORD" envDefault:""`
 }
 
 func GetDockerRegistry() (*DockerRegistry, error) {
