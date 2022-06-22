@@ -5,10 +5,8 @@ import (
 	"automation-suite/dockerRegRouter/ResponseDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
-	"errors"
 	"net/http"
 
-	"github.com/caarlos0/env"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -28,14 +26,15 @@ func (structDockerRegRouter StructDockerRegRouter) UnmarshalGivenResponseBody(re
 	return structDockerRegRouter
 }
 
+/*
 type DockerRegistry struct {
 	PluginId     string `env:"PLUGIN_ID" envDefault:""`
 	RegistryType string `env:"REGISTRY_TYPE" envDefault:""`
 	RegistryUrl  string `env:"REGISTRY_URL" envDefault:""`
 	Username     string `env:"DOCKER_USERNAME" envDefault:""`
 	Password     string `env:"PASSWORD" envDefault:""`
-}
-
+}*/
+/*
 func GetDockerRegistry() (*DockerRegistry, error) {
 	cfg := &DockerRegistry{}
 	err := env.Parse(cfg)
@@ -44,6 +43,7 @@ func GetDockerRegistry() (*DockerRegistry, error) {
 	}
 	return cfg, err
 }
+*/
 
 func GetDockerRegistryRequestDto(isDefault bool) RequestDTOs.SaveDockerRegistryRequestDto {
 	var saveDockerRegistryRequestDto RequestDTOs.SaveDockerRegistryRequestDto
