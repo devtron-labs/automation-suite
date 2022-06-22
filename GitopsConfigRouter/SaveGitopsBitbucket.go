@@ -14,7 +14,7 @@ func (suite *GitOpsRouterTestSuite) TestClassA3SaveGitopsConfig() {
 	suite.Run("A=1=CreateGitopsConfigWithValidPayload", func() {
 		//gitopsConfig, _ := GetGitopsConfig()
 		envConf := Base.ReadBaseEnvConfig()
-		gitopsConfig := Base.ReadAnyJsonFile(envConf.BaseCredentialsFile)
+		gitopsConfig := Base.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 		createGitopsConfigRequestDto := GetGitopsConfigRequestDto(gitopsConfig.Provider, gitopsConfig.GitUsername, gitopsConfig.Host, gitopsConfig.GitToken, gitopsConfig.GitHubOrgId)
 		byteValueOfCreateGitopsConfig, _ := json.Marshal(createGitopsConfigRequestDto)
 
@@ -30,7 +30,7 @@ func (suite *GitOpsRouterTestSuite) TestClassA3SaveGitopsConfig() {
 		provider := Base.GetRandomStringOfGivenLength(10)
 		//gitopsConfig, _ := GetGitopsConfig()
 		envConf := Base.ReadBaseEnvConfig()
-		gitopsConfig := Base.ReadAnyJsonFile(envConf.BaseCredentialsFile)
+		gitopsConfig := Base.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 		createGitopsConfigRequestDto := GetGitopsConfigRequestDto(provider, gitopsConfig.GitUsername, gitopsConfig.Host, gitopsConfig.GitToken, gitopsConfig.GitHubOrgId)
 		byteValueOfCreateGitopsConfig, _ := json.Marshal(createGitopsConfigRequestDto)
 
@@ -44,7 +44,7 @@ func (suite *GitOpsRouterTestSuite) TestClassA3SaveGitopsConfig() {
 		token := Base.GetRandomStringOfGivenLength(10)
 		//gitopsConfig, _ := GetGitopsConfig()
 		envConf := Base.ReadBaseEnvConfig()
-		gitopsConfig := Base.ReadAnyJsonFile(envConf.BaseCredentialsFile)
+		gitopsConfig := Base.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 		createGitopsConfigRequestDto := GetGitopsConfigRequestDto(gitopsConfig.Provider, gitopsConfig.GitUsername, gitopsConfig.Host, token, gitopsConfig.GitHubOrgId)
 		byteValueOfStruct, _ := json.Marshal(createGitopsConfigRequestDto)
 

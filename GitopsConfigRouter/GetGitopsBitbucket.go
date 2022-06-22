@@ -18,7 +18,7 @@ func (suite *GitOpsRouterTestSuite) TestClassA4FetchAllGitopsConfig() {
 		log.Println("Hitting the 'Save Gitops Config' Api for creating a new entry")
 		//gitopsConfig, _ := GetGitopsConfig()
 		envConf := Base.ReadBaseEnvConfig()
-		gitopsConfig := Base.ReadAnyJsonFile(envConf.BaseCredentialsFile)
+		gitopsConfig := Base.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 
 		createGitopsConfigRequestDto := GetGitopsConfigRequestDto(gitopsConfig.Provider, gitopsConfig.GitUsername, gitopsConfig.Host, gitopsConfig.GitToken, gitopsConfig.GitHubOrgId)
 		byteValueOfCreateGitopsConfig, _ := json.Marshal(createGitopsConfigRequestDto)

@@ -49,7 +49,7 @@ func GetDockerRegistryRequestDto(isDefault bool) RequestDTOs.SaveDockerRegistryR
 	var saveDockerRegistryRequestDto RequestDTOs.SaveDockerRegistryRequestDto
 	//dockerRegistry, _ := GetDockerRegistry()
 	envConf := Base.ReadBaseEnvConfig()
-	file := Base.ReadAnyJsonFile(envConf.BaseCredentialsFile)
+	file := Base.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 	saveDockerRegistryRequestDto.Id = file.DockerUsername
 	saveDockerRegistryRequestDto.PluginId = file.PluginId
 	saveDockerRegistryRequestDto.RegistryType = file.RegistryType
