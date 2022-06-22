@@ -68,6 +68,16 @@ type BaseClassEnvironmentConfig struct {
 	LogInUserName   string `json:"LOGIN_USERNAME"`
 	LogInUserPwd    string `json:"LOGIN_PASSWORD"`
 	SSOClientSecret string `json:"CLIENT_SECRET"`
+	Provider        string `json:"PROVIDER"`
+	GitUsername     string `json:"GIT_USERNAME"`
+	Host            string `json:"HOST"`
+	GitToken        string `json:"GIT_TOKEN"`
+	GitHubOrgId     string `json:"GITHUB_ORG_ID"`
+	PluginId        string `json:"PLUGIN_ID"`
+	RegistryType    string `json:"REGISTRY_TYPE"`
+	RegistryUrl     string `json:"REGISTRY_URL"`
+	DockerUsername  string `json:"DOCKER_USERNAME"`
+	Password        string `json:"PASSWORD"`
 }
 
 func getRestyClient() *resty.Client {

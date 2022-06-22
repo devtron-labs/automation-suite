@@ -81,7 +81,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 		workflowStatus := HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
 		assert.Equal(suite.T(), "Running", workflowStatus.Result.CiWorkflowStatus[0].CiStatus)
 		log.Println("=== Here we are getting workflow after 4 minutes of triggering ===")
-		time.Sleep(240 * time.Second)
+		time.Sleep(300 * time.Second)
 		updatedWorkflowStatus := HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
 		assert.Equal(suite.T(), "Succeeded", updatedWorkflowStatus.Result.CiWorkflowStatus[0].CiStatus)
 		assert.Equal(suite.T(), "Healthy", updatedWorkflowStatus.Result.CdWorkflowStatus[0].DeployStatus)

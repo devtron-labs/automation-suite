@@ -1,6 +1,7 @@
 package GitopsConfigRouter
 
 import (
+	Base "automation-suite/testUtils"
 	"encoding/json"
 	"log"
 
@@ -15,13 +16,15 @@ func (suite *GitOpsRouterTestSuite) TestClassA4FetchAllGitopsConfig() {
 		noOfGitopsConfig := len(fetchAllLinkResponseDto.Result)
 
 		log.Println("Hitting the 'Save Gitops Config' Api for creating a new entry")
-		gitopsConfig, _ := GetGitopsConfig()
+		//gitopsConfig, _ := GetGitopsConfig()
+		envConf := Base.ReadBaseEnvConfig()
+		gitopsConfig := Base.ReadAnyJsonFile(envConf.BaseCredentialsFile)
 
-		createGitopsConfigRequestDto := GetGitopsConfigRequestDto(gitopsConfig.Provider, gitopsConfig.Username, gitopsConfig.Host, gitopsConfig.Token, gitopsConfig.GitHubOrgId)
+		createGitopsConfigRequestDto := GetGitopsConfigRequestDto(gitopsConfig.Provider, gitopsConfig.GitUsername, gitopsConfig.Host, gitopsConfig.GitToken, gitopsConfig.GitHubOrgId)
 		byteValueOfCreateGitopsConfig, _ := json.Marshal(createGitopsConfigRequestDto)
 
 		log.Println("Hitting The post gitops config API")
-		HitCreateGitopsConfigApi(byteValueOfCreateGitopsConfig, gitopsConfig.Provider, gitopsConfig.Username, gitopsConfig.Host, gitopsConfig.Token, gitopsConfig.GitHubOrgId, suite.authToken)
+		HitCreateGitopsConfigApi(byteValueOfCreateGitopsConfig, gitopsConfig.Provider, gitopsConfig.GitUsername, gitopsConfig.Host, gitopsConfig.GitToken, gitopsConfig.GitHubOrgId, suite.authToken)
 
 		log.Println("Hitting the HitFetchAllGitopsConfigApi again for verifying the functionality of it")
 		fetchAllLinkResponseDto = HitFetchAllGitopsConfigApi(suite.authToken)

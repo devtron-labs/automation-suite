@@ -12,12 +12,14 @@ import (
 func (suite *GitOpsRouterTestSuite) TestClassA3SaveGitopsConfig() {
 
 	suite.Run("A=1=CreateGitopsConfigWithValidPayload", func() {
-		gitopsConfig, _ := GetGitopsConfig()
-		createGitopsConfigRequestDto := GetGitopsConfigRequestDto(gitopsConfig.Provider, gitopsConfig.Username, gitopsConfig.Host, gitopsConfig.Token, gitopsConfig.GitHubOrgId)
+		//gitopsConfig, _ := GetGitopsConfig()
+		envConf := Base.ReadBaseEnvConfig()
+		gitopsConfig := Base.ReadAnyJsonFile(envConf.BaseCredentialsFile)
+		createGitopsConfigRequestDto := GetGitopsConfigRequestDto(gitopsConfig.Provider, gitopsConfig.GitUsername, gitopsConfig.Host, gitopsConfig.GitToken, gitopsConfig.GitHubOrgId)
 		byteValueOfCreateGitopsConfig, _ := json.Marshal(createGitopsConfigRequestDto)
 
 		log.Println("Hitting The post gitops config API")
-		createLinkResponseDto := HitCreateGitopsConfigApi(byteValueOfCreateGitopsConfig, gitopsConfig.Provider, gitopsConfig.Username, gitopsConfig.Host, gitopsConfig.Token, gitopsConfig.GitHubOrgId, suite.authToken)
+		createLinkResponseDto := HitCreateGitopsConfigApi(byteValueOfCreateGitopsConfig, gitopsConfig.Provider, gitopsConfig.GitUsername, gitopsConfig.Host, gitopsConfig.GitToken, gitopsConfig.GitHubOrgId, suite.authToken)
 
 		log.Println("Validating the Response of the Create Gitops Config API...")
 		assert.Equal(suite.T(), 200, createLinkResponseDto.Code)
@@ -26,25 +28,28 @@ func (suite *GitOpsRouterTestSuite) TestClassA3SaveGitopsConfig() {
 
 	suite.Run("A=2=CreateGitopsConfigWithInValidProvider", func() {
 		provider := Base.GetRandomStringOfGivenLength(10)
-		gitopsConfig, _ := GetGitopsConfig()
-		createGitopsConfigRequestDto := GetGitopsConfigRequestDto(provider, gitopsConfig.Username, gitopsConfig.Host, gitopsConfig.Token, gitopsConfig.GitHubOrgId)
+		//gitopsConfig, _ := GetGitopsConfig()
+		envConf := Base.ReadBaseEnvConfig()
+		gitopsConfig := Base.ReadAnyJsonFile(envConf.BaseCredentialsFile)
+		createGitopsConfigRequestDto := GetGitopsConfigRequestDto(provider, gitopsConfig.GitUsername, gitopsConfig.Host, gitopsConfig.GitToken, gitopsConfig.GitHubOrgId)
 		byteValueOfCreateGitopsConfig, _ := json.Marshal(createGitopsConfigRequestDto)
 
 		log.Println("Hitting The post gitops config API")
-		createLinkResponseDto := HitCreateGitopsConfigApi(byteValueOfCreateGitopsConfig, provider, gitopsConfig.Username, gitopsConfig.Host, gitopsConfig.Token, gitopsConfig.GitHubOrgId, suite.authToken)
+		createLinkResponseDto := HitCreateGitopsConfigApi(byteValueOfCreateGitopsConfig, provider, gitopsConfig.GitUsername, gitopsConfig.Host, gitopsConfig.GitToken, gitopsConfig.GitHubOrgId, suite.authToken)
 
 		log.Println("Validating the Response of the Create Gitops Config API...")
 		assert.Equal(suite.T(), 0, createLinkResponseDto.Code)
 	})
 	suite.Run("A=3=CreateGitopsConfigWithValidPayload", func() {
 		token := Base.GetRandomStringOfGivenLength(10)
-		gitopsConfig, _ := GetGitopsConfig()
-
-		createGitopsConfigRequestDto := GetGitopsConfigRequestDto(gitopsConfig.Provider, gitopsConfig.Username, gitopsConfig.Host, token, gitopsConfig.GitHubOrgId)
+		//gitopsConfig, _ := GetGitopsConfig()
+		envConf := Base.ReadBaseEnvConfig()
+		gitopsConfig := Base.ReadAnyJsonFile(envConf.BaseCredentialsFile)
+		createGitopsConfigRequestDto := GetGitopsConfigRequestDto(gitopsConfig.Provider, gitopsConfig.GitUsername, gitopsConfig.Host, token, gitopsConfig.GitHubOrgId)
 		byteValueOfStruct, _ := json.Marshal(createGitopsConfigRequestDto)
 
 		log.Println("Hitting The post gitops config API")
-		createLinkResponseDto := HitCreateGitopsConfigApi(byteValueOfStruct, gitopsConfig.Provider, gitopsConfig.Username, gitopsConfig.Host, token, gitopsConfig.GitHubOrgId, suite.authToken)
+		createLinkResponseDto := HitCreateGitopsConfigApi(byteValueOfStruct, gitopsConfig.Provider, gitopsConfig.GitUsername, gitopsConfig.Host, token, gitopsConfig.GitHubOrgId, suite.authToken)
 
 		log.Println("Validating the Response of the Create Gitops Config API...")
 		assert.Equal(suite.T(), 0, len(createLinkResponseDto.Result.SuccessfulStages))

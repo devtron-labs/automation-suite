@@ -117,10 +117,10 @@ func HitUpdateGitopsConfigApi(payload []byte, authToken string) ResponseDTOs.Upd
 
 type GitopsConfig struct {
 	Provider    string `env:"PROVIDER" envDefault:"GITHUB"`
-	Username    string `env:"GIT_USERNAME" envDefault:""`
+	Username    string `env:"GIT_USERNAME" envDefault:"deepak-devtron"`
 	Host        string `env:"HOST" envDefault:"https://github.com/"`
-	Token       string `env:"GIT_TOKEN" envDefault:""`
-	GitHubOrgId string `env:"GITHUB_ORG_ID" envDefault:""`
+	Token       string `env:"GIT_TOKEN" envDefault:"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"`
+	GitHubOrgId string `env:"GITHUB_ORG_ID" envDefault:"Deepak-Deepak-Org"`
 	Url         string `env:"URL" envDefault:""`
 }
 

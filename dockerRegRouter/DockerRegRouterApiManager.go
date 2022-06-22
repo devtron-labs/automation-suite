@@ -29,11 +29,11 @@ func (structDockerRegRouter StructDockerRegRouter) UnmarshalGivenResponseBody(re
 }
 
 type DockerRegistry struct {
-	PluginId     string `env:"PLUGINID" envDefault:"cd.go.artifact.docker.registry"`
-	RegistryType string `env:"REGISTRYTYPE" envDefault:"docker-hub"`
-	RegistryUrl  string `env:"REGISTRYURL" envDefault:"docker.io"`
+	PluginId     string `env:"PLUGIN_ID" envDefault:""`
+	RegistryType string `env:"REGISTRY_TYPE" envDefault:""`
+	RegistryUrl  string `env:"REGISTRY_URL" envDefault:""`
 	Username     string `env:"DOCKER_USERNAME" envDefault:""`
-	Password     string `env:"DOCKER_PASSWORD" envDefault:""`
+	Password     string `env:"PASSWORD" envDefault:""`
 }
 
 func GetDockerRegistry() (*DockerRegistry, error) {
@@ -47,14 +47,16 @@ func GetDockerRegistry() (*DockerRegistry, error) {
 
 func GetDockerRegistryRequestDto(isDefault bool) RequestDTOs.SaveDockerRegistryRequestDto {
 	var saveDockerRegistryRequestDto RequestDTOs.SaveDockerRegistryRequestDto
-	dockerRegistry, _ := GetDockerRegistry()
-	saveDockerRegistryRequestDto.Id = dockerRegistry.Username
-	saveDockerRegistryRequestDto.PluginId = dockerRegistry.PluginId
-	saveDockerRegistryRequestDto.RegistryType = dockerRegistry.RegistryType
-	saveDockerRegistryRequestDto.RegistryUrl = dockerRegistry.RegistryUrl
+	//dockerRegistry, _ := GetDockerRegistry()
+	envConf := Base.ReadBaseEnvConfig()
+	file := Base.ReadAnyJsonFile(envConf.BaseCredentialsFile)
+	saveDockerRegistryRequestDto.Id = file.DockerUsername
+	saveDockerRegistryRequestDto.PluginId = file.PluginId
+	saveDockerRegistryRequestDto.RegistryType = file.RegistryType
+	saveDockerRegistryRequestDto.RegistryUrl = file.RegistryUrl
 	saveDockerRegistryRequestDto.IsDefault = isDefault
-	saveDockerRegistryRequestDto.Username = dockerRegistry.Username
-	saveDockerRegistryRequestDto.Password = dockerRegistry.Password
+	saveDockerRegistryRequestDto.Username = file.DockerUsername
+	saveDockerRegistryRequestDto.Password = file.Password
 	return saveDockerRegistryRequestDto
 }
 
