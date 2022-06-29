@@ -1,53 +1,71 @@
 package PipelineConfigRouter
 
 import (
-	"automation-suite/testUtils"
 	Base "automation-suite/testUtils"
 	"encoding/json"
+	"github.com/stretchr/testify/assert"
 	"log"
 	"math/rand"
-	"strings"
-
-	"github.com/stretchr/testify/assert"
+	"strconv"
+	"time"
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixedWithoutBuilds() {
 	config, _ := GetEnvironmentConfigPipelineConfigRouter()
-
-	createAppApiResponse := suite.createAppResponseDto.Result
+	log.Println("=== Here we are creating a App ===")
+	createAppApiResponse := Base.CreateApp(suite.authToken).Result
 	appId := createAppApiResponse.Id
-	createAppMaterialResponse := suite.createAppMaterialResponseDto.Result
 
-	requestPayloadForSaveAppCiPipeline := GetRequestPayloadForSaveAppCiPipeline(createAppApiResponse.Id, config.DockerRegistry, config.DockerRegistry+"/test", config.DockerfilePath, config.DockerfileRepository, config.DockerfileRelativePath, createAppMaterialResponse.Material[0].Id)
+	log.Println("=== Here we are creating App Material ===")
+	createAppMaterialRequestDto := GetAppMaterialRequestDto(appId, 1, false)
+	appMaterialByteValue, _ := json.Marshal(createAppMaterialRequestDto)
+	createAppMaterialResponse := HitCreateAppMaterialApi(appMaterialByteValue, appId, 1, false, suite.authToken).Result
+
+	log.Println("=== Here we are saving docker build config ===")
+	requestPayloadForSaveAppCiPipeline := GetRequestPayloadForSaveAppCiPipeline(appId, config.DockerRegistry, config.DockerRegistry+"/test", config.DockerfilePath, config.DockerfileRepository, config.DockerfileRelativePath, createAppMaterialResponse.Material[0].Id)
 	byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
-	log.Println("=== Hitting the SaveAppCiPipeline API ====")
 	HitSaveAppCiPipeline(byteValueOfSaveAppCiPipeline, suite.authToken)
+
+	log.Println("=== Here we are fetching latestChartReferenceId ===")
+	time.Sleep(2 * time.Second)
+	getChartReferenceResponse := HitGetChartReferenceViaAppId(strconv.Itoa(createAppApiResponse.Id), suite.authToken)
+	latestChartRef := getChartReferenceResponse.Result.LatestChartRef
+
+	log.Println("=== Here we are fetching Template using getAppTemplateAPI ===")
+	getTemplateResponse := HitGetTemplateViaAppIdAndChartRefId(strconv.Itoa(createAppApiResponse.Id), strconv.Itoa(latestChartRef), suite.authToken)
+
+	log.Println("=== Here we are fetching DefaultAppOverride from template response ===")
+	defaultAppOverride := getTemplateResponse.Result.GlobalConfig.DefaultAppOverride
+
+	log.Println("=== Here we are creating payload for SaveTemplate API ===")
+	saveDeploymentTemplate := GetRequestPayloadForSaveDeploymentTemplate(createAppApiResponse.Id, latestChartRef, defaultAppOverride)
+	byteValueOfSaveDeploymentTemplate, _ := json.Marshal(saveDeploymentTemplate)
+
+	log.Println("=== Here we are hitting SaveTemplate API ===")
+	HitSaveDeploymentTemplateApi(byteValueOfSaveDeploymentTemplate, suite.authToken)
 
 	log.Println("Fetching suggested ci pipeline name ")
 	fetchSuggestedCiPipelineName := HitGetPipelineSuggestedCiCd("ci", appId, suite.authToken)
+
 	log.Println("Fetching gitMaterialId ")
 	fetchAppGetResponseDto := HitGetMaterial(appId, suite.authToken)
 
-	log.Println("Retrieving request payload from file")
+	log.Println("Retrieving request payload for creating workflow from file")
 	createWorkflowRequestDto := getRequestPayloadForCreateWorkflow(false, "1", appId, 0)
-
 	createWorkflowRequestDto.CiPipeline.CiMaterial[0].GitMaterialId = fetchAppGetResponseDto.Result.Material[0].Id
 	createWorkflowRequestDto.CiPipeline.Name = fetchSuggestedCiPipelineName.Result
-	createWorkflowRequestDto.CiPipeline.CiMaterial[0].Source.Value = strings.ToLower(testUtils.GetRandomStringOfGivenLength(10))
+	createWorkflowRequestDto.CiPipeline.CiMaterial[0].Source.Value = "main"
 
 	suite.Run("A=1=CreateWorkflowBranchFixedWithoutBuilds", func() {
-
 		byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
 		log.Println("Hitting the Create Workflow Api with valid payload")
 		createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, suite.authToken)
 		log.Println("Validating the Create Workflow Api response with with valid payload")
 		assert.Equal(suite.T(), createWorkflowRequestDto.AppId, createWorkflowResponseDto.Result.AppId)
-		log.Println("Hitting get workflow details api")
-
-		wfId := createWorkflowResponseDto.Result.AppWorkflowId
-
-		DeleteWorkflow(appId, wfId, suite.authToken)
-
+		log.Println("=== Here we are Deleting the CI pipeline ===")
+		DeleteCiPipeline(appId, createWorkflowResponseDto.Result.CiPipelines[0].Id, suite.authToken)
+		log.Println("=== Here we are Deleting CI Workflow ===")
+		HitDeleteWorkflowApi(appId, createWorkflowResponseDto.Result.AppWorkflowId, suite.authToken)
 	})
 
 	/////////////////=== pre-build check with random task with scriptType SHELL====//////////////
@@ -75,12 +93,10 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PreBuildStage.Steps[i].InlineStepDetail.ScriptType, createWorkflowResponseDto.Result.CiPipelines[0].PreBuildStage.Steps[i].InlineStepDetail.ScriptType)
 		}
 		// after creation call /orchestrator/app/ci-pipeline/app-id/wf-id get for delete ci-pipeline
-		log.Println("Hitting get workflow details api")
-
-		wfId := createWorkflowResponseDto.Result.AppWorkflowId
-
-		DeleteWorkflow(appId, wfId, suite.authToken)
-
+		log.Println("=== Here we are Deleting the CI pipeline ===")
+		DeleteCiPipeline(appId, createWorkflowResponseDto.Result.CiPipelines[0].Id, suite.authToken)
+		log.Println("=== Here we are Deleting CI Workflow ===")
+		HitDeleteWorkflowApi(appId, createWorkflowResponseDto.Result.AppWorkflowId, suite.authToken)
 	})
 
 	/////////////////=== pre-build check with random task with scriptType CONTAINER_IMAGE====//////////////
@@ -105,9 +121,10 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PreBuildStage.Steps[i].Name, createWorkflowResponseDto.Result.CiPipelines[0].PreBuildStage.Steps[i].Name)
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PreBuildStage.Steps[i].InlineStepDetail.ScriptType, createWorkflowResponseDto.Result.CiPipelines[0].PreBuildStage.Steps[i].InlineStepDetail.ScriptType)
 		}
-		wfId := createWorkflowResponseDto.Result.AppWorkflowId
-
-		DeleteWorkflow(appId, wfId, suite.authToken)
+		log.Println("=== Here we are Deleting the CI pipeline ===")
+		DeleteCiPipeline(appId, createWorkflowResponseDto.Result.CiPipelines[0].Id, suite.authToken)
+		log.Println("=== Here we are Deleting CI Workflow ===")
+		HitDeleteWorkflowApi(appId, createWorkflowResponseDto.Result.AppWorkflowId, suite.authToken)
 	})
 
 	/////////////////=== pre-build check with random task with scriptType either SHELL or CONTAINER_IMAGE====//////////////
@@ -133,9 +150,10 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PreBuildStage.Steps[i].Name, createWorkflowResponseDto.Result.CiPipelines[0].PreBuildStage.Steps[i].Name)
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PreBuildStage.Steps[i].InlineStepDetail.ScriptType, createWorkflowResponseDto.Result.CiPipelines[0].PreBuildStage.Steps[i].InlineStepDetail.ScriptType)
 		}
-		wfId := createWorkflowResponseDto.Result.AppWorkflowId
-
-		DeleteWorkflow(appId, wfId, suite.authToken)
+		log.Println("=== Here we are Deleting the CI pipeline ===")
+		DeleteCiPipeline(appId, createWorkflowResponseDto.Result.CiPipelines[0].Id, suite.authToken)
+		log.Println("=== Here we are Deleting CI Workflow ===")
+		HitDeleteWorkflowApi(appId, createWorkflowResponseDto.Result.AppWorkflowId, suite.authToken)
 	})
 
 	/////////////////=== pre-build check with random task with scriptType SHELL with Input Variables====//////////////
@@ -166,9 +184,10 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 			}
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PreBuildStage.Steps[i].InlineStepDetail.InputVariables[4].Format, createWorkflowResponseDto.Result.CiPipelines[0].PreBuildStage.Steps[i].InlineStepDetail.InputVariables[4].Format)
 		}
-		wfId := createWorkflowResponseDto.Result.AppWorkflowId
-
-		DeleteWorkflow(appId, wfId, suite.authToken)
+		log.Println("=== Here we are Deleting the CI pipeline ===")
+		DeleteCiPipeline(appId, createWorkflowResponseDto.Result.CiPipelines[0].Id, suite.authToken)
+		log.Println("=== Here we are Deleting CI Workflow ===")
+		HitDeleteWorkflowApi(appId, createWorkflowResponseDto.Result.AppWorkflowId, suite.authToken)
 	})
 
 	/////////////////=== Post-build check with scriptType SHELL====//////////////
@@ -195,11 +214,11 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PostBuildStage.Steps[i].Name, createWorkflowResponseDto.Result.CiPipelines[0].PostBuildStage.Steps[i].Name)
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PostBuildStage.Steps[i].InlineStepDetail.ScriptType, createWorkflowResponseDto.Result.CiPipelines[0].PostBuildStage.Steps[i].InlineStepDetail.ScriptType)
 		}
-		wfId := createWorkflowResponseDto.Result.AppWorkflowId
-
-		DeleteWorkflow(appId, wfId, suite.authToken)
+		log.Println("=== Here we are Deleting the CI pipeline ===")
+		DeleteCiPipeline(appId, createWorkflowResponseDto.Result.CiPipelines[0].Id, suite.authToken)
+		log.Println("=== Here we are Deleting CI Workflow ===")
+		HitDeleteWorkflowApi(appId, createWorkflowResponseDto.Result.AppWorkflowId, suite.authToken)
 	})
-
 	/////////////////=== post-build check with random task with scriptType CONTAINER_IMAGE====//////////////
 
 	suite.Run("A=7=CreateWorkflowWithBranchFixedWithPostBuildScriptTypeContainerImage", func() {
@@ -224,9 +243,10 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PostBuildStage.Steps[i].Name, createWorkflowResponseDto.Result.CiPipelines[0].PostBuildStage.Steps[i].Name)
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PostBuildStage.Steps[i].InlineStepDetail.ScriptType, createWorkflowResponseDto.Result.CiPipelines[0].PostBuildStage.Steps[i].InlineStepDetail.ScriptType)
 		}
-		wfId := createWorkflowResponseDto.Result.AppWorkflowId
-
-		DeleteWorkflow(appId, wfId, suite.authToken)
+		log.Println("=== Here we are Deleting the CI pipeline ===")
+		DeleteCiPipeline(appId, createWorkflowResponseDto.Result.CiPipelines[0].Id, suite.authToken)
+		log.Println("=== Here we are Deleting CI Workflow ===")
+		HitDeleteWorkflowApi(appId, createWorkflowResponseDto.Result.AppWorkflowId, suite.authToken)
 	})
 
 	/////////////////=== post-build check with random task with scriptType either SHELL or CONTAINER_IMAGE====//////////////
@@ -254,10 +274,10 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PostBuildStage.Steps[i].Name, createWorkflowResponseDto.Result.CiPipelines[0].PostBuildStage.Steps[i].Name)
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PostBuildStage.Steps[i].InlineStepDetail.ScriptType, createWorkflowResponseDto.Result.CiPipelines[0].PostBuildStage.Steps[i].InlineStepDetail.ScriptType)
 		}
-
-		wfId := createWorkflowResponseDto.Result.AppWorkflowId
-
-		DeleteWorkflow(appId, wfId, suite.authToken)
+		log.Println("=== Here we are Deleting the CI pipeline ===")
+		DeleteCiPipeline(appId, createWorkflowResponseDto.Result.CiPipelines[0].Id, suite.authToken)
+		log.Println("=== Here we are Deleting CI Workflow ===")
+		HitDeleteWorkflowApi(appId, createWorkflowResponseDto.Result.AppWorkflowId, suite.authToken)
 	})
 
 	/////////////////=== post-build check with random task with scriptType SHELL with Input Variables====//////////////
@@ -289,12 +309,11 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 			}
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PostBuildStage.Steps[i].InlineStepDetail.InputVariables[4].Format, createWorkflowResponseDto.Result.CiPipelines[0].PostBuildStage.Steps[i].InlineStepDetail.InputVariables[4].Format)
 		}
-
-		wfId := createWorkflowResponseDto.Result.AppWorkflowId
-
-		DeleteWorkflow(appId, wfId, suite.authToken)
+		log.Println("=== Here we are Deleting the CI pipeline ===")
+		DeleteCiPipeline(appId, createWorkflowResponseDto.Result.CiPipelines[0].Id, suite.authToken)
+		log.Println("=== Here we are Deleting CI Workflow ===")
+		HitDeleteWorkflowApi(appId, createWorkflowResponseDto.Result.AppWorkflowId, suite.authToken)
 	})
-
 	/////////////////=== pre-build check with random task with variable conditions====//////////////
 	suite.Run("A=10=CreateWorkflowBranchFixedPreBuildWithVariableConditions", func() {
 
@@ -325,10 +344,10 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 			}
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PreBuildStage.Steps[i].InlineStepDetail.InputVariables[4].Format, createWorkflowResponseDto.Result.CiPipelines[0].PreBuildStage.Steps[i].InlineStepDetail.InputVariables[4].Format)
 		}
-
-		wfId := createWorkflowResponseDto.Result.AppWorkflowId
-
-		DeleteWorkflow(appId, wfId, suite.authToken)
+		log.Println("=== Here we are Deleting the CI pipeline ===")
+		DeleteCiPipeline(appId, createWorkflowResponseDto.Result.CiPipelines[0].Id, suite.authToken)
+		log.Println("=== Here we are Deleting CI Workflow ===")
+		HitDeleteWorkflowApi(appId, createWorkflowResponseDto.Result.AppWorkflowId, suite.authToken)
 	})
 
 	/////////////////=== post-build check with random task with variable conditions====//////////////
@@ -358,9 +377,10 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 			}
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PostBuildStage.Steps[i].InlineStepDetail.InputVariables[4].Format, createWorkflowResponseDto.Result.CiPipelines[0].PostBuildStage.Steps[i].InlineStepDetail.InputVariables[4].Format)
 		}
-		wfId := createWorkflowResponseDto.Result.AppWorkflowId
-
-		DeleteWorkflow(appId, wfId, suite.authToken)
+		log.Println("=== Here we are Deleting the CI pipeline ===")
+		DeleteCiPipeline(appId, createWorkflowResponseDto.Result.CiPipelines[0].Id, suite.authToken)
+		log.Println("=== Here we are Deleting CI Workflow ===")
+		HitDeleteWorkflowApi(appId, createWorkflowResponseDto.Result.AppWorkflowId, suite.authToken)
 	})
 
 	suite.Run("A=12=CreateWorkflowPreBuildOutoutDirectory", func() {
@@ -382,9 +402,10 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 		for i = 0; i < numberOfTasks; i++ {
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PreBuildStage.Steps[i].OutputDirectoryPath, createWorkflowResponseDto.Result.CiPipelines[0].PreBuildStage.Steps[i].OutputDirectoryPath)
 		}
-		wfId := createWorkflowResponseDto.Result.AppWorkflowId
-
-		DeleteWorkflow(appId, wfId, suite.authToken)
+		log.Println("=== Here we are Deleting the CI pipeline ===")
+		DeleteCiPipeline(appId, createWorkflowResponseDto.Result.CiPipelines[0].Id, suite.authToken)
+		log.Println("=== Here we are Deleting CI Workflow ===")
+		HitDeleteWorkflowApi(appId, createWorkflowResponseDto.Result.AppWorkflowId, suite.authToken)
 	})
 	suite.Run("A=13=CreateWorkflowPostBuildOutoutDirectory", func() {
 
@@ -407,21 +428,20 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 		for i = 0; i < numberOfTasks; i++ {
 			assert.Equal(suite.T(), createWorkflowRequestDto.CiPipeline.PostBuildStage.Steps[i].OutputDirectoryPath, createWorkflowResponseDto.Result.CiPipelines[0].PostBuildStage.Steps[i].OutputDirectoryPath)
 		}
-
-		wfId := createWorkflowResponseDto.Result.AppWorkflowId
-
-		DeleteWorkflow(appId, wfId, suite.authToken)
+		log.Println("=== Here we are Deleting the CI pipeline ===")
+		DeleteCiPipeline(appId, createWorkflowResponseDto.Result.CiPipelines[0].Id, suite.authToken)
+		log.Println("=== Here we are Deleting CI Workflow ===")
+		HitDeleteWorkflowApi(appId, createWorkflowResponseDto.Result.AppWorkflowId, suite.authToken)
 	})
 
 	suite.Run("A=14=CreateWorkflowWithFullPayload", func() {
 		createWorkflowResponseDto := HitCreateWorkflowApiWithFullPayload(appId, suite.authToken)
-
 		log.Println("Validating pre-build request payload")
 		assert.Equal(suite.T(), appId, createWorkflowResponseDto.Result.AppId)
-
-		wfId := createWorkflowResponseDto.Result.AppWorkflowId
-
-		DeleteWorkflow(appId, wfId, suite.authToken)
+		log.Println("=== Here we are Deleting the CI pipeline ===")
+		DeleteCiPipeline(appId, createWorkflowResponseDto.Result.CiPipelines[0].Id, suite.authToken)
+		log.Println("=== Here we are Deleting CI Workflow ===")
+		HitDeleteWorkflowApi(appId, createWorkflowResponseDto.Result.AppWorkflowId, suite.authToken)
 	})
 
 	//todo disabling this test case as we are not deleting test data for this test case ,will handle the deletion of data and enable this
@@ -445,7 +465,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 		wfId := createWorkflowResponseDto.Result.AppWorkflowId
 
-		DeleteWorkflow(appId, wfId, suite.authToken)
+		DeleteCiPipeline(appId, wfId, suite.authToken)
 
 		log.Println("getting payload for Delete material API")
 		byteValueOfDeleteApp := GetPayLoadForDeleteAppMaterialAPI(createAppMaterialResponseDto.Result.AppId, createAppMaterialResponseDto.Result.Material[0])
@@ -453,6 +473,6 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 		HitDeleteAppMaterialApi(byteValueOfDeleteApp, suite.authToken)
 
 	})*/
-
+	log.Println("=== Here we are Deleting app after verification of flow ===")
 	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 }

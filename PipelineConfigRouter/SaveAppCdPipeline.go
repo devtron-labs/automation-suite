@@ -107,11 +107,11 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassB7SaveCdPipeline() {
 		savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
 		assert.Equal(suite.T(), "pg: no rows in result set", savePipelineResponse.Errors[0].UserMessage)
 	})
-
-	log.Println("=== Here we are Deleting the Test CI pipeline ===")
-	DeleteWorkflow(createAppApiResponse.Id, workflowResponse.CiPipelines[0].Id, suite.authToken)
-
-	log.Println("=== Here we are Deleting the Test data created after verification ===")
+	log.Println("=== Here we are Deleting the CI pipeline ===")
+	DeleteCiPipeline(createAppApiResponse.Id, workflowResponse.CiPipelines[0].Id, suite.authToken)
+	log.Println("=== Here we are Deleting CI Workflow ===")
+	HitDeleteWorkflowApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, suite.authToken)
+	log.Println("=== Here we Deleting the Test data created after verification ===")
 	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 }
 

@@ -51,7 +51,10 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC8GetWorkflows() {
 		assert.Equal(suite.T(), "pg: no rows in result set", fetchAllAppWorkflowResponseDto.Error[0].UserMessage)
 	})
 
-	wfId := createWorkflowResponseDto.Result.AppWorkflowId
-	DeleteWorkflow(appId, wfId, suite.authToken)
+	log.Println("=== Here we are Deleting the CI pipeline ===")
+	DeleteCiPipeline(createAppApiResponse.Id, createWorkflowResponseDto.Result.CiPipelines[0].Id, suite.authToken)
+	log.Println("=== Here we are Deleting CI Workflow ===")
+	HitDeleteWorkflowApi(createAppApiResponse.Id, createWorkflowResponseDto.Result.AppWorkflowId, suite.authToken)
+	log.Println("=== Here we Deleting the Test data created after verification ===")
 	Base.DeleteApp(appId, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 }

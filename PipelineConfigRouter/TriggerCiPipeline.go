@@ -118,8 +118,9 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 	HitForceDeleteCdPipelineApi(deletePipelineByteCode, suite.authToken)
 
 	log.Println("=== Here we are Deleting the CI pipeline ===")
-	DeleteWorkflow(createAppApiResponse.Id, workflowResponse.CiPipelines[0].Id, suite.authToken)
-
+	DeleteCiPipeline(createAppApiResponse.Id, workflowResponse.CiPipelines[0].Id, suite.authToken)
+	log.Println("=== Here we are Deleting CI Workflow ===")
+	HitDeleteWorkflowApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, suite.authToken)
 	log.Println("=== Here we are Deleting the app after all verifications ===")
 	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 }

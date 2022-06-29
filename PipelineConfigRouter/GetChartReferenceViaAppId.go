@@ -6,8 +6,8 @@ import (
 	"strconv"
 )
 
-// TestClass5GetChartReference todo need to add one more test case  for ValidAppIdAfterSavingTemplate
-// TestClass5GetChartReference todo need to add test case of invalid App Id as well once issue fixed from dev side
+// TestClassA7GetChartReference todo need to add one more test case  for ValidAppIdAfterSavingTemplate
+// TestClassA7GetChartReference todo need to add test case of invalid App Id as well once issue fixed from dev side
 func (suite *PipelinesConfigRouterTestSuite) TestClassA7GetChartReference() {
 	createAppApiResponse := suite.createAppResponseDto.Result
 	appId := strconv.Itoa(createAppApiResponse.Id)

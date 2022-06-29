@@ -641,7 +641,7 @@ func HitCreateWorkflowApi(payload []byte, authToken string) ResponseDTOs.CreateW
 	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), CreateWorkflowApi)
 	return pipelineConfigRouter.createWorkflowResponseDto
 }
-func worflowTypeProvider(temp string) string {
+func workflowTypeProvider(temp string) string {
 	var str string
 	switch temp {
 	case "1":
@@ -662,7 +662,7 @@ func getRequestPayloadForCreateWorkflow(forDelete bool, wfTypeId string, appId i
 		createWorkflowRequestDto.Action = 2
 		return createWorkflowRequestDto
 	}
-	wfTypeStr := worflowTypeProvider(wfTypeId)
+	wfTypeStr := workflowTypeProvider(wfTypeId)
 	var CiMaterial RequestDTOs.CiMaterial
 	CiMaterial.Source.Type = wfTypeStr
 	createWorkflowRequestDto.CiPipeline.Active = true
@@ -680,7 +680,6 @@ func HitGetWorkflowDetailsApi(appId int, wfId int, authToken string) RequestDTOs
 func HitDeleteWorkflowApi(appId int, wfId int, authToken string) DeleteResponseDto {
 	resp, err := Base.MakeApiCall(GetWorkflowApiUrl+strconv.Itoa(appId)+"/"+strconv.Itoa(wfId), http.MethodDelete, "", nil, authToken)
 	Base.HandleError(err, DeleteAppApi)
-
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
 	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), DeleteAppApi)
 	return pipelineConfigRouter.deleteResponseDto
@@ -840,21 +839,17 @@ func HitCreateWorkflowApiWithFullPayload(appId int, authToken string) ResponseDT
 	createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, authToken)
 	return createWorkflowResponseDto
 }
-func DeleteWorkflow(appId int, wfId int, authToken string) {
-	getWorkflowDetailsResponseDto := HitGetWorkflowDetailsApi(appId, wfId, authToken)
-	log.Println("Validating get workflow details api")
-	log.Println("Getting data for delete ci-pipeline")
 
-	deleteCiPipelineRequestDto := getRequestPayloadForCreateWorkflow(true, "1", appId, wfId)
+func DeleteCiPipeline(appId int, ciPipelineId int, authToken string) {
+	getWorkflowDetailsResponseDto := HitGetWorkflowDetailsApi(appId, ciPipelineId, authToken)
+	log.Println("Getting data for delete ci-pipeline")
+	deleteCiPipelineRequestDto := getRequestPayloadForCreateWorkflow(true, "1", appId, ciPipelineId)
 	deleteCiPipelineRequestDto.CiPipeline = getWorkflowDetailsResponseDto.Result
 	log.Println("Removing the data created via ci-pipeline API")
 	byteValueOfDeleteCiPipeline, _ := json.Marshal(deleteCiPipelineRequestDto)
-
 	log.Println("Hitting the Create Workflow Api with action=2 for delete ci-pipeline")
 	HitCreateWorkflowApi(byteValueOfDeleteCiPipeline, authToken)
-
 	log.Println("Deleting workflow")
-	HitDeleteWorkflowApi(appId, wfId, authToken)
 	return
 }
 

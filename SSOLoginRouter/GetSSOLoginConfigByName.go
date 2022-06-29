@@ -25,6 +25,7 @@ import (
 func (suite *SSOLoginTestSuite) TestClass1GetSsoLoginConfig() {
 	envConfig := Base.ReadBaseEnvConfig()
 	baseCredentials := Base.ReadAnyJsonFile(envConfig.BaseCredentialsFile)
+	classCredentials := Base.ReadAnyJsonFile(envConfig.BaseCredentialsFile)
 	suite.Run("A=1=SsoLoginConfigWithCorrectName", func() {
 		queryParams := map[string]string{"name": "google"}
 		log.Println("Hitting the Get SSO login config by Name API")
@@ -32,7 +33,7 @@ func (suite *SSOLoginTestSuite) TestClass1GetSsoLoginConfig() {
 
 		log.Println("Asserting the API Response...")
 		assert.Equal(suite.T(), baseCredentials.BaseServerUrl+"/orchestrator", actualSSODetailsResponse.CreateSSODetailsRequestDto.Url)
-		assert.Equal(suite.T(), baseCredentials.SSOClientSecret, actualSSODetailsResponse.CreateSSODetailsRequestDto.Config.Config.ClientSecret)
+		assert.Equal(suite.T(), classCredentials.SSOClientSecret, actualSSODetailsResponse.CreateSSODetailsRequestDto.Config.Config.ClientSecret)
 		assert.Equal(suite.T(), baseCredentials.BaseServerUrl+"/orchestrator/api/dex/callback", actualSSODetailsResponse.CreateSSODetailsRequestDto.Config.Config.RedirectURI)
 
 	})

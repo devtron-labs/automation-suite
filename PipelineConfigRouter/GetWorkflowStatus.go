@@ -70,7 +70,6 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD1GetWorkflowStatus() {
 	suite.Run("A=1=GetWorkflowStatusWithoutTriggering", func() {
 		workflowStatus := HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
 		assert.Equal(suite.T(), "Not Triggered", workflowStatus.Result.CiWorkflowStatus[0].CiStatus)
-		assert.Equal(suite.T(), workflowResponse.AppWorkflowId, workflowStatus.Result.CiWorkflowStatus[0].CiPipelineId)
 		assert.Equal(suite.T(), "Not Triggered", workflowStatus.Result.CdWorkflowStatus[0].PreStatus)
 		assert.Equal(suite.T(), "Not Deployed", workflowStatus.Result.CdWorkflowStatus[0].DeployStatus)
 		assert.Equal(suite.T(), savePipelineResponse.Result.Pipelines[0].Id, workflowStatus.Result.CdWorkflowStatus[0].PipelineId)
@@ -89,9 +88,10 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD1GetWorkflowStatus() {
 	HitForceDeleteCdPipelineApi(deletePipelineByteCode, suite.authToken)
 
 	log.Println("=== Here we are Deleting the CI pipeline ===")
-	DeleteWorkflow(createAppApiResponse.Id, workflowResponse.CiPipelines[0].Id, suite.authToken)
-
-	log.Println("=== Here we are Deleting the app after all verifications ===")
+	DeleteCiPipeline(createAppApiResponse.Id, workflowResponse.CiPipelines[0].Id, suite.authToken)
+	log.Println("=== Here we are Deleting CI Workflow ===")
+	HitDeleteWorkflowApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, suite.authToken)
+	log.Println("=== Here we Deleting the Test data created after verification ===")
 	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 }
 
