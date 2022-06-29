@@ -12,9 +12,10 @@ import (
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixedWithoutBuilds() {
-	appId := suite.createAppResponseDto.Result.Id
 	config, _ := GetEnvironmentConfigPipelineConfigRouter()
+
 	createAppApiResponse := suite.createAppResponseDto.Result
+	appId := createAppApiResponse.Id
 	createAppMaterialResponse := suite.createAppMaterialResponseDto.Result
 
 	requestPayloadForSaveAppCiPipeline := GetRequestPayloadForSaveAppCiPipeline(createAppApiResponse.Id, config.DockerRegistry, config.DockerRegistry+"/test", config.DockerfilePath, config.DockerfileRepository, config.DockerfileRelativePath, createAppMaterialResponse.Material[0].Id)
@@ -423,7 +424,9 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 		DeleteWorkflow(appId, wfId, suite.authToken)
 	})
 
-	suite.Run("A=15=CreateWorkflowWithTwoMaterials", func() {
+	//todo disabling this test case as we are not deleting test data for this test case ,will handle the deletion of data and enable this
+
+	/*suite.Run("A=15=CreateWorkflowWithTwoMaterials", func() {
 		createAppMaterialRequestDto := GetAppMaterialRequestDto(appId, 1, false)
 
 		secondBranchValue := "./repo-two"
@@ -449,7 +452,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 		log.Println("Hitting the Delete material API for Removing the data created via automation")
 		HitDeleteAppMaterialApi(byteValueOfDeleteApp, suite.authToken)
 
-	})
-	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
+	})*/
 
+	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 }

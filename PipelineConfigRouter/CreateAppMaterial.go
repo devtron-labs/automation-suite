@@ -8,7 +8,10 @@ import (
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassA2CreateMaterial() {
-	appId := suite.CreateApp().Result.Id
+	log.Println("=== Here we are creating a App ===")
+	createAppApiResponse := Base.CreateApp(suite.authToken).Result
+	appId := createAppApiResponse.Id
+
 	suite.Run("A=1=CreateAppMaterialWithValidPayloadAndFetchSubmodulesFalse", func() {
 		createAppMaterialRequestDto := GetAppMaterialRequestDto(appId, 1, false)
 		byteValueOfStruct2, _ := json.Marshal(createAppMaterialRequestDto)
@@ -75,6 +78,12 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA2CreateMaterial() {
 		assert.Equal(suite.T(), "Key: 'CreateMaterialDTO.Material[0].CheckoutPath' Error:Field validation for 'CheckoutPath' failed on the 'checkout-path-component' tag", createAppMaterialResponseDto.Errors[0].UserMessage)
 
 	})
+
+	log.Println("getting payload for Delete Team API")
+	byteValueOfDeleteApp := GetPayLoadForDeleteAppAPI(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId)
+
+	log.Println("Hitting the Delete team API for Removing the data created via automation")
+	HitDeleteAppApi(byteValueOfDeleteApp, createAppApiResponse.Id, suite.authToken)
 
 	// add testcase for ./path
 }

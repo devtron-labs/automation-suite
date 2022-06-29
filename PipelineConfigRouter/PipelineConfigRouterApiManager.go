@@ -4,17 +4,16 @@ import (
 	"automation-suite/PipelineConfigRouter/RequestDTOs"
 	"automation-suite/PipelineConfigRouter/ResponseDTOs"
 	"os"
+	"strings"
 
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"errors"
+	"github.com/caarlos0/env"
+	"github.com/stretchr/testify/suite"
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
-
-	"github.com/caarlos0/env"
-	"github.com/stretchr/testify/suite"
 )
 
 type DeleteResponseDto struct {
@@ -611,19 +610,19 @@ func (suite *PipelinesConfigRouterTestSuite) SetupSuite() {
 	suite.createAppMaterialResponseDto = suite.CreateAppMaterial()
 }
 
+func (suite *PipelinesConfigRouterTestSuite) CreateAppMaterial() CreateAppMaterialResponseDto {
+	createAppMaterialRequestDto := GetAppMaterialRequestDto(suite.createAppResponseDto.Result.Id, 1, false)
+	appMaterialByteValue, _ := json.Marshal(createAppMaterialRequestDto)
+	createAppMaterialResponseDto := HitCreateAppMaterialApi(appMaterialByteValue, suite.createAppResponseDto.Result.Id, 1, false, suite.authToken)
+	return createAppMaterialResponseDto
+}
+
 func (suite *PipelinesConfigRouterTestSuite) CreateApp() CreateAppResponseDto {
 	appName := strings.ToLower(Base.GetRandomStringOfGivenLength(10))
 	createAppRequestDto := GetAppRequestDto("app"+appName, 1, 0)
 	byteValueOfCreateApp, _ := json.Marshal(createAppRequestDto)
 	createAppResponseDto := HitCreateAppApi(byteValueOfCreateApp, "app"+appName, 1, 0, suite.authToken)
 	return createAppResponseDto
-}
-
-func (suite *PipelinesConfigRouterTestSuite) CreateAppMaterial() CreateAppMaterialResponseDto {
-	createAppMaterialRequestDto := GetAppMaterialRequestDto(suite.createAppResponseDto.Result.Id, 1, false)
-	appMaterialByteValue, _ := json.Marshal(createAppMaterialRequestDto)
-	createAppMaterialResponseDto := HitCreateAppMaterialApi(appMaterialByteValue, suite.createAppResponseDto.Result.Id, 1, false, suite.authToken)
-	return createAppMaterialResponseDto
 }
 
 func (suite *PipelinesConfigRouterTestSuite) TearDownSuite() {
@@ -671,7 +670,7 @@ func getRequestPayloadForCreateWorkflow(forDelete bool, wfTypeId string, appId i
 	createWorkflowRequestDto.CiPipeline.CiMaterial = append(createWorkflowRequestDto.CiPipeline.CiMaterial, CiMaterial)
 	return createWorkflowRequestDto
 }
-func HitGetWorkflowGetailsApi(appId int, wfId int, authToken string) RequestDTOs.GetWorkflowDetails {
+func HitGetWorkflowDetailsApi(appId int, wfId int, authToken string) RequestDTOs.GetWorkflowDetails {
 	resp, err := Base.MakeApiCall(GetCiPipelineViaIdApiUrl+strconv.Itoa(appId)+"/"+strconv.Itoa(wfId), http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, GetWorkflowDetailsApi)
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
@@ -842,7 +841,7 @@ func HitCreateWorkflowApiWithFullPayload(appId int, authToken string) ResponseDT
 	return createWorkflowResponseDto
 }
 func DeleteWorkflow(appId int, wfId int, authToken string) {
-	getWorkflowDetailsResponseDto := HitGetWorkflowGetailsApi(appId, wfId, authToken)
+	getWorkflowDetailsResponseDto := HitGetWorkflowDetailsApi(appId, wfId, authToken)
 	log.Println("Validating get workflow details api")
 	log.Println("Getting data for delete ci-pipeline")
 

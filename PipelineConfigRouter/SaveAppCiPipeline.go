@@ -2,6 +2,7 @@ package PipelineConfigRouter
 
 import (
 	"automation-suite/testUtils"
+	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"log"
@@ -9,8 +10,13 @@ import (
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassA3SaveAppCiPipeline() {
 	config, _ := GetEnvironmentConfigPipelineConfigRouter()
-	createAppApiResponse := suite.createAppResponseDto.Result
-	createAppMaterialResponse := suite.createAppMaterialResponseDto.Result
+	log.Println("=== Here we are creating a App ===")
+	createAppApiResponse := Base.CreateApp(suite.authToken).Result
+
+	log.Println("=== Here we are creating App Material ===")
+	createAppMaterialRequestDto := GetAppMaterialRequestDto(createAppApiResponse.Id, 1, false)
+	appMaterialByteValue, _ := json.Marshal(createAppMaterialRequestDto)
+	createAppMaterialResponse := HitCreateAppMaterialApi(appMaterialByteValue, createAppApiResponse.Id, 1, false, suite.authToken).Result
 
 	suite.Run("A=1=SaveAppCiPipelineWithValidPayload", func() {
 		requestPayloadForSaveAppCiPipeline := GetRequestPayloadForSaveAppCiPipeline(createAppApiResponse.Id, config.DockerRegistry, config.DockerRegistry+"/test", config.DockerfilePath, config.DockerfileRepository, config.DockerfileRelativePath, createAppMaterialResponse.Material[0].Id)
@@ -45,4 +51,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA3SaveAppCiPipeline() {
 		saveAppCiPipelineResponse := HitSaveAppCiPipeline(byteValueOfSaveAppCiPipeline, suite.authToken)
 		assert.Equal(suite.T(), saveAppCiPipelineResponse.Errors[0].UserMessage, "pg: no rows in result set")
 	})
+	
+	log.Println("=== Here we are Deleting the Test data created after verification ===")
+	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 }

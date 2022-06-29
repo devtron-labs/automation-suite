@@ -7,12 +7,12 @@ import (
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassA6GetApp() {
-	appId := suite.createAppResponseDto.Result.Id
+	createAppApiResponse := Base.CreateApp(suite.authToken).Result
 
 	suite.Run("A=1=FetchAppWithValidAppId", func() {
-		fetchAppGetResponseDto := HitGetMaterial(appId, suite.authToken)
+		fetchAppGetResponseDto := HitGetMaterial(createAppApiResponse.Id, suite.authToken)
 		log.Println("Validating the response of FetchAllLink API")
-		assert.Equal(suite.T(), appId, fetchAppGetResponseDto.Result.Id)
+		assert.Equal(suite.T(), createAppApiResponse.Id, fetchAppGetResponseDto.Result.Id)
 
 	})
 	suite.Run("A=2=FetchAppWithInvalidAppId", func() {
@@ -22,4 +22,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA6GetApp() {
 		assert.Equal(suite.T(), "pg: no rows in result set", fetchAppGetResponseDto.Errors[0].UserMessage)
 
 	})
+
+	log.Println("=== Here we are Deleting the Test data created after verification ===")
+	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 }
