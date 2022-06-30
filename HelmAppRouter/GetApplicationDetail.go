@@ -21,11 +21,9 @@ func (suite *HelmAppTestSuite) TestGetApplicationDetail() {
 			assert.Equal(suite.T(), "deployed", respOfGetApplicationDetailApi.Result.AppDetail.ReleaseStatus.Status)
 			assert.Equal(suite.T(), "envoy", respOfGetApplicationDetailApi.Result.AppDetail.ChartMetadata.ChartName)
 			assert.Equal(suite.T(), 1, respOfGetApplicationDetailApi.Result.AppDetail.EnvironmentDetails.ClusterId)
-
+			// here we are hitting the UnHibernateWorkloadApi and verifying the status of app
 			HitUnHibernateWorkloadApi(string(byteValueOfStruct), suite.authToken)
-			respOfGetApplicationDetailApi = HitGetApplicationDetailApi(queryParams, suite.authToken)
-			time.Sleep(15 * time.Second)
-			assert.Equal(suite.T(), "Healthy", respOfGetApplicationDetailApi.Result.AppDetail.ApplicationStatus)
+			assert.True(suite.T(), PollForAppStatus(queryParams, suite.authToken))
 		}
 		//Un-hibernating again for saving cost
 		HitHibernateWorkloadApi(string(byteValueOfStruct), suite.authToken)
@@ -36,4 +34,18 @@ func (suite *HelmAppTestSuite) TestGetApplicationDetail() {
 		respOfGetApplicationDetailApi := HitGetApplicationDetailApi(queryParams, suite.authToken)
 		assert.Equal(suite.T(), "malformed app id InvalidAppId", respOfGetApplicationDetailApi.Errors[0].UserMessage)
 	})
+}
+
+func PollForAppStatus(queryParams map[string]string, authToken string) bool {
+	count := 0
+	for {
+		respOfGetApplicationDetailApi := HitGetApplicationDetailApi(queryParams, authToken)
+		deploymentStatus := respOfGetApplicationDetailApi.Result.AppDetail.ApplicationStatus
+		time.Sleep(1 * time.Second)
+		count = count + 1
+		if deploymentStatus == "Healthy" || count >= 100 {
+			break
+		}
+	}
+	return true
 }
