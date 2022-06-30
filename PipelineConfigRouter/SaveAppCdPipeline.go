@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"log"
 	"strconv"
+	"time"
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassB7SaveCdPipeline() {
@@ -43,7 +44,6 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassB7SaveCdPipeline() {
 	HitSaveDeploymentTemplateApi(byteValueOfSaveDeploymentTemplate, suite.authToken)
 
 	log.Println("=== Here we are saving Global Configmap ===")
-
 	requestPayloadForConfigMap := HelperRouter.GetRequestPayloadForSecretOrConfig(0, "-config1", createAppApiResponse.Id, "environment", "kubernetes", false, false, false)
 	byteValueOfSaverConfigMap, _ := json.Marshal(requestPayloadForConfigMap)
 	globalConfigMap := HelperRouter.HitSaveGlobalConfigMap(byteValueOfSaverConfigMap, suite.authToken)
@@ -56,7 +56,6 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassB7SaveCdPipeline() {
 
 	log.Println("=== Here we are saving workflow with Pre/Post CI ===")
 	workflowResponse := HitCreateWorkflowApiWithFullPayload(createAppApiResponse.Id, suite.authToken).Result
-
 	preStageScript, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/PipeLineConfigRouter/preStageScript.txt")
 	postStageScript, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/PipeLineConfigRouter/postStageScript.txt")
 
@@ -64,11 +63,11 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassB7SaveCdPipeline() {
 		payload := getRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Automatic, string(preStageScript), string(postStageScript), Automatic)
 		bytePayload, _ := json.Marshal(payload)
 		savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
+		time.Sleep(1 * time.Second)
 		assert.Equal(suite.T(), Automatic, savePipelineResponse.Result.Pipelines[0].TriggerType)
 		assert.Equal(suite.T(), payload.Pipelines[0].Strategies, savePipelineResponse.Result.Pipelines[0].Strategies)
 		assert.Equal(suite.T(), payload.Pipelines[0].PostStage.Config, savePipelineResponse.Result.Pipelines[0].PostStage.Config)
 		assert.Equal(suite.T(), payload.Pipelines[0].PostStageConfigMapSecretNames, savePipelineResponse.Result.Pipelines[0].PostStageConfigMapSecretNames)
-
 		deletePipelinePayload := GetPayloadForDeleteCdPipeline(createAppApiResponse.Id, savePipelineResponse.Result.Pipelines[0].Id)
 		deletePipelineByteCode, _ := json.Marshal(deletePipelinePayload)
 		HitForceDeleteCdPipelineApi(deletePipelineByteCode, suite.authToken)
@@ -78,6 +77,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassB7SaveCdPipeline() {
 		payload := getRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Automatic, string(preStageScript), string(postStageScript), Manual)
 		bytePayload, _ := json.Marshal(payload)
 		savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
+		time.Sleep(1 * time.Second)
 		assert.Equal(suite.T(), Manual, savePipelineResponse.Result.Pipelines[0].TriggerType)
 		assert.Equal(suite.T(), payload.Pipelines[0].Strategies, savePipelineResponse.Result.Pipelines[0].Strategies)
 		assert.Equal(suite.T(), payload.Pipelines[0].PostStage.Config, savePipelineResponse.Result.Pipelines[0].PostStage.Config)
@@ -92,6 +92,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassB7SaveCdPipeline() {
 		payload := getRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Manual, string(preStageScript), string(postStageScript), Manual)
 		bytePayload, _ := json.Marshal(payload)
 		savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
+		time.Sleep(1 * time.Second)
 		assert.Equal(suite.T(), Manual, savePipelineResponse.Result.Pipelines[0].TriggerType)
 		assert.Equal(suite.T(), Manual, savePipelineResponse.Result.Pipelines[0].PostStage.TriggerType)
 		assert.Equal(suite.T(), Manual, savePipelineResponse.Result.Pipelines[0].PreStage.TriggerType)
@@ -105,6 +106,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassB7SaveCdPipeline() {
 		payload := getRequestPayloadForSaveCdPipelineApi(Base.GetRandomNumberOf9Digit(), workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Manual, string(preStageScript), string(postStageScript), Manual)
 		bytePayload, _ := json.Marshal(payload)
 		savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
+		time.Sleep(1 * time.Second)
 		assert.Equal(suite.T(), "pg: no rows in result set", savePipelineResponse.Errors[0].UserMessage)
 	})
 	log.Println("=== Here we are Deleting the CI pipeline ===")

@@ -66,6 +66,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 	payload := getRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Automatic, string(preStageScript), string(postStageScript), Automatic)
 	bytePayload, _ := json.Marshal(payload)
 	savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
+	time.Sleep(1 * time.Second)
 
 	log.Println("=== Here we are getting pipeline material ===")
 	pipelineMaterial := HitGetCiPipelineMaterial(workflowResponse.CiPipelines[0].Id, suite.authToken)
@@ -81,8 +82,8 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 		time.Sleep(10 * time.Second)
 		workflowStatus := HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
 		assert.Equal(suite.T(), "Running", workflowStatus.Result.CiWorkflowStatus[0].CiStatus)
-		log.Println("=== Here we are getting workflow after 5 minutes of triggering ===")
-		time.Sleep(300 * time.Second)
+		log.Println("=== Here we are getting workflow and verifying the status after triggering via poll function ===")
+		assert.True(suite.T(), PollForGettingAppStatusAfterTrigger(createAppApiResponse.Id, suite.authToken))
 		updatedWorkflowStatus := HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
 		assert.Equal(suite.T(), "Succeeded", updatedWorkflowStatus.Result.CiWorkflowStatus[0].CiStatus)
 		assert.Equal(suite.T(), "Healthy", updatedWorkflowStatus.Result.CdWorkflowStatus[0].DeployStatus)
@@ -123,4 +124,18 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 	HitDeleteWorkflowApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, suite.authToken)
 	log.Println("=== Here we are Deleting the app after all verifications ===")
 	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
+}
+
+func PollForGettingAppStatusAfterTrigger(id int, authToken string) bool {
+	count := 0
+	for {
+		updatedWorkflowStatus := HitGetWorkflowStatus(id, authToken)
+		deploymentStatus := updatedWorkflowStatus.Result.CiWorkflowStatus[0].CiStatus
+		time.Sleep(1 * time.Second)
+		count = count + 1
+		if deploymentStatus == "Succeeded" || count >= 350 {
+			break
+		}
+	}
+	return true
 }
