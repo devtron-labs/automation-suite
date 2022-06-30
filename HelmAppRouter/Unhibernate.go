@@ -20,10 +20,11 @@ func (suite *HelmAppTestSuite) TestUnHibernateWorkloadApi() {
 			time.Sleep(15 * time.Second)
 			//Again UnHibernating and verifying the response
 			HitUnHibernateWorkloadApi(string(byteValueOfStruct), suite.authToken)
-			time.Sleep(15 * time.Second)
+			assert.Equal(suite.T(), "object is already scaled up", resp.Result[0].ErrorMessage)
+		} else {
 			assert.Equal(suite.T(), "", resp.Result[0].ErrorMessage)
-			assert.True(suite.T(), resp.Result[0].Success)
 		}
+		HitHibernateWorkloadApi(string(byteValueOfStruct), suite.authToken)
 	})
 
 	suite.Run("A=2=UnHibernateWithValidArgs", func() {

@@ -23,9 +23,9 @@ func (suite *HelmAppTestSuite) TestHibernateWorkloadApi() {
 			time.Sleep(15 * time.Second)
 			//Again Hibernating and verifying the response
 			HitHibernateWorkloadApi(string(byteValueOfStruct), suite.authToken)
-			time.Sleep(15 * time.Second)
+			assert.Equal(suite.T(), "object is already scaled down", resp.Result[0].ErrorMessage)
+		} else {
 			assert.Equal(suite.T(), "", resp.Result[0].ErrorMessage)
-			assert.True(suite.T(), resp.Result[0].Success)
 		}
 	})
 
