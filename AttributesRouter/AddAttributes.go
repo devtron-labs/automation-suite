@@ -7,16 +7,17 @@ import (
 )
 
 func (suite *AttributeRouterTestSuite) TestClassA1AddAttributes() {
-	fileData := Base.ReadAnyJsonFile("../testUtils/credentials.json")
-	attributesDTO := GetPayloadForAddAttributes(fileData.BaseServerUrl)
+	envConfig := Base.ReadBaseEnvConfig()
+	baseCredentials := Base.ReadAnyJsonFile(envConfig.BaseCredentialsFile)
+	attributesDTO := GetPayloadForAddAttributes(baseCredentials.BaseServerUrl)
 	attributesBytePayload, _ := json.Marshal(attributesDTO)
 
 	suite.Run("A=1=AddAttributesWithValidPayload", func() {
 		ApiResp := HitAddAttributesApi(attributesBytePayload, suite.authToken)
-		assert.Equal(suite.T(), fileData.BaseServerUrl, ApiResp.Result.Value)
+		assert.Equal(suite.T(), baseCredentials.BaseServerUrl, ApiResp.Result.Value)
 		queryParams := map[string]string{"key": "url"}
 		attributesApiResp := HitGetAttributesApi(queryParams, suite.authToken)
-		assert.Equal(suite.T(), fileData.BaseServerUrl, attributesApiResp.Result.Value)
+		assert.Equal(suite.T(), baseCredentials.BaseServerUrl, attributesApiResp.Result.Value)
 	})
 }
 
