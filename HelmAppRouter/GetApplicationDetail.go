@@ -24,7 +24,7 @@ func (suite *HelmAppTestSuite) TestGetApplicationDetail() {
 
 			HitUnHibernateWorkloadApi(string(byteValueOfStruct), suite.authToken)
 			respOfGetApplicationDetailApi = HitGetApplicationDetailApi(queryParams, suite.authToken)
-			time.Sleep(10 * time.Second)
+			time.Sleep(15 * time.Second)
 			assert.Equal(suite.T(), "Healthy", respOfGetApplicationDetailApi.Result.AppDetail.ApplicationStatus)
 		}
 		//Un-hibernating again for saving cost
