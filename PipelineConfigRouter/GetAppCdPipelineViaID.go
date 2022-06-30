@@ -69,7 +69,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassB8GetCdPipeline() {
 		payload := getRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Automatic, string(preStageScript), string(postStageScript), Automatic)
 		bytePayload, _ := json.Marshal(payload)
 		savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
-		time.Sleep(1 * time.Second)
+		time.Sleep(2 * time.Second)
 		appCdPipelineResponse := HitGetAppCdPipeline(strconv.Itoa(createAppApiResponse.Id), suite.authToken)
 		assert.Equal(suite.T(), savePipelineResponse.Result.Pipelines[0].Strategies, appCdPipelineResponse.Result.Pipelines[0].Strategies)
 		assert.Equal(suite.T(), savePipelineResponse.Result.Pipelines[0].PostStage.Config, appCdPipelineResponse.Result.Pipelines[0].PostStage.Config)

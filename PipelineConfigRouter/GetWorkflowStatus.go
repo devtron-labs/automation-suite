@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"log"
 	"strconv"
+	"time"
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassD1GetWorkflowStatus() {
@@ -66,6 +67,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD1GetWorkflowStatus() {
 	payload := getRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Automatic, string(preStageScript), string(postStageScript), Automatic)
 	bytePayload, _ := json.Marshal(payload)
 	savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
+	time.Sleep(2 * time.Second)
 
 	suite.Run("A=1=GetWorkflowStatusWithoutTriggering", func() {
 		workflowStatus := HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)

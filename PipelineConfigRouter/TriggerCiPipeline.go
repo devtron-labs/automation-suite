@@ -66,7 +66,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 	payload := getRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Automatic, string(preStageScript), string(postStageScript), Automatic)
 	bytePayload, _ := json.Marshal(payload)
 	savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
-	time.Sleep(1 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	log.Println("=== Here we are getting pipeline material ===")
 	pipelineMaterial := HitGetCiPipelineMaterial(workflowResponse.CiPipelines[0].Id, suite.authToken)
