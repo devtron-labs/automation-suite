@@ -3,6 +3,7 @@ package HelmAppRouter
 import (
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
+	"time"
 )
 
 func (suite *HelmAppTestSuite) TestUnHibernateWorkloadApi() {
@@ -16,8 +17,10 @@ func (suite *HelmAppTestSuite) TestUnHibernateWorkloadApi() {
 			assert.False(suite.T(), resp.Result[0].Success)
 			//Hibernating the Workload First
 			HitHibernateWorkloadApi(string(byteValueOfStruct), suite.authToken)
+			time.Sleep(15 * time.Second)
 			//Again UnHibernating and verifying the response
 			HitUnHibernateWorkloadApi(string(byteValueOfStruct), suite.authToken)
+			time.Sleep(15 * time.Second)
 			assert.Equal(suite.T(), "", resp.Result[0].ErrorMessage)
 			assert.True(suite.T(), resp.Result[0].Success)
 		}

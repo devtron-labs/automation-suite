@@ -20,9 +20,10 @@ func (suite *HelmAppTestSuite) TestHibernateWorkloadApi() {
 			assert.False(suite.T(), resp.Result[0].Success)
 			//Un-hibernating the Workload First
 			HitUnHibernateWorkloadApi(string(byteValueOfStruct), suite.authToken)
-			time.Sleep(2 * time.Second)
+			time.Sleep(15 * time.Second)
 			//Again Hibernating and verifying the response
 			HitHibernateWorkloadApi(string(byteValueOfStruct), suite.authToken)
+			time.Sleep(15 * time.Second)
 			assert.Equal(suite.T(), "", resp.Result[0].ErrorMessage)
 			assert.True(suite.T(), resp.Result[0].Success)
 		}

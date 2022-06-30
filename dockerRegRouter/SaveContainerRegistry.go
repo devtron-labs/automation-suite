@@ -3,8 +3,11 @@ package dockerRegRouter
 import (
 	"automation-suite/dockerRegRouter/ResponseDTOs"
 	"encoding/json"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"log"
+	"os"
+	"strings"
 )
 
 func (suite *DockersRegRouterTestSuite) TestClassA6GetApp() {
@@ -20,8 +23,17 @@ func (suite *DockersRegRouterTestSuite) TestClassA6GetApp() {
 		saveDockerRegistryResponseDto = HitSaveContainerRegistryApi(byteValueOfSaveDockerRegistry, suite.authToken)
 
 		log.Println("Validating the Response of the save docker registry API...")
-		assert.Equal(suite.T(), saveDockerRegistryRequestDto.Id, saveDockerRegistryResponseDto.Result.Id)
-		assert.Equal(suite.T(), saveDockerRegistryRequestDto.IsDefault, saveDockerRegistryResponseDto.Result.IsDefault)
+		myDir, err := os.Getwd()
+		if err != nil {
+			fmt.Println(err)
+		}
+		if strings.Contains(myDir, "OssInstallationMode") {
+			assert.Equal(suite.T(), saveDockerRegistryRequestDto.Id, saveDockerRegistryResponseDto.Result.Id)
+			assert.Equal(suite.T(), saveDockerRegistryRequestDto.IsDefault, saveDockerRegistryResponseDto.Result.IsDefault)
+		} else {
+			assert.Equal(suite.T(), saveDockerRegistryResponseDto.Errors[0].InternalMessage, "docker registry failed to create in db")
+			assert.Equal(suite.T(), saveDockerRegistryResponseDto.Errors[0].UserMessage, "requested by 2")
+		}
 
 	})
 
