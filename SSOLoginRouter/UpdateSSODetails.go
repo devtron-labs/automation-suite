@@ -11,7 +11,7 @@ import (
 func (suite *SSOLoginTestSuite) TestClass4UpdateSsoLogin() {
 	envConfig := Base.ReadBaseEnvConfig()
 	baseCredentials := Base.ReadAnyJsonFile(envConfig.BaseCredentialsFile)
-	classCredentials := Base.ReadAnyJsonFile(envConfig.BaseCredentialsFile)
+	classCredentials := Base.ReadAnyJsonFile(envConfig.ClassCredentialsFile)
 	suite.Run("A=1=UpdateSsoLoginWithCorrectArgs", func() {
 		byteValue, err := Base.GetByteArrayOfGivenJsonFile("../testdata/SSOLoginTestData/updateSSODetailsPayload.json")
 		if nil != err {

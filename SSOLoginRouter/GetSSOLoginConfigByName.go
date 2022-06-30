@@ -25,7 +25,7 @@ import (
 func (suite *SSOLoginTestSuite) TestClass1GetSsoLoginConfig() {
 	envConfig := Base.ReadBaseEnvConfig()
 	baseCredentials := Base.ReadAnyJsonFile(envConfig.BaseCredentialsFile)
-	classCredentials := Base.ReadAnyJsonFile(envConfig.BaseCredentialsFile)
+	classCredentials := Base.ReadAnyJsonFile(envConfig.ClassCredentialsFile)
 	suite.Run("A=1=SsoLoginConfigWithCorrectName", func() {
 		queryParams := map[string]string{"name": "google"}
 		log.Println("Hitting the Get SSO login config by Name API")
