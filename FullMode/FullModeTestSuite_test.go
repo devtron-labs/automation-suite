@@ -19,8 +19,12 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-func TestSSOLoginRouterSuite(t *testing.T) {
-	suite.Run(t, new(SSOLoginRouter.SSOLoginTestSuite))
+func TestAttributeRouterSuite(t *testing.T) {
+	suite.Run(t, new(AttributesRouter.AttributeRouterTestSuite))
+}
+
+func TestGitOpsRouterSuite(t *testing.T) {
+	suite.Run(t, new(GitopsConfigRouter.GitOpsRouterTestSuite))
 }
 
 func TestTeamRouterSuite(t *testing.T) {
@@ -31,20 +35,8 @@ func TestUserRouterSuite(t *testing.T) {
 	suite.Run(t, new(UserRouter.UserTestSuite))
 }
 
-func TestHelmAppRouterSuite(t *testing.T) {
-	suite.Run(t, new(HelmAppRouter.HelmAppTestSuite))
-}
-
-func TestAppStoreRouterSuite(t *testing.T) {
-	suite.Run(t, new(AppStoreRouter.AppStoreTestSuite))
-}
-
 func TestChartRepoRouterSuite(t *testing.T) {
 	suite.Run(t, new(ChartRepositoryRouter.ChartRepoTestSuite))
-}
-
-func TestAttributeRouterSuite(t *testing.T) {
-	suite.Run(t, new(AttributesRouter.AttributeRouterTestSuite))
 }
 
 func TestAppLabelsRouterSuite(t *testing.T) {
@@ -63,8 +55,16 @@ func TestLinkOutRouterSuite(t *testing.T) {
 	suite.Run(t, new(externalLinkoutRouter.ExternalLinkOutRouterTestSuite))
 }
 
-func TestGitOpsRouterSuite(t *testing.T) {
-	suite.Run(t, new(GitopsConfigRouter.GitOpsRouterTestSuite))
+func TestSSOLoginRouterSuite(t *testing.T) {
+	suite.Run(t, new(SSOLoginRouter.SSOLoginTestSuite))
+}
+
+func TestHelmAppRouterSuite(t *testing.T) {
+	suite.Run(t, new(HelmAppRouter.HelmAppTestSuite))
+}
+
+func TestAppStoreRouterSuite(t *testing.T) {
+	suite.Run(t, new(AppStoreRouter.AppStoreTestSuite))
 }
 
 func TestPipelineConfigSuite(t *testing.T) {
