@@ -56,6 +56,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassB8GetCdPipeline() {
 
 	log.Println("=== Here we are saving workflow with Pre/Post CI ===")
 	workflowResponse := HitCreateWorkflowApiWithFullPayload(createAppApiResponse.Id, suite.authToken).Result
+	time.Sleep(1 * time.Second)
 
 	preStageScript, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/PipeLineConfigRouter/preStageScript.txt")
 	postStageScript, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/PipeLineConfigRouter/postStageScript.txt")
@@ -69,7 +70,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassB8GetCdPipeline() {
 		payload := getRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Automatic, string(preStageScript), string(postStageScript), Automatic)
 		bytePayload, _ := json.Marshal(payload)
 		savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
-		time.Sleep(2 * time.Second)
+		time.Sleep(3 * time.Second)
 		appCdPipelineResponse := HitGetAppCdPipeline(strconv.Itoa(createAppApiResponse.Id), suite.authToken)
 		assert.Equal(suite.T(), savePipelineResponse.Result.Pipelines[0].Strategies, appCdPipelineResponse.Result.Pipelines[0].Strategies)
 		assert.Equal(suite.T(), savePipelineResponse.Result.Pipelines[0].PostStage.Config, appCdPipelineResponse.Result.Pipelines[0].PostStage.Config)
