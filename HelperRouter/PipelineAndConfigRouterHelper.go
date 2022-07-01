@@ -56,7 +56,7 @@ type StructConfigMapRouter struct {
 	saveConfigMapResponseDTO SaveConfigMapResponseDTO
 }
 
-func GetRequestPayloadForSecretOrConfig(configId int, configName string, appId int, userOfSecretAs string, externalType string, isSubPathNeeded bool, isFilePermissionNeeded bool, isSecret bool) ConfigMapAndSecretDataRequestDTO {
+func GetRequestPayloadForSecretOrConfig(configId int, configName string, appId int, userOfSecretAs string, externalType string, isSubPathNeeded bool, isFilePermissionNeeded bool, isSecret bool, needExternal bool) ConfigMapAndSecretDataRequestDTO {
 	configMapDataRequestDTO := ConfigMapAndSecretDataRequestDTO{}
 	var configDataList = make([]ConfigData, 0)
 	conf := ConfigData{}
@@ -66,32 +66,32 @@ func GetRequestPayloadForSecretOrConfig(configId int, configName string, appId i
 	switch externalType {
 	case awsSystemManager:
 		{
-			data := GetConfigData(awsSystemManager+configName, userOfSecretAs, true, awsSystemManager, isSubPathNeeded, isFilePermissionNeeded, isSecret)
+			data := GetConfigData(awsSystemManager+configName, userOfSecretAs, true, awsSystemManager, isSubPathNeeded, isFilePermissionNeeded, isSecret, needExternal)
 			data.RoleARN = "RoleARNAdmin"
 			conf = data
 		}
 	case hashiCorpVault:
 		{
-			data := GetConfigData(hashiCorpVault+configName, userOfSecretAs, true, hashiCorpVault, isSubPathNeeded, isFilePermissionNeeded, isSecret)
+			data := GetConfigData(hashiCorpVault+configName, userOfSecretAs, true, hashiCorpVault, isSubPathNeeded, isFilePermissionNeeded, isSecret, needExternal)
 			data.RoleARN = ""
 			conf = data
 		}
 	case awsSecretsManager:
 		{
-			data := GetConfigData(awsSecretsManager+configName, userOfSecretAs, true, awsSecretsManager, isSubPathNeeded, isFilePermissionNeeded, isSecret)
+			data := GetConfigData(awsSecretsManager+configName, userOfSecretAs, true, awsSecretsManager, isSubPathNeeded, isFilePermissionNeeded, isSecret, needExternal)
 			data.RoleARN = ""
 			conf = data
 		}
 	case kubernetes:
 		{
-			data := GetConfigData(kubernetes+configName, userOfSecretAs, false, "", isSubPathNeeded, isFilePermissionNeeded, isSecret)
+			data := GetConfigData(kubernetes+configName, userOfSecretAs, false, "", isSubPathNeeded, isFilePermissionNeeded, isSecret, needExternal)
 			data.RoleARN = ""
 			data.Data = GetDataForConfigOrSecret(isSecret)
 			conf = data
 		}
 	case externalKubernetes:
 		{
-			data := GetConfigData(externalKubernetes+configName, userOfSecretAs, false, kubernetes, isSubPathNeeded, isFilePermissionNeeded, isSecret)
+			data := GetConfigData(externalKubernetes+configName, userOfSecretAs, false, kubernetes, isSubPathNeeded, isFilePermissionNeeded, isSecret, needExternal)
 			data.RoleARN = ""
 			conf = data
 		}
@@ -101,7 +101,7 @@ func GetRequestPayloadForSecretOrConfig(configId int, configName string, appId i
 	return configMapDataRequestDTO
 }
 
-func GetConfigData(configName string, userOfSecretAs string, isSecretDataNeeded bool, externalSecretType string, isSubPathNeeded bool, isFilePermissionRequired bool, isSecret bool) ConfigData {
+func GetConfigData(configName string, userOfSecretAs string, isSecretDataNeeded bool, externalSecretType string, isSubPathNeeded bool, isFilePermissionRequired bool, isSecret bool, external bool) ConfigData {
 	conf := ConfigData{}
 	conf.Name = configName
 	conf.Type = userOfSecretAs
@@ -114,7 +114,7 @@ func GetConfigData(configName string, userOfSecretAs string, isSecretDataNeeded 
 		}
 
 	}
-	conf.External = true
+	conf.External = external
 	conf.ExternalSecretType = externalSecretType
 	if isSecretDataNeeded {
 		conf.SecretData = GetSecretData(isSecret)
