@@ -3,7 +3,6 @@ package FullMode
 import (
 	"automation-suite/AppLabelsRouter"
 	"automation-suite/AppListingRouter"
-	"automation-suite/AppStoreRouter"
 	"automation-suite/AttributesRouter"
 	"automation-suite/ChartRepositoryRouter"
 	"automation-suite/GitopsConfigRouter"
@@ -51,10 +50,6 @@ func TestDockerRegRouterSuite(t *testing.T) {
 
 func TestLinkOutRouterSuite(t *testing.T) {
 	suite.Run(t, new(externalLinkoutRouter.ExternalLinkOutRouterTestSuite))
-}
-
-func TestAppStoreRouterSuite(t *testing.T) {
-	suite.Run(t, new(AppStoreRouter.AppStoreTestSuite))
 }
 
 func TestPipelineConfigSuite(t *testing.T) {
