@@ -4,6 +4,7 @@ import (
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
+	"time"
 )
 
 //todo currently user is able to add repo with invalid access token as well so commenting this test case
@@ -33,12 +34,12 @@ func (suite *ChartRepoTestSuite) TestClassC1CreateChartRepo() {
 		RepoName := Base.GetRandomStringOfGivenLength(8)
 		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
-		respGetRepoApi := HitCreateChartRepoApi(string(byteValueOfStruct), suite.authToken)
+		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
+		time.Sleep(2 * time.Second)
 		assert.Equal(suite.T(), AUTH_MODE_ANONYMOUS, respGetRepoApi.Result.AuthMode)
-
-		createChartRepoRequestDto = createChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, respGetRepoApi.Result.Id, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
+		createChartRepoRequestDto.Id = respGetRepoApi.Result.Id
 		byteValueOfStruct, _ = json.Marshal(createChartRepoRequestDto)
-		deleteChartRepoApiResp := HitDeleteChartRepo(string(byteValueOfStruct), suite.authToken)
+		deleteChartRepoApiResp := HitDeleteChartRepo(byteValueOfStruct, suite.authToken)
 		assert.Equal(suite.T(), "Chart repo deleted successfully.", deleteChartRepoApiResp.Result)
 	})
 
@@ -47,9 +48,8 @@ func (suite *ChartRepoTestSuite) TestClassC1CreateChartRepo() {
 		RepoName := Base.GetRandomStringOfGivenLength(8)
 		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, chartRepoConfig.ChartRepoUrl+"invalid", "", true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
-		respGetRepoApi := HitCreateChartRepoApi(string(byteValueOfStruct), suite.authToken)
+		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
 		assert.Equal(suite.T(), "Could not find an index.yaml file in the repo directory. Please try another chart repo.", respGetRepoApi.Result.CustomErrMsg)
-
 	})
 
 	suite.Run("A=3=CreateRepoWithValidAuthModeAccessToken", func() {
@@ -57,22 +57,22 @@ func (suite *ChartRepoTestSuite) TestClassC1CreateChartRepo() {
 		RepoName := Base.GetRandomStringOfGivenLength(8)
 		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, 0, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
-		respGetRepoApi := HitCreateChartRepoApi(string(byteValueOfStruct), suite.authToken)
+		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
+		time.Sleep(2 * time.Second)
 		assert.Equal(suite.T(), AUTH_MODE_ACCESS_TOKEN, respGetRepoApi.Result.AuthMode)
 		assert.Equal(suite.T(), RepoName, respGetRepoApi.Result.Name)
 
-		createChartRepoRequestDto = createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, respGetRepoApi.Result.Id, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
+		createChartRepoRequestDto.Id = respGetRepoApi.Result.Id
 		byteValueOfStruct, _ = json.Marshal(createChartRepoRequestDto)
-		deleteChartRepoApiResp := HitDeleteChartRepo(string(byteValueOfStruct), suite.authToken)
+		deleteChartRepoApiResp := HitDeleteChartRepo(byteValueOfStruct, suite.authToken)
 		assert.Equal(suite.T(), "Chart repo deleted successfully.", deleteChartRepoApiResp.Result)
-
 	})
 
 	suite.Run("A=4=CreateRepoWithInValidChartRepoUrl", func() {
 		RepoName := Base.GetRandomStringOfGivenLength(8)
 		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, "https://invalid-chart-repo-url.com", "", true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
-		respGetRepoApi := HitCreateChartRepoApi(string(byteValueOfStruct), suite.authToken)
+		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
 		assert.Equal(suite.T(), "Could not validate the repo. Please try again.", respGetRepoApi.Result.CustomErrMsg)
 	})
 }

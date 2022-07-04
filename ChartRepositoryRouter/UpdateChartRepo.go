@@ -4,6 +4,7 @@ import (
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
+	"time"
 )
 
 func (suite *ChartRepoTestSuite) TestClassC2UpdateChartRepo() {
@@ -13,16 +14,15 @@ func (suite *ChartRepoTestSuite) TestClassC2UpdateChartRepo() {
 		RepoName := Base.GetRandomStringOfGivenLength(8)
 		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
-		respGetRepoApi := HitCreateChartRepoApi(string(byteValueOfStruct), suite.authToken)
+		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
 
 		createChartRepoRequestDto = createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, respGetRepoApi.Result.Id, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
 		byteValueOfStruct, _ = json.Marshal(createChartRepoRequestDto)
-		updateChartRepoResponse := HitUpdateChartRepoApi(string(byteValueOfStruct), suite.authToken)
+		updateChartRepoResponse := HitUpdateChartRepoApi(byteValueOfStruct, suite.authToken)
 		assert.Equal(suite.T(), AUTH_MODE_ACCESS_TOKEN, updateChartRepoResponse.Result.AuthMode)
-
-		createChartRepoRequestDto = createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, respGetRepoApi.Result.Id, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
+		createChartRepoRequestDto.Id = respGetRepoApi.Result.Id
 		byteValueOfStruct, _ = json.Marshal(createChartRepoRequestDto)
-		HitDeleteChartRepo(string(byteValueOfStruct), suite.authToken)
+		HitDeleteChartRepo(byteValueOfStruct, suite.authToken)
 	})
 
 	suite.Run("A=2=UpdateAuthFromAccessTokenToAnonymous", func() {
@@ -30,16 +30,15 @@ func (suite *ChartRepoTestSuite) TestClassC2UpdateChartRepo() {
 		RepoName := Base.GetRandomStringOfGivenLength(8)
 		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, 0, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
-		respGetRepoApi := HitCreateChartRepoApi(string(byteValueOfStruct), suite.authToken)
+		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
 
 		createChartRepoRequestDto = createChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, respGetRepoApi.Result.Id, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
 		byteValueOfStruct, _ = json.Marshal(createChartRepoRequestDto)
-		updateChartRepoResponse := HitUpdateChartRepoApi(string(byteValueOfStruct), suite.authToken)
+		updateChartRepoResponse := HitUpdateChartRepoApi(byteValueOfStruct, suite.authToken)
 		assert.Equal(suite.T(), AUTH_MODE_ANONYMOUS, updateChartRepoResponse.Result.AuthMode)
-
-		createChartRepoRequestDto = createChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, respGetRepoApi.Result.Id, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
+		createChartRepoRequestDto.Id = respGetRepoApi.Result.Id
 		byteValueOfStruct, _ = json.Marshal(createChartRepoRequestDto)
-		HitDeleteChartRepo(string(byteValueOfStruct), suite.authToken)
+		HitDeleteChartRepo(byteValueOfStruct, suite.authToken)
 	})
 
 	suite.Run("A=3=UpdateAccessTokenForChartRepo", func() {
@@ -47,17 +46,16 @@ func (suite *ChartRepoTestSuite) TestClassC2UpdateChartRepo() {
 		RepoName := Base.GetRandomStringOfGivenLength(8)
 		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, 0, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
-		respGetRepoApi := HitCreateChartRepoApi(string(byteValueOfStruct), suite.authToken)
-
+		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
+		time.Sleep(2 * time.Second)
 		createChartRepoRequestDto = createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, respGetRepoApi.Result.Id, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken+"updatedUrl", true)
 		byteValueOfStruct, _ = json.Marshal(createChartRepoRequestDto)
-		updateChartRepoResponse := HitUpdateChartRepoApi(string(byteValueOfStruct), suite.authToken)
+		updateChartRepoResponse := HitUpdateChartRepoApi(byteValueOfStruct, suite.authToken)
+		time.Sleep(2 * time.Second)
 		assert.Equal(suite.T(), AUTH_MODE_ACCESS_TOKEN, updateChartRepoResponse.Result.AuthMode)
 		assert.Equal(suite.T(), chartRepoConfig.ChartAccessToken+"updatedUrl", updateChartRepoResponse.Result.AccessToken)
-
-		createChartRepoRequestDto = createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, respGetRepoApi.Result.Id, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken+"updatedUrl", true)
+		createChartRepoRequestDto.Id = respGetRepoApi.Result.Id
 		byteValueOfStruct, _ = json.Marshal(createChartRepoRequestDto)
-		HitDeleteChartRepo(string(byteValueOfStruct), suite.authToken)
 	})
 
 	suite.Run("A=4=UpdateActiveFalseFromTrue", func() {
@@ -65,18 +63,17 @@ func (suite *ChartRepoTestSuite) TestClassC2UpdateChartRepo() {
 		RepoName := Base.GetRandomStringOfGivenLength(8)
 		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, 0, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
-		respGetRepoApi := HitCreateChartRepoApi(string(byteValueOfStruct), suite.authToken)
-
+		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
+		time.Sleep(2 * time.Second)
 		createChartRepoRequestDto = createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, respGetRepoApi.Result.Id, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken+"updatedUrl", false)
 		byteValueOfStruct, _ = json.Marshal(createChartRepoRequestDto)
-		updateChartRepoResponse := HitUpdateChartRepoApi(string(byteValueOfStruct), suite.authToken)
+		updateChartRepoResponse := HitUpdateChartRepoApi(byteValueOfStruct, suite.authToken)
+		time.Sleep(2 * time.Second)
 		assert.Equal(suite.T(), AUTH_MODE_ACCESS_TOKEN, updateChartRepoResponse.Result.AuthMode)
 		assert.Equal(suite.T(), chartRepoConfig.ChartAccessToken+"updatedUrl", updateChartRepoResponse.Result.AccessToken)
 		assert.False(suite.T(), updateChartRepoResponse.Result.Active)
-
-		createChartRepoRequestDto = createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, respGetRepoApi.Result.Id, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken+"updatedUrl", false)
+		createChartRepoRequestDto.Id = respGetRepoApi.Result.Id
 		byteValueOfStruct, _ = json.Marshal(createChartRepoRequestDto)
-		HitDeleteChartRepo(string(byteValueOfStruct), suite.authToken)
 	})
 }
 

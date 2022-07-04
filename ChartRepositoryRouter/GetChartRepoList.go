@@ -4,6 +4,7 @@ import (
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
+	"time"
 )
 
 func (suite *ChartRepoTestSuite) TestClassC4GetRepoList() {
@@ -15,14 +16,13 @@ func (suite *ChartRepoTestSuite) TestClassC4GetRepoList() {
 		RepoName := Base.GetRandomStringOfGivenLength(8)
 		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
-		respGetRepoApi := HitCreateChartRepoApi(string(byteValueOfStruct), suite.authToken)
-
+		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
+		time.Sleep(2 * time.Second)
 		respGetRepoListApi = HitGetChartRepoList(suite.authToken)
 		assert.Equal(suite.T(), listSize+1, len(respGetRepoListApi.Result))
-
-		createChartRepoRequestDto = createChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, respGetRepoApi.Result.Id, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
+		createChartRepoRequestDto.Id = respGetRepoApi.Result.Id
 		byteValueOfStruct, _ = json.Marshal(createChartRepoRequestDto)
-		deleteChartRepoApiResp := HitDeleteChartRepo(string(byteValueOfStruct), suite.authToken)
+		deleteChartRepoApiResp := HitDeleteChartRepo(byteValueOfStruct, suite.authToken)
 		assert.Equal(suite.T(), "Chart repo deleted successfully.", deleteChartRepoApiResp.Result)
 	})
 }

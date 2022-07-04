@@ -18,16 +18,16 @@ type StructChartRepoRouter struct {
 	triggerChartSyncManualRespDto ResponseDTOs.TriggerChartSyncManualRespDTo
 }
 
-func HitCreateChartRepoApi(payload string, authToken string) ResponseDTOs.CreateChartRepoResponseDTO {
-	resp, err := Base.MakeApiCall(CreateChartRepoApiUrl, http.MethodPost, payload, nil, authToken)
+func HitCreateChartRepoApi(payload []byte, authToken string) ResponseDTOs.CreateChartRepoResponseDTO {
+	resp, err := Base.MakeApiCall(CreateChartRepoApiUrl, http.MethodPost, string(payload), nil, authToken)
 	Base.HandleError(err, CreateChartRepo)
 	structChartRepoRouter := StructChartRepoRouter{}
 	chartRepoRouter := structChartRepoRouter.UnmarshalGivenResponseBody(resp.Body(), CreateChartRepo)
 	return chartRepoRouter.createChartRepoResponseDto
 }
 
-func HitUpdateChartRepoApi(payload string, authToken string) ResponseDTOs.CreateChartRepoResponseDTO {
-	resp, err := Base.MakeApiCall(UpdateChartRepoUrl, http.MethodPost, payload, nil, authToken)
+func HitUpdateChartRepoApi(payload []byte, authToken string) ResponseDTOs.CreateChartRepoResponseDTO {
+	resp, err := Base.MakeApiCall(UpdateChartRepoUrl, http.MethodPost, string(payload), nil, authToken)
 	Base.HandleError(err, UpdateChartRepo)
 	structChartRepoRouter := StructChartRepoRouter{}
 	chartRepoRouter := structChartRepoRouter.UnmarshalGivenResponseBody(resp.Body(), CreateChartRepo)
@@ -50,8 +50,8 @@ func HitGetChartRepoViaId(authToken string, id string) ResponseDTOs.CreateChartR
 	return chartRepoRouter.createChartRepoResponseDto
 }
 
-func HitDeleteChartRepo(payload string, authToken string) ResponseDTOs.DeleteChartRepoResponseDTO {
-	resp, err := Base.MakeApiCall(DeleteChartRepoApiUrl, http.MethodDelete, payload, nil, authToken)
+func HitDeleteChartRepo(payload []byte, authToken string) ResponseDTOs.DeleteChartRepoResponseDTO {
+	resp, err := Base.MakeApiCall(DeleteChartRepoApiUrl, http.MethodDelete, string(payload), nil, authToken)
 	Base.HandleError(err, DeleteChartRepoApi)
 	structChartRepoRouter := StructChartRepoRouter{}
 	chartRepoRouter := structChartRepoRouter.UnmarshalGivenResponseBody(resp.Body(), DeleteChartRepoApi)

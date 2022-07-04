@@ -4,6 +4,7 @@ import (
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
+	"time"
 )
 
 func (suite *ChartRepoTestSuite) TestClassC7DeleteChartRepo() {
@@ -13,11 +14,11 @@ func (suite *ChartRepoTestSuite) TestClassC7DeleteChartRepo() {
 		RepoName := Base.GetRandomStringOfGivenLength(8)
 		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
-		respGetRepoApi := HitCreateChartRepoApi(string(byteValueOfStruct), suite.authToken)
-
-		createChartRepoRequestDto = createChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, respGetRepoApi.Result.Id, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
+		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
+		time.Sleep(2 * time.Second)
+		createChartRepoRequestDto.Id = respGetRepoApi.Result.Id
 		byteValueOfStruct, _ = json.Marshal(createChartRepoRequestDto)
-		deleteChartRepoApiResp := HitDeleteChartRepo(string(byteValueOfStruct), suite.authToken)
+		deleteChartRepoApiResp := HitDeleteChartRepo(byteValueOfStruct, suite.authToken)
 		assert.Equal(suite.T(), "Chart repo deleted successfully.", deleteChartRepoApiResp.Result)
 	})
 
@@ -26,27 +27,28 @@ func (suite *ChartRepoTestSuite) TestClassC7DeleteChartRepo() {
 		RepoName := Base.GetRandomStringOfGivenLength(8)
 		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, 0, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
-		respGetRepoApi := HitCreateChartRepoApi(string(byteValueOfStruct), suite.authToken)
-		createChartRepoRequestDto = createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, respGetRepoApi.Result.Id, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
+		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
+		time.Sleep(2 * time.Second)
+		createChartRepoRequestDto.Id = respGetRepoApi.Result.Id
 		byteValueOfStruct, _ = json.Marshal(createChartRepoRequestDto)
-		deleteChartRepoApiResp := HitDeleteChartRepo(string(byteValueOfStruct), suite.authToken)
+		deleteChartRepoApiResp := HitDeleteChartRepo(byteValueOfStruct, suite.authToken)
 		assert.Equal(suite.T(), "Chart repo deleted successfully.", deleteChartRepoApiResp.Result)
-
 	})
+
 	suite.Run("A=3=DeleteRepoHavingInvalidId", func() {
 		chartRepoConfig, _ := GetChartRepoRouterConfig()
 		RepoName := Base.GetRandomStringOfGivenLength(8)
 		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, 0, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
-		respGetRepoApi := HitCreateChartRepoApi(string(byteValueOfStruct), suite.authToken)
+		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
+		time.Sleep(2 * time.Second)
 		createChartRepoRequestDto = createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, 123456789, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
 		byteValueOfStruct, _ = json.Marshal(createChartRepoRequestDto)
-		deleteChartRepoApiResp := HitDeleteChartRepo(string(byteValueOfStruct), suite.authToken)
+		deleteChartRepoApiResp := HitDeleteChartRepo(byteValueOfStruct, suite.authToken)
 		assert.Equal(suite.T(), "pg: no rows in result set", deleteChartRepoApiResp.Errors[0].UserMessage)
-
-		createChartRepoRequestDto = createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, respGetRepoApi.Result.Id, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
+		createChartRepoRequestDto.Id = respGetRepoApi.Result.Id
 		byteValueOfStruct, _ = json.Marshal(createChartRepoRequestDto)
-		deleteChartRepoApiResp = HitDeleteChartRepo(string(byteValueOfStruct), suite.authToken)
+		deleteChartRepoApiResp = HitDeleteChartRepo(byteValueOfStruct, suite.authToken)
 		assert.Equal(suite.T(), "Chart repo deleted successfully.", deleteChartRepoApiResp.Result)
 	})
 }
