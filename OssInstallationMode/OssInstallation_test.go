@@ -1,4 +1,4 @@
-package FullMode
+package OssInstallationMode
 
 import (
 	"automation-suite/AppLabelsRouter"

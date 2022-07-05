@@ -75,12 +75,22 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 		payloadForTriggerCiPipeline := createPayloadForTriggerCiPipeline(pipelineMaterial.Result[0].History[0].Commit, workflowResponse.CiPipelines[0].Id, pipelineMaterial.Result[0].Id, true)
 		bytePayloadForTriggerCiPipeline, _ := json.Marshal(payloadForTriggerCiPipeline)
 		triggerCiPipelineResponse := HitTriggerCiPipelineApi(bytePayloadForTriggerCiPipeline, suite.authToken)
-		assert.Equal(suite.T(), "allowed for all pipelines", triggerCiPipelineResponse.Result.AuthStatus)
-		assert.NotNil(suite.T(), triggerCiPipelineResponse.Result.ApiResponse)
-		log.Println("=== Here we are getting workflow after triggering ===")
+		if triggerCiPipelineResponse.Result.AuthStatus != "allowed for all pipelines" {
+			time.Sleep(2 * time.Second)
+			triggerCiPipelineResponse = HitTriggerCiPipelineApi(bytePayloadForTriggerCiPipeline, suite.authToken)
+			assert.Equal(suite.T(), "allowed for all pipelines", triggerCiPipelineResponse.Result.AuthStatus)
+			assert.NotNil(suite.T(), triggerCiPipelineResponse.Result.ApiResponse)
+		}
 		time.Sleep(10 * time.Second)
+		log.Println("=== Here we are getting workflow after triggering ===")
 		workflowStatus := HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
-		assert.Equal(suite.T(), "Running", workflowStatus.Result.CiWorkflowStatus[0].CiStatus)
+		if workflowStatus.Result.CiWorkflowStatus[0].CiStatus == "Starting" {
+			time.Sleep(5 * time.Second)
+			workflowStatus = HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
+			assert.Equal(suite.T(), "Running", workflowStatus.Result.CiWorkflowStatus[0].CiStatus)
+		} else {
+			assert.Equal(suite.T(), "Running", workflowStatus.Result.CiWorkflowStatus[0].CiStatus)
+		}
 		log.Println("=== Here we are getting workflow and verifying the status after triggering via poll function ===")
 		assert.True(suite.T(), PollForGettingAppStatusAfterTrigger(createAppApiResponse.Id, suite.authToken))
 		updatedWorkflowStatus := HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
@@ -92,8 +102,12 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 		payloadForTriggerCiPipeline := createPayloadForTriggerCiPipeline(pipelineMaterial.Result[0].History[0].Commit, workflowResponse.CiPipelines[0].Id, pipelineMaterial.Result[0].Id, true)
 		bytePayloadForTriggerCiPipeline, _ := json.Marshal(payloadForTriggerCiPipeline)
 		triggerCiPipelineResponse := HitTriggerCiPipelineApi(bytePayloadForTriggerCiPipeline, suite.authToken)
-		assert.Equal(suite.T(), "allowed for all pipelines", triggerCiPipelineResponse.Result.AuthStatus)
-		assert.NotNil(suite.T(), triggerCiPipelineResponse.Result.ApiResponse)
+		if triggerCiPipelineResponse.Result.AuthStatus != "allowed for all pipelines" {
+			time.Sleep(2 * time.Second)
+			triggerCiPipelineResponse = HitTriggerCiPipelineApi(bytePayloadForTriggerCiPipeline, suite.authToken)
+			assert.Equal(suite.T(), "allowed for all pipelines", triggerCiPipelineResponse.Result.AuthStatus)
+			assert.NotNil(suite.T(), triggerCiPipelineResponse.Result.ApiResponse)
+		}
 	})
 
 	suite.Run("A=3=TriggerCiPipelineWithInvalidPipelineId", func() {
