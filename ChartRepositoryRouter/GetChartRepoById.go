@@ -13,7 +13,7 @@ func (suite *ChartRepoTestSuite) TestClassC3GetChartRepoById() {
 	suite.Run("A=1=GetRepoByValidId", func() {
 		chartRepoConfig, _ := GetChartRepoRouterConfig()
 		RepoName := Base.GetRandomStringOfGivenLength(8)
-		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
+		createChartRepoRequestDto := CreateChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
 		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
 		time.Sleep(2 * time.Second)

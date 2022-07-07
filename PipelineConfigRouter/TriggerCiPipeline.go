@@ -144,9 +144,9 @@ func PollForGettingAppStatusAfterTrigger(id int, authToken string) bool {
 	for {
 		updatedWorkflowStatus := HitGetWorkflowStatus(id, authToken)
 		deploymentStatus := updatedWorkflowStatus.Result.CdWorkflowStatus[0].DeployStatus
-		time.Sleep(5 * time.Second)
+		time.Sleep(1 * time.Second)
 		count = count + 1
-		if deploymentStatus == "Healthy" || count >= 80 {
+		if deploymentStatus == "Healthy" || count >= 500 {
 			break
 		}
 	}

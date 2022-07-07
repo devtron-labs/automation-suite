@@ -19,6 +19,10 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+func TestSSOLoginRouterSuite(t *testing.T) {
+	suite.Run(t, new(SSOLoginRouter.SSOLoginTestSuite))
+}
+
 func TestAttributeRouterSuite(t *testing.T) {
 	suite.Run(t, new(AttributesRouter.AttributeRouterTestSuite))
 }
@@ -53,10 +57,6 @@ func TestDockerRegRouterSuite(t *testing.T) {
 
 func TestLinkOutRouterSuite(t *testing.T) {
 	suite.Run(t, new(externalLinkoutRouter.ExternalLinkOutRouterTestSuite))
-}
-
-func TestSSOLoginRouterSuite(t *testing.T) {
-	suite.Run(t, new(SSOLoginRouter.SSOLoginTestSuite))
 }
 
 func TestHelmAppRouterSuite(t *testing.T) {

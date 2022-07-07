@@ -88,7 +88,7 @@ func (structChartRepoRouter StructChartRepoRouter) UnmarshalGivenResponseBody(re
 	return structChartRepoRouter
 }
 
-func createChartRepoRequestPayload(authenticateType string, repoId int, RepoName string, repoUrl string, AccessToken string, Active bool) RequestDTOs.ChartRepoRequestDTO {
+func CreateChartRepoRequestPayload(authenticateType string, repoId int, RepoName string, repoUrl string, AccessToken string, Active bool) RequestDTOs.ChartRepoRequestDTO {
 	chartRepoRequestDto := RequestDTOs.ChartRepoRequestDTO{}
 	switch authenticateType {
 

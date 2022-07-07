@@ -12,7 +12,7 @@ func (suite *ChartRepoTestSuite) TestClassC7DeleteChartRepo() {
 	suite.Run("A=1=DeleteRepoHavingAnonymousAuthMode", func() {
 		chartRepoConfig, _ := GetChartRepoRouterConfig()
 		RepoName := Base.GetRandomStringOfGivenLength(8)
-		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
+		createChartRepoRequestDto := CreateChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
 		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
 		time.Sleep(2 * time.Second)
@@ -25,7 +25,7 @@ func (suite *ChartRepoTestSuite) TestClassC7DeleteChartRepo() {
 	suite.Run("A=2=DeleteRepoHavingAuthModeAccessToken", func() {
 		chartRepoConfig, _ := GetChartRepoRouterConfig()
 		RepoName := Base.GetRandomStringOfGivenLength(8)
-		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, 0, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
+		createChartRepoRequestDto := CreateChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, 0, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
 		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
 		time.Sleep(2 * time.Second)
@@ -38,11 +38,11 @@ func (suite *ChartRepoTestSuite) TestClassC7DeleteChartRepo() {
 	suite.Run("A=3=DeleteRepoHavingInvalidId", func() {
 		chartRepoConfig, _ := GetChartRepoRouterConfig()
 		RepoName := Base.GetRandomStringOfGivenLength(8)
-		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, 0, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
+		createChartRepoRequestDto := CreateChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, 0, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
 		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
 		time.Sleep(2 * time.Second)
-		createChartRepoRequestDto = createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, 123456789, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
+		createChartRepoRequestDto = CreateChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, 123456789, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
 		byteValueOfStruct, _ = json.Marshal(createChartRepoRequestDto)
 		deleteChartRepoApiResp := HitDeleteChartRepo(byteValueOfStruct, suite.authToken)
 		assert.Equal(suite.T(), "pg: no rows in result set", deleteChartRepoApiResp.Errors[0].UserMessage)

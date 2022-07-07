@@ -32,7 +32,7 @@ func (suite *ChartRepoTestSuite) TestClassC1CreateChartRepo() {
 	suite.Run("A=1=CreateRepoWithValidArgsOnly", func() {
 		chartRepoConfig, _ := GetChartRepoRouterConfig()
 		RepoName := Base.GetRandomStringOfGivenLength(8)
-		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
+		createChartRepoRequestDto := CreateChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
 		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
 		time.Sleep(2 * time.Second)
@@ -46,7 +46,7 @@ func (suite *ChartRepoTestSuite) TestClassC1CreateChartRepo() {
 	suite.Run("A=2=CreateRepoWithInvalidUrl", func() {
 		chartRepoConfig, _ := GetChartRepoRouterConfig()
 		RepoName := Base.GetRandomStringOfGivenLength(8)
-		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, chartRepoConfig.ChartRepoUrl+"invalid", "", true)
+		createChartRepoRequestDto := CreateChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, chartRepoConfig.ChartRepoUrl+"invalid", "", true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
 		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
 		assert.Equal(suite.T(), "Could not find an index.yaml file in the repo directory. Please try another chart repo.", respGetRepoApi.Result.CustomErrMsg)
@@ -55,7 +55,7 @@ func (suite *ChartRepoTestSuite) TestClassC1CreateChartRepo() {
 	suite.Run("A=3=CreateRepoWithValidAuthModeAccessToken", func() {
 		chartRepoConfig, _ := GetChartRepoRouterConfig()
 		RepoName := Base.GetRandomStringOfGivenLength(8)
-		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, 0, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
+		createChartRepoRequestDto := CreateChartRepoRequestPayload(AUTH_MODE_ACCESS_TOKEN, 0, RepoName, chartRepoConfig.ChartRepoUrl, chartRepoConfig.ChartAccessToken, true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
 		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
 		time.Sleep(2 * time.Second)
@@ -70,7 +70,7 @@ func (suite *ChartRepoTestSuite) TestClassC1CreateChartRepo() {
 
 	suite.Run("A=4=CreateRepoWithInValidChartRepoUrl", func() {
 		RepoName := Base.GetRandomStringOfGivenLength(8)
-		createChartRepoRequestDto := createChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, "https://invalid-chart-repo-url.com", "", true)
+		createChartRepoRequestDto := CreateChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, "https://invalid-chart-repo-url.com", "", true)
 		byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
 		respGetRepoApi := HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
 		assert.Equal(suite.T(), "Could not validate the repo. Please try again.", respGetRepoApi.Result.CustomErrMsg)
