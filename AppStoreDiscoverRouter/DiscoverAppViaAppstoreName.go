@@ -6,30 +6,29 @@ import (
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"log"
-	"strconv"
 	"time"
 )
 
-func (suite *AppStoreDiscoverTestSuite) TestDiscoverHelmAppsViaChartRepoId() {
+func (suite *AppStoreDiscoverTestSuite) TestDiscoverHelmAppsViaAppstoreName() {
 	log.Println("=== Here we are Adding a chart repo ===")
 	chartRepoConfig, _ := ChartRepositoryRouter.GetChartRepoRouterConfig()
 	RepoName := Base.GetRandomStringOfGivenLength(8)
 	createChartRepoRequestDto := ChartRepositoryRouter.CreateChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
 	byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
 	respGetRepoApi := ChartRepositoryRouter.HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
-	chartRepoId := respGetRepoApi.Result.Id
+	chartRepoName := respGetRepoApi.Result.Name
 
-	suite.Run("A=1=DiscoverWithCorrectRepoId", func() {
-		queryParams := map[string]string{"chartRepoId": strconv.Itoa(chartRepoId)}
+	suite.Run("A=1=DiscoverWithCorrectRepoName", func() {
+		queryParams := map[string]string{"appStoreName": chartRepoName}
 		PollForGettingHelmAppData(queryParams, suite.authToken)
 		ActiveDiscoveredApps := HitDiscoverAppApi(queryParams, suite.authToken)
-		assert.Equal(suite.T(), chartRepoId, ActiveDiscoveredApps.Result[0].ChartRepoId)
+		assert.Equal(suite.T(), chartRepoName, ActiveDiscoveredApps.Result[0].Name)
 		assert.False(suite.T(), ActiveDiscoveredApps.Result[0].Deprecated)
 	})
 
-	suite.Run("A=2=DiscoverWithInCorrectRepoId", func() {
-		randomRepoId := strconv.Itoa(Base.GetRandomNumberOf9Digit())
-		queryParams := map[string]string{"chartRepoId": randomRepoId}
+	suite.Run("A=2=DiscoverWithInCorrectRepoName", func() {
+		randomRepoName := Base.GetRandomStringOfGivenLength(8)
+		queryParams := map[string]string{"chartRepoId": randomRepoName}
 		time.Sleep(10 * time.Second)
 		ActiveDiscoveredApps := HitDiscoverAppApi(queryParams, suite.authToken)
 		assert.Nil(suite.T(), ActiveDiscoveredApps.Result)
