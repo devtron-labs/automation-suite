@@ -12,6 +12,9 @@ import (
 type StructAppStoreDiscoverRouter struct {
 	discoverAppApiResponse              ResponseDTOs.DiscoverAppApiResponse
 	deploymentOfInstalledAppResponseDTO ResponseDTOs.DeploymentOfInstalledAppResponseDTO
+	helmAppVersionsDTO                  ResponseDTOs.HelmAppVersionsDTO
+	helmAppViaAppVersionIDResponseDTO   ResponseDTOs.HelmAppViaVersionIdResponseDTO
+	helmEnvAutocompleteResponseDTO      ResponseDTOs.HelmEnvAutocompleteResponseDTO
 }
 
 func HitDiscoverAppApi(queryParams map[string]string, authToken string) ResponseDTOs.DiscoverAppApiResponse {
@@ -30,12 +33,43 @@ func HitGetDeploymentOfInstalledAppApi(appId string, authToken string) ResponseD
 	return appStoreDiscoverRouter.deploymentOfInstalledAppResponseDTO
 }
 
+func GetAppVersionsAutocomplete(chartStorId string, authToken string) ResponseDTOs.HelmAppVersionsDTO {
+	resp, err := Base.MakeApiCall(GetVersionsAutocompleteApiUrl+chartStorId+"/version/autocomplete", http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetVersionsAutocompleteApi)
+	structAppStoreDiscoverRouter := StructAppStoreDiscoverRouter{}
+	appStoreDiscoverRouter := structAppStoreDiscoverRouter.UnmarshalGivenResponseBody(resp.Body(), GetVersionsAutocompleteApi)
+	return appStoreDiscoverRouter.helmAppVersionsDTO
+}
+
+func DiscoverAppViaAppStoreApplicationVersionId(appStoreApplicationVersionId string, authToken string) ResponseDTOs.HelmAppViaVersionIdResponseDTO {
+	resp, err := Base.MakeApiCall(GetVersionsAutocompleteApiUrl+appStoreApplicationVersionId, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, DiscoverAppViaAppstoreApplicationVersionIdApi)
+	structAppStoreDiscoverRouter := StructAppStoreDiscoverRouter{}
+	appStoreDiscoverRouter := structAppStoreDiscoverRouter.UnmarshalGivenResponseBody(resp.Body(), DiscoverAppViaAppstoreApplicationVersionIdApi)
+	return appStoreDiscoverRouter.helmAppViaAppVersionIDResponseDTO
+}
+
+func HitHelmEnvAutocompleteApi(authToken string) ResponseDTOs.HelmEnvAutocompleteResponseDTO {
+	resp, err := Base.MakeApiCall(GetHelmEnvAutocompleteApiUrl, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetHelmEnvAutocompleteApi)
+	structAppStoreDiscoverRouter := StructAppStoreDiscoverRouter{}
+	appStoreDiscoverRouter := structAppStoreDiscoverRouter.UnmarshalGivenResponseBody(resp.Body(), GetHelmEnvAutocompleteApi)
+	return appStoreDiscoverRouter.helmEnvAutocompleteResponseDTO
+}
+
 func (structAppStoreDiscoverRouter StructAppStoreDiscoverRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructAppStoreDiscoverRouter {
 	switch apiName {
 	case DiscoverAppApi:
 		json.Unmarshal(response, &structAppStoreDiscoverRouter.discoverAppApiResponse)
 	case GetDeploymentOfInstalledAppApi:
 		json.Unmarshal(response, &structAppStoreDiscoverRouter.deploymentOfInstalledAppResponseDTO)
+	case GetVersionsAutocompleteApi:
+		json.Unmarshal(response, &structAppStoreDiscoverRouter.helmAppVersionsDTO)
+	case DiscoverAppViaAppstoreApplicationVersionIdApi:
+		json.Unmarshal(response, &structAppStoreDiscoverRouter.helmAppViaAppVersionIDResponseDTO)
+	case GetHelmEnvAutocompleteApi:
+		json.Unmarshal(response, &structAppStoreDiscoverRouter.helmEnvAutocompleteResponseDTO)
+
 	}
 	return structAppStoreDiscoverRouter
 }
