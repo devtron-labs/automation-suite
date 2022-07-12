@@ -10,11 +10,12 @@ import (
 )
 
 type StructAppStoreDiscoverRouter struct {
-	discoverAppApiResponse              ResponseDTOs.DiscoverAppApiResponse
-	deploymentOfInstalledAppResponseDTO ResponseDTOs.DeploymentOfInstalledAppResponseDTO
-	helmAppVersionsDTO                  ResponseDTOs.HelmAppVersionsDTO
-	helmAppViaAppVersionIDResponseDTO   ResponseDTOs.HelmAppViaVersionIdResponseDTO
-	helmEnvAutocompleteResponseDTO      ResponseDTOs.HelmEnvAutocompleteResponseDTO
+	discoverAppApiResponse                  ResponseDTOs.DiscoverAppApiResponse
+	deploymentOfInstalledAppResponseDTO     ResponseDTOs.DeploymentOfInstalledAppResponseDTO
+	helmAppVersionsDTO                      ResponseDTOs.HelmAppVersionsDTO
+	helmAppViaAppVersionIDResponseDTO       ResponseDTOs.HelmAppViaVersionIdResponseDTO
+	helmEnvAutocompleteResponseDTO          ResponseDTOs.HelmEnvAutocompleteResponseDTO
+	templateValuesViaReferenceIdResponseDTO ResponseDTOs.TemplateValuesResponseDTO
 }
 
 func HitDiscoverAppApi(queryParams map[string]string, authToken string) ResponseDTOs.DiscoverAppApiResponse {
@@ -57,6 +58,14 @@ func HitHelmEnvAutocompleteApi(authToken string) ResponseDTOs.HelmEnvAutocomplet
 	return appStoreDiscoverRouter.helmEnvAutocompleteResponseDTO
 }
 
+func HitGetTemplateValuesViaReferenceIdApi(queryParams map[string]string, authToken string) ResponseDTOs.TemplateValuesResponseDTO {
+	resp, err := Base.MakeApiCall(GetTemplateValuesViaReferenceIdApiUrl, http.MethodGet, "", queryParams, authToken)
+	Base.HandleError(err, GetTemplateValuesViaReferenceIdApi)
+	structAppStoreDiscoverRouter := StructAppStoreDiscoverRouter{}
+	appStoreDiscoverRouter := structAppStoreDiscoverRouter.UnmarshalGivenResponseBody(resp.Body(), GetTemplateValuesViaReferenceIdApi)
+	return appStoreDiscoverRouter.templateValuesViaReferenceIdResponseDTO
+}
+
 func (structAppStoreDiscoverRouter StructAppStoreDiscoverRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructAppStoreDiscoverRouter {
 	switch apiName {
 	case DiscoverAppApi:
@@ -69,6 +78,8 @@ func (structAppStoreDiscoverRouter StructAppStoreDiscoverRouter) UnmarshalGivenR
 		json.Unmarshal(response, &structAppStoreDiscoverRouter.helmAppViaAppVersionIDResponseDTO)
 	case GetHelmEnvAutocompleteApi:
 		json.Unmarshal(response, &structAppStoreDiscoverRouter.helmEnvAutocompleteResponseDTO)
+	case GetTemplateValuesViaReferenceIdApi:
+		json.Unmarshal(response, &structAppStoreDiscoverRouter.templateValuesViaReferenceIdResponseDTO)
 
 	}
 	return structAppStoreDiscoverRouter

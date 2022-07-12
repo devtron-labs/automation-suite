@@ -11,4 +11,6 @@ const (
 	DiscoverAppViaAppstoreApplicationVersionIdApi string = "DiscoverAppViaAppstoreApplicationVersionIdApi"
 	GetHelmEnvAutocompleteApiUrl                  string = "/orchestrator/env/autocomplete/helm"
 	GetHelmEnvAutocompleteApi                     string = "GetHelmEnvAutocompleteApi"
+	GetTemplateValuesViaReferenceIdApiUrl         string = "/orchestrator/app-store/values/template/values"
+	GetTemplateValuesViaReferenceIdApi            string = "GetTemplateValuesViaReferenceIdApi"
 )

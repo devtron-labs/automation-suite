@@ -27,8 +27,8 @@ func (suite *AppStoreDiscoverTestSuite) TestDiscoverHelmAppsViaAppstoreName() {
 	})
 
 	suite.Run("A=2=DiscoverWithInCorrectRepoName", func() {
-		randomRepoName := Base.GetRandomStringOfGivenLength(8)
-		queryParams := map[string]string{"chartRepoId": randomRepoName}
+		randomAppstoreName := Base.GetRandomStringOfGivenLength(8)
+		queryParams := map[string]string{"appStoreName": randomAppstoreName}
 		time.Sleep(10 * time.Second)
 		ActiveDiscoveredApps := HitDiscoverAppApi(queryParams, suite.authToken)
 		assert.Nil(suite.T(), ActiveDiscoveredApps.Result)
@@ -40,3 +40,5 @@ func (suite *AppStoreDiscoverTestSuite) TestDiscoverHelmAppsViaAppstoreName() {
 	deleteChartRepoApiResp := ChartRepositoryRouter.HitDeleteChartRepo(byteValueOfStruct, suite.authToken)
 	assert.Equal(suite.T(), "Chart repo deleted successfully.", deleteChartRepoApiResp.Result)
 }
+
+//todo this API is not working as of now because of bug so test case is failing
