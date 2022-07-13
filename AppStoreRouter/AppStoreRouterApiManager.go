@@ -15,6 +15,7 @@ type StructAppStoreRouter struct {
 	getApplicationValuesListResponseDto ResponseDTOs.GetApplicationValuesListResponseDTO
 	installAppResponseDto               ResponseDTOs.InstallAppResponseDTO
 	installAppRequestDto                RequestDTOs.InstallAppRequestDTO
+	installedAppDetailsResponseDTO      ResponseDTOs.InstalledAppDetailsResponseDTO
 }
 
 func HitGetApplicationValuesList(appStoreId string, authToken string) ResponseDTOs.GetApplicationValuesListResponseDTO {
@@ -41,12 +42,22 @@ func HitDeleteInstalledAppApi(id string, authToken string) ResponseDTOs.InstallA
 	return appStoreRouter.installAppResponseDto
 }
 
+func HitGetInstalledAppDetailsApi(queryParams map[string]string, authToken string) ResponseDTOs.InstalledAppDetailsResponseDTO {
+	resp, err := Base.MakeApiCall(GetInstalledAppDetailsApiUrl, http.MethodGet, "", queryParams, authToken)
+	Base.HandleError(err, GetInstalledAppDetailsApi)
+	structAppStoreDiscoverRouter := StructAppStoreRouter{}
+	appStoreDiscoverRouter := structAppStoreDiscoverRouter.UnmarshalGivenResponseBody(resp.Body(), GetInstalledAppDetailsApi)
+	return appStoreDiscoverRouter.installedAppDetailsResponseDTO
+}
+
 func (structAppStoreRouter StructAppStoreRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructAppStoreRouter {
 	switch apiName {
 	case GetApplicationValuesListApi:
 		json.Unmarshal(response, &structAppStoreRouter.getApplicationValuesListResponseDto)
 	case InstallAppApi:
 		json.Unmarshal(response, &structAppStoreRouter.installAppResponseDto)
+	case GetInstalledAppDetailsApi:
+		json.Unmarshal(response, &structAppStoreRouter.installedAppDetailsResponseDTO)
 	}
 	return structAppStoreRouter
 }
