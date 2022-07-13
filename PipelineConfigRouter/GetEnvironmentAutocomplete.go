@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-func (suite *PipelinesConfigRouterTestSuite) TestClassC6GetAllEnvironmentDetails() {
+func (suite *PipelinesConfigRouterTestSuite) TestClassC6GetEnvironmentAutocompleteDetails() {
 	queryParams := map[string]string{"auth": "true"}
 	suite.Run("A=1=GetEnvironmentDetailsWithAuthAsTrue", func() {
 		allEnvironmentDetailsResponse := HitGetAllEnvironmentDetails(queryParams, suite.authToken)

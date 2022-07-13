@@ -93,7 +93,7 @@ func HitUpdateTeamApi(byteValueOfStruct []byte, authToken string) ResponseDTOs.S
 }
 
 func HitFetchForAutocompleteApi(authToken string) ResponseDTOs.FetchAllTeamResponseDTO {
-	resp, err := Base.MakeApiCall(FetchForAutocompleteApiUrl, http.MethodGet, "", nil, authToken)
+	resp, err := Base.MakeApiCall(FetchTeamAutocompleteApiUrl, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, FetchForAutocompleteApi)
 
 	teamRouterStruct := TeamsRouterStruct{}

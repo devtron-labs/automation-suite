@@ -431,10 +431,10 @@ func HitGetCdPipelineStrategies(appId string, authToken string) GetCdPipelineStr
 }
 
 func HitGetAllEnvironmentDetails(queryParams map[string]string, authToken string) EnvironmentDetailsResponseDTO {
-	resp, err := Base.MakeApiCall(GetAllEnvironmentDetailsApiUrl, http.MethodGet, "", queryParams, authToken)
-	Base.HandleError(err, GetAllEnvironmentDetailsApi)
+	resp, err := Base.MakeApiCall(GetEnvAutocompleteApiUrl, http.MethodGet, "", queryParams, authToken)
+	Base.HandleError(err, GetEnvAutocompleteApi)
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
-	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetAllEnvironmentDetailsApi)
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetEnvAutocompleteApi)
 	return pipelineConfigRouter.environmentDetailsResponseDTO
 }
 
@@ -566,7 +566,7 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.getCdPipelineStrategiesResponseDto)
 	case GetPipelineSuggestedCICDApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.pipelineSuggestedCDResponseDTO)
-	case GetAllEnvironmentDetailsApi:
+	case GetEnvAutocompleteApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.environmentDetailsResponseDTO)
 	case SaveDeploymentTemplateApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.saveDeploymentTemplateResponseDTO)
