@@ -7,22 +7,6 @@ import (
 	"strconv"
 )
 
-//todo disabling this test case until latest build not deployed on stage cluster
-/*func (suite *AppStoreTestSuite) TestInstallAppApiWithPayloadHavingAlreadyInstalledAppName() {
-	expectedPayload, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/AppStoreRouter/InstallAppRequestPayloadWithAlreadyExistsName.json")
-	resp := HitInstallAppApi(string(expectedPayload))
-
-	log.Println("Hitting the install App API with already installed app name")
-	latestResponse := HitInstallAppApi(string(expectedPayload))
-
-	log.Println("Validating the InstallAppApi response with already existed name in payload")
-	assert.Equal(suite.T(), "applications.argoproj.io \"deepak-airflow-test-already-installed-devtron-demo\" already exists", latestResponse.Errors[0].UserMessage)
-
-	log.Println("Removing the data created via API")
-	respOfDeleteInstallAppApi := HitDeleteInstalledAppApi(strconv.Itoa(resp.InstallAppRequestDto.InstalledAppId))
-	assert.Equal(suite.T(), resp.InstallAppRequestDto.InstalledAppId, respOfDeleteInstallAppApi.InstallAppRequestDto.InstalledAppId)
-}*/
-
 func (suite *AppStoreTestSuite) TestInstallApp() {
 
 	suite.Run("A=1=InstallAppWithValidPayload", func() {
@@ -32,12 +16,12 @@ func (suite *AppStoreTestSuite) TestInstallApp() {
 		expectedValuesOverrideYaml, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/AppStoreRouter/expectedValuesOverrideYaml.txt")
 
 		log.Println("Validating the InstallAppApi response with with valid payload")
-		assert.Equal(suite.T(), string(expectedValuesOverrideYaml), resp.InstallAppRequestDto.ValuesOverrideYaml)
-		assert.NotNil(suite.T(), resp.InstallAppRequestDto.InstalledAppId)
+		assert.Equal(suite.T(), string(expectedValuesOverrideYaml), resp.Result.ValuesOverrideYaml)
+		assert.NotNil(suite.T(), resp.Result.InstalledAppId)
 
 		log.Println("Removing the data created via API")
-		respOfDeleteInstallAppApi := HitDeleteInstalledAppApi(strconv.Itoa(resp.InstallAppRequestDto.InstalledAppId), suite.authToken)
-		assert.Equal(suite.T(), resp.InstallAppRequestDto.InstalledAppId, respOfDeleteInstallAppApi.InstallAppRequestDto.InstalledAppId)
+		respOfDeleteInstallAppApi := HitDeleteInstalledAppApi(strconv.Itoa(resp.Result.InstalledAppId), suite.authToken)
+		assert.Equal(suite.T(), resp.Result.InstalledAppId, respOfDeleteInstallAppApi.Result.InstalledAppId)
 	})
 	suite.Run("A=2=InstallAppWithInvalidTeamId", func() {
 		expectedPayload, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/AppStoreRouter/InstalledAppRequestPayloadWithInvalidTeamId.json")
@@ -63,5 +47,15 @@ func (suite *AppStoreTestSuite) TestInstallApp() {
 		log.Println("Hitting the InstallAppApi with valid payload")
 		resp := HitInstallAppApi(string(expectedPayload), suite.authToken)
 		assert.Equal(suite.T(), "Key: 'InstallAppVersionDTO.ReferenceValueKind' Error:Field validation for 'ReferenceValueKind' failed on the 'oneof' tag", resp.Errors[0].UserMessage)
+	})
+
+	suite.Run("A=6=InstallAppWithAlreadyExistingName", func() {
+		expectedPayload, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/AppStoreRouter/InstallAppRequestPayloadWithAlreadyExistsName.json")
+
+		log.Println("Hitting the install App API with already installed app name")
+		latestResponse := HitInstallAppApi(string(expectedPayload), suite.authToken)
+
+		log.Println("Validating the InstallAppApi response with already existed name in payload")
+		assert.Equal(suite.T(), "applications.argoproj.io \"deepak-airflow-test-already-installed-devtron-demo\" already exists", latestResponse.Errors[0].UserMessage)
 	})
 }
