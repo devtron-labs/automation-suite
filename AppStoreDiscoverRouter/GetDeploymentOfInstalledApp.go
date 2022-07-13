@@ -30,8 +30,8 @@ func (suite *AppStoreDiscoverTestSuite) TestDiscoverPreviouslyInstalledHelmAppsV
 		assert.NotNil(suite.T(), deploymentOfInstalledApp.Result[0].InstalledAppVersionId)
 		assert.Equal(suite.T(), deploymentOfInstalledApp.Result[0].AppName, "deepak-airflow-test")
 		log.Println("Removing the data created via API")
-		respOfDeleteInstallAppApi := AppStoreRouter.HitDeleteInstalledAppApi(strconv.Itoa(resp.InstallAppRequestDto.InstalledAppId), suite.authToken)
-		assert.Equal(suite.T(), resp.InstallAppRequestDto.InstalledAppId, respOfDeleteInstallAppApi.InstallAppRequestDto.InstalledAppId)
+		respOfDeleteInstallAppApi := AppStoreRouter.HitDeleteInstalledAppApi(strconv.Itoa(resp.Result.InstalledAppId), suite.authToken)
+		assert.Equal(suite.T(), resp.Result.InstalledAppId, respOfDeleteInstallAppApi.Result.InstalledAppId)
 	})
 }
 
