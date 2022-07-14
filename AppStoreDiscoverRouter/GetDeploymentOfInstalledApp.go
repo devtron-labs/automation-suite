@@ -10,13 +10,13 @@ import (
 )
 
 func (suite *AppStoreDiscoverTestSuite) TestDiscoverPreviouslyInstalledHelmAppsViaRepoId() {
-	log.Println("=== Here we are getting memcached chart repo ===")
+	log.Println("=== Here we are getting airflow chart repo ===")
 	queryParams := map[string]string{"appStoreName": "airflow"}
 	PollForGettingHelmAppData(queryParams, suite.authToken)
-	ActiveDiscoveredApps := HitDiscoverAppApi(queryParams, suite.authToken)
+	DiscoveredApps := HitDiscoverAppApi(queryParams, suite.authToken)
 
 	suite.Run("A=1=DiscoverWithoutDeployment", func() {
-		deploymentOfInstalledApp := HitGetDeploymentOfInstalledAppApi(strconv.Itoa(ActiveDiscoveredApps.Result[0].Id), suite.authToken)
+		deploymentOfInstalledApp := HitGetDeploymentOfInstalledAppApi(strconv.Itoa(DiscoveredApps.Result[0].Id), suite.authToken)
 		assert.Nil(suite.T(), deploymentOfInstalledApp.Result)
 	})
 
@@ -26,7 +26,7 @@ func (suite *AppStoreDiscoverTestSuite) TestDiscoverPreviouslyInstalledHelmAppsV
 		resp := AppStoreRouter.HitInstallAppApi(string(expectedPayload), suite.authToken)
 		time.Sleep(5 * time.Second)
 		log.Println("Hitting the GetDeploymentOfInstalledApp API with valid payload")
-		deploymentOfInstalledApp := HitGetDeploymentOfInstalledAppApi(strconv.Itoa(ActiveDiscoveredApps.Result[0].Id), suite.authToken)
+		deploymentOfInstalledApp := HitGetDeploymentOfInstalledAppApi(strconv.Itoa(DiscoveredApps.Result[0].Id), suite.authToken)
 		assert.NotNil(suite.T(), deploymentOfInstalledApp.Result[0].InstalledAppVersionId)
 		assert.Equal(suite.T(), deploymentOfInstalledApp.Result[0].AppName, "deepak-airflow-test")
 		log.Println("Removing the data created via API")

@@ -14,7 +14,7 @@ func (suite *AppStoreDiscoverTestSuite) TestDiscoverHelmAppsViaChartRepoId() {
 	log.Println("=== Here we are Adding a chart repo ===")
 	chartRepoConfig, _ := ChartRepositoryRouter.GetChartRepoRouterConfig()
 	RepoName := Base.GetRandomStringOfGivenLength(8)
-	createChartRepoRequestDto := ChartRepositoryRouter.CreateChartRepoRequestPayload(AUTH_MODE_ANONYMOUS, 0, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
+	createChartRepoRequestDto := ChartRepositoryRouter.CreateChartRepoRequestPayload(AuthModeAnonymous, 0, RepoName, chartRepoConfig.ChartRepoUrl, "", true)
 	byteValueOfStruct, _ := json.Marshal(createChartRepoRequestDto)
 	respGetRepoApi := ChartRepositoryRouter.HitCreateChartRepoApi(byteValueOfStruct, suite.authToken)
 	chartRepoId := respGetRepoApi.Result.Id

@@ -3,7 +3,7 @@ package AppStoreDiscoverRouter
 const (
 	DiscoverAppApiUrl                             string = "/orchestrator/app-store/discover/"
 	DiscoverAppApi                                string = "DiscoverAppApi"
-	AUTH_MODE_ANONYMOUS                           string = "ANONYMOUS"
+	AuthModeAnonymous                             string = "ANONYMOUS"
 	GetDeploymentOfInstalledAppApiUrl             string = "/orchestrator/app-store/deployment/installed-app/"
 	GetDeploymentOfInstalledAppApi                string = "GetDeploymentOfInstalledAppApi"
 	GetVersionsAutocompleteApiUrl                 string = "/orchestrator/app-store/discover/application/"
@@ -13,4 +13,9 @@ const (
 	GetHelmEnvAutocompleteApi                     string = "GetHelmEnvAutocompleteApi"
 	GetTemplateValuesViaReferenceIdApiUrl         string = "/orchestrator/app-store/values/template/values"
 	GetTemplateValuesViaReferenceIdApi            string = "GetTemplateValuesViaReferenceIdApi"
+	GetApplicationValuesListApiUrl                string = "/orchestrator/app-store/values/application/values/list/"
+	GetApplicationValuesListApi                   string = "GetApplicationValuesListApi"
+	SaveTemplateValuesApiUrl                      string = "/orchestrator/app-store/values/template/values"
+	SaveTemplateValuesApi                         string = "SaveTemplateValuesApi"
+	DeleteTemplateValuesApi                       string = "DeleteTemplateValuesApi"
 )

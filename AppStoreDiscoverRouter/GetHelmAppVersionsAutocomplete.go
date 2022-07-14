@@ -8,7 +8,7 @@ import (
 )
 
 func (suite *AppStoreDiscoverTestSuite) TestVersionsAutocomplete() {
-	log.Println("=== Here we are getting memcached chart repo ===")
+	log.Println("=== Here we are getting airflow chart repo ===")
 	queryParams := map[string]string{"appStoreName": "airflow"}
 	PollForGettingHelmAppData(queryParams, suite.authToken)
 	ActiveDiscoveredApps := HitDiscoverAppApi(queryParams, suite.authToken)
