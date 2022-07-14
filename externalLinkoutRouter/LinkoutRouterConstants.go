@@ -1,7 +1,7 @@
 package externalLinkoutRouter
 
 const (
-	SaveLinkApiUrl        string = "/orchestrator/external-links"
+	SaveExternalLink      string = "/orchestrator/external-links"
 	CreateLinkApi         string = "CreateLinkApi"
 	SaveToolApi           string = "SaveToolApi"
 	SaveToolApiUrl        string = "/orchestrator/external-links/tools"

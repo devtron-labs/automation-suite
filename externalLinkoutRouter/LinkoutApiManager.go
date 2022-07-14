@@ -55,34 +55,21 @@ func (linkRouterStruct LinkRouterStruct) UnmarshalGivenResponseBody(response []b
 	return linkRouterStruct
 }
 func HitCreateLinkApi(payload []byte, authToken string) ResponseDTO.CreateLinkResponseDto {
-	var payloadOfApi string
-	if payload != nil {
-		payloadOfApi = string(payload)
-	} else {
-		var createLinkRequestDto RequestDTO.CreateLinkRequestDto
-		createLinkRequestDto.Name = Base.GetRandomStringOfGivenLength(10)
-		createLinkRequestDto.Active = false
-		createLinkRequestDto.MonitoringToolId = 1
-		createLinkRequestDto.Url = Base.GetRandomStringOfGivenLength(20)
-		byteValueOfStruct, _ := json.Marshal(createLinkRequestDto)
-		payloadOfApi = string(byteValueOfStruct)
-	}
-
-	resp, err := Base.MakeApiCall(SaveLinkApiUrl, http.MethodPost, payloadOfApi, nil, authToken)
+	resp, err := Base.MakeApiCall(SaveExternalLink, http.MethodPost, string(payload), nil, authToken)
 	Base.HandleError(err, CreateLinkApi)
 
 	linkRouterStruct := LinkRouterStruct{}
-	externalLinkoutRouter := linkRouterStruct.UnmarshalGivenResponseBody(resp.Body(), CreateLinkApi)
-	return externalLinkoutRouter.createLinkResponseDto
+	externalLinkOutRouter := linkRouterStruct.UnmarshalGivenResponseBody(resp.Body(), CreateLinkApi)
+	return externalLinkOutRouter.createLinkResponseDto
 }
 
 func HitDeleteLinkApi(id int, authToken string) ResponseDTO.CreateLinkResponseDto {
-	resp, err := Base.MakeApiCall(SaveLinkApiUrl+"?id="+strconv.Itoa(id), http.MethodDelete, "", nil, authToken)
+	resp, err := Base.MakeApiCall(SaveExternalLink+"?id="+strconv.Itoa(id), http.MethodDelete, "", nil, authToken)
 	Base.HandleError(err, CreateLinkApi)
 
 	linkRouterStruct := LinkRouterStruct{}
-	externalLinkoutRouter := linkRouterStruct.UnmarshalGivenResponseBody(resp.Body(), CreateLinkApi)
-	return externalLinkoutRouter.createLinkResponseDto
+	externalLinkOutRouter := linkRouterStruct.UnmarshalGivenResponseBody(resp.Body(), CreateLinkApi)
+	return externalLinkOutRouter.createLinkResponseDto
 }
 
 func HitFetchAllToolsApi(authToken string) ResponseDTO.FetchAllToolsResponseDto {
@@ -90,50 +77,50 @@ func HitFetchAllToolsApi(authToken string) ResponseDTO.FetchAllToolsResponseDto 
 	Base.HandleError(err, SaveToolApi)
 
 	linkRouterStruct := LinkRouterStruct{}
-	externalLinkoutRouter := linkRouterStruct.UnmarshalGivenResponseBody(resp.Body(), SaveToolApi)
-	return externalLinkoutRouter.fetchAllToolsResponseDto
+	externalLinkOutRouter := linkRouterStruct.UnmarshalGivenResponseBody(resp.Body(), SaveToolApi)
+	return externalLinkOutRouter.fetchAllToolsResponseDto
 }
 
 func HitFetchAllLinkApi(authToken string) ResponseDTO.GetLinkByIdResponseDto {
-	resp, err := Base.MakeApiCall(SaveLinkApiUrl, http.MethodGet, "", nil, authToken)
+	resp, err := Base.MakeApiCall(SaveExternalLink, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, FetchAllLinkApi)
 
 	linkRouterStruct := LinkRouterStruct{}
-	externalLinkoutRouter := linkRouterStruct.UnmarshalGivenResponseBody(resp.Body(), FetchAllLinkApi)
-	return externalLinkoutRouter.getLinkByIdResponseDto
+	externalLinkOutRouter := linkRouterStruct.UnmarshalGivenResponseBody(resp.Body(), FetchAllLinkApi)
+	return externalLinkOutRouter.getLinkByIdResponseDto
 }
 func HitFetchAllLinkByClusterIdApi(id map[string]string, authToken string) ResponseDTO.GetLinkByIdResponseDto {
-	resp, err := Base.MakeApiCall(SaveLinkApiUrl, http.MethodGet, "", id, authToken)
+	resp, err := Base.MakeApiCall(SaveExternalLink, http.MethodGet, "", id, authToken)
 	Base.HandleError(err, FetchAllLinkApi)
 
 	linkRouterStruct := LinkRouterStruct{}
-	externalLinkoutRouter := linkRouterStruct.UnmarshalGivenResponseBody(resp.Body(), FetchAllLinkApi)
-	return externalLinkoutRouter.getLinkByIdResponseDto
+	externalLinkOutRouter := linkRouterStruct.UnmarshalGivenResponseBody(resp.Body(), FetchAllLinkApi)
+	return externalLinkOutRouter.getLinkByIdResponseDto
 }
 
 func HitGetLinkByIdApi(id string, authToken string) ResponseDTO.GetLinkByIdResponseDto {
-	resp, err := Base.MakeApiCall(SaveLinkApiUrl+"/"+id, http.MethodGet, "", nil, authToken)
+	resp, err := Base.MakeApiCall(SaveExternalLink+"/"+id, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, GetLinkByIdApi)
 
 	linkRouterStruct := LinkRouterStruct{}
-	externalLinkoutRouter := linkRouterStruct.UnmarshalGivenResponseBody(resp.Body(), GetLinkByIdApi)
-	return externalLinkoutRouter.getLinkByIdResponseDto
+	externalLinkOutRouter := linkRouterStruct.UnmarshalGivenResponseBody(resp.Body(), GetLinkByIdApi)
+	return externalLinkOutRouter.getLinkByIdResponseDto
 }
 
 func HitUpdateLinkApi(byteValueOfStruct []byte, authToken string) ResponseDTO.CreateLinkResponseDto {
-	resp, err := Base.MakeApiCall(SaveLinkApiUrl, http.MethodPut, string(byteValueOfStruct), nil, authToken)
+	resp, err := Base.MakeApiCall(SaveExternalLink, http.MethodPut, string(byteValueOfStruct), nil, authToken)
 	Base.HandleError(err, UpdateLinkApi)
 
 	linkRouterStruct := LinkRouterStruct{}
-	externalLinkoutRouter := linkRouterStruct.UnmarshalGivenResponseBody(resp.Body(), UpdateLinkApi)
-	return externalLinkoutRouter.createLinkResponseDto
+	externalLinkOutRouter := linkRouterStruct.UnmarshalGivenResponseBody(resp.Body(), UpdateLinkApi)
+	return externalLinkOutRouter.createLinkResponseDto
 }
 
-type ExternalLinkOutRouterTestSuite struct {
+type LinkOutRouterTestSuite struct {
 	suite.Suite
 	authToken string
 }
 
-func (suite *ExternalLinkOutRouterTestSuite) SetupSuite() {
+func (suite *LinkOutRouterTestSuite) SetupSuite() {
 	suite.authToken = Base.GetAuthToken()
 }

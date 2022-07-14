@@ -6,5 +6,5 @@ import (
 )
 
 func TestLinkOutRouterSuite(t *testing.T) {
-	suite.Run(t, new(ExternalLinkOutRouterTestSuite))
+	suite.Run(t, new(LinkOutRouterTestSuite))
 }

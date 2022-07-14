@@ -56,7 +56,7 @@ func TestDockerRegRouterSuite(t *testing.T) {
 }
 
 func TestLinkOutRouterSuite(t *testing.T) {
-	suite.Run(t, new(externalLinkoutRouter.ExternalLinkOutRouterTestSuite))
+	suite.Run(t, new(externalLinkoutRouter.LinkOutRouterTestSuite))
 }
 
 func TestHelmAppRouterSuite(t *testing.T) {
