@@ -22,7 +22,8 @@ func (suite *ChartRepoTestSuite) TestClassC3GetChartRepoById() {
 		assert.Equal(suite.T(), AUTH_MODE_ANONYMOUS, respGetRepoListApi.Result.AuthMode)
 		createChartRepoRequestDto.Id = respGetRepoApi.Result.Id
 		byteValueOfStruct, _ = json.Marshal(createChartRepoRequestDto)
-		HitDeleteChartRepo(byteValueOfStruct, suite.authToken)
+		deleteChartRepoApiResp := HitDeleteChartRepo(byteValueOfStruct, suite.authToken)
+		assert.Equal(suite.T(), "Chart repo deleted successfully.", deleteChartRepoApiResp.Result)
 	})
 
 	suite.Run("A=2=GetRepoByInvalidId", func() {
