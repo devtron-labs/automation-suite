@@ -1,7 +1,6 @@
 package AppStoreRouter
 
 import (
-	"automation-suite/AppStoreRouter/RequestDTOs"
 	"automation-suite/AppStoreRouter/ResponseDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
@@ -13,8 +12,6 @@ import (
 
 type StructAppStoreRouter struct {
 	getApplicationValuesListResponseDto ResponseDTOs.GetApplicationValuesListResponseDTO
-	installAppResponseDto               ResponseDTOs.InstallAppResponseDTO
-	installAppRequestDto                RequestDTOs.InstallAppRequestDTO
 	installedAppDetailsResponseDTO      ResponseDTOs.InstalledAppDetailsResponseDTO
 }
 
@@ -24,22 +21,6 @@ func HitGetApplicationValuesList(appStoreId string, authToken string) ResponseDT
 	structAppStoreRouter := StructAppStoreRouter{}
 	appStoreRouter := structAppStoreRouter.UnmarshalGivenResponseBody(resp.Body(), GetApplicationValuesListApi)
 	return appStoreRouter.getApplicationValuesListResponseDto
-}
-
-func HitInstallAppApi(requestPayload string, authToken string) ResponseDTOs.InstallAppResponseDTO {
-	resp, err := Base.MakeApiCall(InstallAppApiUrl, http.MethodPost, requestPayload, nil, authToken)
-	Base.HandleError(err, InstallAppApi)
-	structAppStoreRouter := StructAppStoreRouter{}
-	appStoreRouter := structAppStoreRouter.UnmarshalGivenResponseBody(resp.Body(), InstallAppApi)
-	return appStoreRouter.installAppResponseDto
-}
-
-func HitDeleteInstalledAppApi(id string, authToken string) ResponseDTOs.InstallAppResponseDTO {
-	resp, err := Base.MakeApiCall(DeleteInstalledAppApiUrl+id, http.MethodDelete, " ", nil, authToken)
-	Base.HandleError(err, DeleteInstalledAppApi)
-	structAppStoreRouter := StructAppStoreRouter{}
-	appStoreRouter := structAppStoreRouter.UnmarshalGivenResponseBody(resp.Body(), InstallAppApi)
-	return appStoreRouter.installAppResponseDto
 }
 
 func HitGetInstalledAppDetailsApi(queryParams map[string]string, authToken string) ResponseDTOs.InstalledAppDetailsResponseDTO {
@@ -54,8 +35,6 @@ func (structAppStoreRouter StructAppStoreRouter) UnmarshalGivenResponseBody(resp
 	switch apiName {
 	case GetApplicationValuesListApi:
 		json.Unmarshal(response, &structAppStoreRouter.getApplicationValuesListResponseDto)
-	case InstallAppApi:
-		json.Unmarshal(response, &structAppStoreRouter.installAppResponseDto)
 	case GetInstalledAppDetailsApi:
 		json.Unmarshal(response, &structAppStoreRouter.installedAppDetailsResponseDTO)
 	}

@@ -1,4 +1,4 @@
-package AppStoreRouter
+package AppStoreDeploymentRouter
 
 import (
 	Base "automation-suite/testUtils"
@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func (suite *AppStoreTestSuite) TestInstallApp() {
+func (suite *AppStoreDeploymentTestSuite) TestInstallApp() {
 
 	suite.Run("A=1=InstallAppWithValidPayload", func() {
 		expectedPayload, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/AppStoreRouter/InstallAppRequestPayload.json")

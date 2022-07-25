@@ -1,7 +1,7 @@
 package AppStoreDiscoverRouter
 
 import (
-	"automation-suite/AppStoreRouter"
+	"automation-suite/AppStoreDeploymentRouter"
 	"automation-suite/AppStoreRouter/RequestDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
@@ -29,7 +29,7 @@ func (suite *AppStoreDiscoverTestSuite) TestGetApplicationValuesList() {
 		json.Unmarshal(expectedPayload, &installAppRequestDTO)
 		installAppRequestDTO.AppName = "deepak-helm-airflow" + strings.ToLower(Base.GetRandomStringOfGivenLength(5))
 		requestPayload, _ := json.Marshal(installAppRequestDTO)
-		responseAfterInstallingApp := AppStoreRouter.HitInstallAppApi(string(requestPayload), suite.authToken)
+		responseAfterInstallingApp := AppStoreDeploymentRouter.HitInstallAppApi(string(requestPayload), suite.authToken)
 		time.Sleep(2 * time.Second)
 		appName := responseAfterInstallingApp.Result.AppName
 		log.Println("=== Here We are getting noOfDeployedCharts after new deployment ===")
@@ -42,7 +42,7 @@ func (suite *AppStoreDiscoverTestSuite) TestGetApplicationValuesList() {
 		assert.Equal(suite.T(), "EXISTING", ApplicationValuesList.Result.Values[3].Kind)
 
 		log.Println("Removing the data created via API")
-		respOfDeleteInstallAppApi := AppStoreRouter.HitDeleteInstalledAppApi(strconv.Itoa(responseAfterInstallingApp.Result.InstalledAppId), suite.authToken)
+		respOfDeleteInstallAppApi := AppStoreDeploymentRouter.HitDeleteInstalledAppApi(strconv.Itoa(responseAfterInstallingApp.Result.InstalledAppId), suite.authToken)
 		assert.Equal(suite.T(), responseAfterInstallingApp.Result.InstalledAppId, respOfDeleteInstallAppApi.Result.InstalledAppId)
 	})
 

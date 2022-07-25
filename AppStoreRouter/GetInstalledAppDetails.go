@@ -1,6 +1,7 @@
 package AppStoreRouter
 
 import (
+	"automation-suite/AppStoreDeploymentRouter"
 	"automation-suite/AppStoreRouter/RequestDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
@@ -19,7 +20,7 @@ func (suite *AppStoreTestSuite) TestGetInstalledAppDetails() {
 	json.Unmarshal(expectedPayload, &installAppRequestDTO)
 	installAppRequestDTO.AppName = "deepak-helm-airflow" + strings.ToLower(Base.GetRandomStringOfGivenLength(5))
 	requestPayload, _ := json.Marshal(installAppRequestDTO)
-	responseAfterInstallingApp := HitInstallAppApi(string(requestPayload), suite.authToken)
+	responseAfterInstallingApp := AppStoreDeploymentRouter.HitInstallAppApi(string(requestPayload), suite.authToken)
 	time.Sleep(2 * time.Second)
 	installedAppId := responseAfterInstallingApp.Result.InstalledAppId
 	environmentId := strconv.Itoa(responseAfterInstallingApp.Result.EnvironmentId)
@@ -65,7 +66,7 @@ func (suite *AppStoreTestSuite) TestGetInstalledAppDetails() {
 	})
 
 	log.Println("Removing the data created via API")
-	respOfDeleteInstallAppApi := HitDeleteInstalledAppApi(strconv.Itoa(responseAfterInstallingApp.Result.InstalledAppId), suite.authToken)
+	respOfDeleteInstallAppApi := AppStoreDeploymentRouter.HitDeleteInstalledAppApi(strconv.Itoa(responseAfterInstallingApp.Result.InstalledAppId), suite.authToken)
 	assert.Equal(suite.T(), responseAfterInstallingApp.Result.InstalledAppId, respOfDeleteInstallAppApi.Result.InstalledAppId)
 }
 
