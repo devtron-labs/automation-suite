@@ -1,8 +1,9 @@
 {
-  "teamId": 3,
+  "teamId": 1,
   "referenceValueId": 16227,
   "referenceValueKind": "DEFAULT",
   "environmentId": 1,
+  "namespace": "devtron-demo",
   "appStoreVersion": 16227,
   "valuesOverride": {
     "global": {

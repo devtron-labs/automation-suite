@@ -18,7 +18,7 @@ func (suite *AppStoreTestSuite) TestGetInstalledAppDetails() {
 	log.Println("Hitting the InstallAppApi with valid payload")
 	installAppRequestDTO := RequestDTOs.InstallAppRequestDTO{}
 	json.Unmarshal(expectedPayload, &installAppRequestDTO)
-	installAppRequestDTO.AppName = "deepak-helm-airflow" + strings.ToLower(Base.GetRandomStringOfGivenLength(5))
+	installAppRequestDTO.AppName = "automation-helm-airflow" + strings.ToLower(Base.GetRandomStringOfGivenLength(5))
 	requestPayload, _ := json.Marshal(installAppRequestDTO)
 	responseAfterInstallingApp := AppStoreDeploymentRouter.HitInstallAppApi(string(requestPayload), suite.authToken)
 	time.Sleep(2 * time.Second)

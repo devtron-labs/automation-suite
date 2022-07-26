@@ -1,10 +1,13 @@
 package AppStoreDeploymentRouter
 
 import (
+	"automation-suite/AppStoreDeploymentRouter/RequestDTOs"
 	Base "automation-suite/testUtils"
+	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"strconv"
+	"strings"
 )
 
 func (suite *AppStoreDeploymentTestSuite) TestInstallApp() {
@@ -12,7 +15,11 @@ func (suite *AppStoreDeploymentTestSuite) TestInstallApp() {
 	suite.Run("A=1=InstallAppWithValidPayload", func() {
 		expectedPayload, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/AppStoreRouter/InstallAppRequestPayload.json")
 		log.Println("Hitting the InstallAppApi with valid payload")
-		resp := HitInstallAppApi(string(expectedPayload), suite.authToken)
+		installAppRequestDTO := RequestDTOs.InstallAppRequestDTO{}
+		json.Unmarshal(expectedPayload, &installAppRequestDTO)
+		installAppRequestDTO.AppName = "automation-helm-airflow" + strings.ToLower(Base.GetRandomStringOfGivenLength(5))
+		requestPayload, _ := json.Marshal(installAppRequestDTO)
+		resp := HitInstallAppApi(string(requestPayload), suite.authToken)
 		expectedValuesOverrideYaml, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/AppStoreRouter/expectedValuesOverrideYaml.txt")
 
 		log.Println("Validating the InstallAppApi response with with valid payload")
