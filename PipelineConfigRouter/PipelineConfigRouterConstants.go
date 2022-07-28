@@ -23,7 +23,7 @@ const (
 	GetCdPipelineStrategiesApi                string = "GetCdPipelineStrategiesApi"
 	GetPipelineSuggestedCICDApiUrl            string = "/orchestrator/app/pipeline/suggest/"
 	GetPipelineSuggestedCICDApi               string = "GetPipelineSuggestedCICDApi"
-	GetEnvAutocompleteApiUrl                  string = "/orchestrator/env/autocomplete?auth=true"
+	GetEnvAutocompleteApiUrl                  string = "/orchestrator/env/autocomplete"
 	GetEnvAutocompleteApi                     string = "GetEnvAutocompleteApi"
 	SaveDeploymentTemplateAPiUrl              string = "/orchestrator/app/template"
 	SaveDeploymentTemplateApi                 string = "SaveDeploymentTemplateApi"
