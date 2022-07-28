@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"log"
+	"strconv"
 	"strings"
 )
 
@@ -20,12 +21,14 @@ func (suite *ClustersRouterTestSuite) TestSaveCluster() {
 		assert.Equal(suite.T(), clusterName, saveClusterResponse.Result.ClusterName)
 		assert.Equal(suite.T(), file.ClusterBearerToken, saveClusterResponse.Result.Config.BearerToken)
 		assert.Equal(suite.T(), file.ClusterServerUrl, saveClusterResponse.Result.ServerUrl)
+		queryParams := map[string]string{"id": strconv.Itoa(saveClusterResponse.Result.Id)}
+		getClusterResponse := HitGetClusterByIdApi(queryParams, suite.authToken)
+		assert.Equal(suite.T(), clusterName, getClusterResponse.Result.ClusterName)
 		log.Println("=== Here we are deleting the cluster after verification ===")
 		requestPayload = GetRequestPayloadForSaveOrDeleteCluster(saveClusterResponse.Result.Id, clusterName, file.ClusterBearerToken, file.ClusterServerUrl)
 		byteValueOfStruct, _ = json.Marshal(requestPayload)
 		deleteClusterResponse := HitDeleteClusterApi(byteValueOfStruct, suite.authToken)
 		assert.Equal(suite.T(), "Cluster deleted successfully.", deleteClusterResponse.Result)
-
 	})
 
 	suite.Run("A=2=SaveClusterWithInvalidServerUrl", func() {

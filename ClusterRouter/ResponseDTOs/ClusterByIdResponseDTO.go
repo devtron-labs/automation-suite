@@ -2,9 +2,9 @@ package ResponseDTOs
 
 import "automation-suite/testUtils"
 
-type DeleteClusterResponseDTO struct {
+type ClusterByIdResponseDTO struct {
 	Code   int                `json:"code"`
 	Status string             `json:"status"`
-	Result string             `json:"result"`
+	Result Cluster            `json:"result"`
 	Errors []testUtils.Errors `json:"errors"`
 }

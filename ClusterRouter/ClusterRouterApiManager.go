@@ -14,6 +14,7 @@ import (
 type StructClusterRouter struct {
 	saveClusterResponseDTO   ResponseDTOs.SaveClusterResponseDTO
 	deleteClusterResponseDTO ResponseDTOs.DeleteClusterResponseDTO
+	clusterByIdResponseDTO   ResponseDTOs.ClusterByIdResponseDTO
 }
 
 func HitSaveClusterApi(payload []byte, authToken string) ResponseDTOs.SaveClusterResponseDTO {
@@ -32,12 +33,23 @@ func HitDeleteClusterApi(payload []byte, authToken string) ResponseDTOs.DeleteCl
 	return apiRouter.deleteClusterResponseDTO
 }
 
+func HitGetClusterByIdApi(queryParams map[string]string, authToken string) ResponseDTOs.ClusterByIdResponseDTO {
+	resp, err := Base.MakeApiCall(SaveClusterApiUrl, http.MethodGet, "", queryParams, authToken)
+	Base.HandleError(err, GetClusterById)
+	structClusterRouter := StructClusterRouter{}
+	apiRouter := structClusterRouter.UnmarshalGivenResponseBody(resp.Body(), GetClusterById)
+	return apiRouter.clusterByIdResponseDTO
+}
+
 func (structClusterRouter StructClusterRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructClusterRouter {
 	switch apiName {
 	case SaveClusterApi:
 		json.Unmarshal(response, &structClusterRouter.saveClusterResponseDTO)
 	case DeleteClusterApi:
 		json.Unmarshal(response, &structClusterRouter.deleteClusterResponseDTO)
+	case GetClusterById:
+		json.Unmarshal(response, &structClusterRouter.clusterByIdResponseDTO)
+
 	}
 	return structClusterRouter
 }
