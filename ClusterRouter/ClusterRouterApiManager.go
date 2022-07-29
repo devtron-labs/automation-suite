@@ -15,6 +15,7 @@ type StructClusterRouter struct {
 	saveClusterResponseDTO   ResponseDTOs.SaveClusterResponseDTO
 	deleteClusterResponseDTO ResponseDTOs.DeleteClusterResponseDTO
 	clusterByIdResponseDTO   ResponseDTOs.ClusterByIdResponseDTO
+	findAllForAutocomplete   ResponseDTOs.FindAllForAutocomplete
 }
 
 func HitSaveClusterApi(payload []byte, authToken string) ResponseDTOs.SaveClusterResponseDTO {
@@ -41,6 +42,14 @@ func HitGetClusterByIdApi(queryParams map[string]string, authToken string) Respo
 	return apiRouter.clusterByIdResponseDTO
 }
 
+func HitFindAllClusterForAutocomplete(authToken string) ResponseDTOs.FindAllForAutocomplete {
+	resp, err := Base.MakeApiCall(SaveClusterApiUrl+"/autocomplete", http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, FindAllForAutocompleteApi)
+	structClusterRouter := StructClusterRouter{}
+	apiRouter := structClusterRouter.UnmarshalGivenResponseBody(resp.Body(), FindAllForAutocompleteApi)
+	return apiRouter.findAllForAutocomplete
+}
+
 func (structClusterRouter StructClusterRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructClusterRouter {
 	switch apiName {
 	case SaveClusterApi:
@@ -49,7 +58,8 @@ func (structClusterRouter StructClusterRouter) UnmarshalGivenResponseBody(respon
 		json.Unmarshal(response, &structClusterRouter.deleteClusterResponseDTO)
 	case GetClusterById:
 		json.Unmarshal(response, &structClusterRouter.clusterByIdResponseDTO)
-
+	case FindAllForAutocompleteApi:
+		json.Unmarshal(response, &structClusterRouter.findAllForAutocomplete)
 	}
 	return structClusterRouter
 }
