@@ -17,7 +17,7 @@ func (suite *AppStoreDeploymentTestSuite) TestInstallApp() {
 		log.Println("Hitting the InstallAppApi with valid payload")
 		installAppRequestDTO := RequestDTOs.InstallAppRequestDTO{}
 		json.Unmarshal(expectedPayload, &installAppRequestDTO)
-		installAppRequestDTO.AppName = "automation-helm-airflow" + strings.ToLower(Base.GetRandomStringOfGivenLength(5))
+		installAppRequestDTO.AppName = "automation" + strings.ToLower(Base.GetRandomStringOfGivenLength(5))
 		requestPayload, _ := json.Marshal(installAppRequestDTO)
 		resp := HitInstallAppApi(string(requestPayload), suite.authToken)
 		expectedValuesOverrideYaml, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/AppStoreRouter/expectedValuesOverrideYaml.txt")
