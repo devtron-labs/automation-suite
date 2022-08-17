@@ -443,6 +443,8 @@ func GetRequestPayloadForSaveDeploymentTemplate(AppId int, chartRefId int, defau
 	saveDeploymentTemplateRequestDTO.AppId = AppId
 	saveDeploymentTemplateRequestDTO.ChartRefId = chartRefId
 	saveDeploymentTemplateRequestDTO.ValuesOverride = defaultOverride
+	saveDeploymentTemplateRequestDTO.ValuesOverride.Spec.Affinity.Key = "node"
+	saveDeploymentTemplateRequestDTO.ValuesOverride.Spec.Affinity.Values = "devtron"
 	saveDeploymentTemplateRequestDTO.DefaultAppOverride = defaultOverride
 	return saveDeploymentTemplateRequestDTO
 }
@@ -523,7 +525,7 @@ func HitTriggerCiPipelineApi(payload []byte, authToken string) ResponseDTOs.Trig
 	return pipelineConfigRouter.triggerCiPipelineResponseDTO
 }
 
-func createPayloadForTriggerCiPipeline(commit string, PipelineId int, ciPipelineMaterialId int, invalidateCache bool) RequestDTOs.TriggerCiPipelineRequestDTO {
+func CreatePayloadForTriggerCiPipeline(commit string, PipelineId int, ciPipelineMaterialId int, invalidateCache bool) RequestDTOs.TriggerCiPipelineRequestDTO {
 	var listOfCiPipelineMaterials []RequestDTOs.CiPipelineMaterials
 	listOfCiPipelineMaterials = append(listOfCiPipelineMaterials, getCiPipelineMaterials(commit, ciPipelineMaterialId))
 	TriggerCiPipelineRequestDTO := RequestDTOs.TriggerCiPipelineRequestDTO{}
@@ -853,7 +855,7 @@ func DeleteCiPipeline(appId int, ciPipelineId int, authToken string) {
 	return
 }
 
-func getRequestPayloadForSaveCdPipelineApi(appId int, AppWorkflowId int, EnvironmentId int, CiPipelineId int, ParentPipelineId int, strategy string, prescript string, postscript string, pipelineTriggerType string) RequestDTOs.SaveCdPipelineRequestDTO {
+func GetRequestPayloadForSaveCdPipelineApi(appId int, AppWorkflowId int, EnvironmentId int, CiPipelineId int, ParentPipelineId int, strategy string, prescript string, postscript string, pipelineTriggerType string) RequestDTOs.SaveCdPipelineRequestDTO {
 	CdPipelineRequestDTO := RequestDTOs.SaveCdPipelineRequestDTO{}
 	CdPipelineRequestDTO.AppId = appId
 	CdPipelineRequestDTO.Pipelines = getPipeLines(AppWorkflowId, EnvironmentId, CiPipelineId, ParentPipelineId, strategy, prescript, postscript, pipelineTriggerType)

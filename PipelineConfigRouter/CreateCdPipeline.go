@@ -60,7 +60,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassB7SaveCdPipeline() {
 	postStageScript, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/PipeLineConfigRouter/postStageScript.txt")
 
 	suite.Run("A=1=AutomaticStrategyWithGlobalSecretAndConfigMap", func() {
-		payload := getRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Automatic, string(preStageScript), string(postStageScript), Automatic)
+		payload := GetRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Automatic, string(preStageScript), string(postStageScript), Automatic)
 		bytePayload, _ := json.Marshal(payload)
 		savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
 		time.Sleep(3 * time.Second)
@@ -74,7 +74,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassB7SaveCdPipeline() {
 	})
 
 	suite.Run("A=2=ManualStrategyWithAutomaticPipelineTriggerType", func() {
-		payload := getRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Automatic, string(preStageScript), string(postStageScript), Manual)
+		payload := GetRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Automatic, string(preStageScript), string(postStageScript), Manual)
 		bytePayload, _ := json.Marshal(payload)
 		savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
 		time.Sleep(2 * time.Second)
@@ -89,7 +89,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassB7SaveCdPipeline() {
 	})
 
 	suite.Run("A=3=ManualStrategyWithManualPipelineTriggerType", func() {
-		payload := getRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Manual, string(preStageScript), string(postStageScript), Manual)
+		payload := GetRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Manual, string(preStageScript), string(postStageScript), Manual)
 		bytePayload, _ := json.Marshal(payload)
 		savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
 		time.Sleep(2 * time.Second)
@@ -103,7 +103,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassB7SaveCdPipeline() {
 	})
 
 	suite.Run("A=4=SaveAppCdWithInvalidAppID", func() {
-		payload := getRequestPayloadForSaveCdPipelineApi(Base.GetRandomNumberOf9Digit(), workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Manual, string(preStageScript), string(postStageScript), Manual)
+		payload := GetRequestPayloadForSaveCdPipelineApi(Base.GetRandomNumberOf9Digit(), workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Manual, string(preStageScript), string(postStageScript), Manual)
 		bytePayload, _ := json.Marshal(payload)
 		savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
 		time.Sleep(2 * time.Second)

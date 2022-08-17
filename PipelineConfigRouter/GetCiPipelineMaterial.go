@@ -64,7 +64,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD2GetCiPipelineMaterial() 
 	postStageScript, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/PipeLineConfigRouter/postStageScript.txt")
 
 	log.Println("=== Here we are saving CD pipeline ===")
-	payload := getRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Automatic, string(preStageScript), string(postStageScript), Automatic)
+	payload := GetRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Automatic, string(preStageScript), string(postStageScript), Automatic)
 	bytePayload, _ := json.Marshal(payload)
 	savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
 	time.Sleep(2 * time.Second)
