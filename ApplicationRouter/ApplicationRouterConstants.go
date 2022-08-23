@@ -1,6 +1,8 @@
 package ApplicationRouter
 
 const (
-	GetResourceTreeApiBaseUrl string = "/orchestrator/api/v1/applications/"
+	ApplicationsRouterBaseUrl string = "/orchestrator/api/v1/applications/"
 	GetResourceTreeApi        string = "GetResourceTreeApi"
+	GetManagedResourcesApi    string = "GetManagedResourcesApi"
+	GetListApi                string = "GetListApi"
 )
