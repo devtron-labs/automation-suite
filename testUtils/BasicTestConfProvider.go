@@ -351,7 +351,7 @@ func ReadBaseEnvConfig() *BaseEnvConfigStruct {
 	return cfg
 }
 
-func ReadEventStreamsForSpecificApi(apiUrl string, authToken string, t *testing.T) {
+func ReadEventStreamsForSpecificApi(apiUrl string, authToken string, ContainerName string, t *testing.T) {
 	baseConfig := ReadBaseEnvConfig()
 	fileData := ReadAnyJsonFile(baseConfig.BaseCredentialsFile)
 	url := fileData.BaseServerUrl + apiUrl
@@ -374,7 +374,7 @@ func ReadEventStreamsForSpecificApi(apiUrl string, authToken string, t *testing.
 		msg, err := wait(events, time.Second*60)
 		require.Nil(t, err)
 		if i == 0 {
-			assert.True(t, strings.Contains(string(msg.Data), "\"podName\":\"appeicbhw1s3m-devtron-demo-686bf6f465-fpgcq\""))
+			assert.True(t, strings.Contains(string(msg.Data), ContainerName))
 		}
 		fmt.Println(i, "=====>", string(msg.Data))
 		dt := time.Now()
@@ -395,4 +395,15 @@ func wait(ch chan *sse.Event, duration time.Duration) (*sse.Event, error) {
 		err = errors.New("timeout")
 	}
 	return msg, err
+}
+
+func CreateUrlForEventStreamsHavingQueryParam(params map[string]string) string {
+	var url string = ""
+	var finalUrl string = ""
+	for key, value := range params {
+		url = key + "=" + value
+		finalUrl = url + "&" + finalUrl
+	}
+	finalTrimmedUrl := strings.TrimSpace(finalUrl)
+	return strings.TrimRight(finalTrimmedUrl, "&")
 }
