@@ -3,8 +3,12 @@ package testUtils
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/caarlos0/env"
+	"github.com/r3labs/sse/v2"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -12,6 +16,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"testing"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -64,20 +69,22 @@ type DeleteResponseDto struct {
 }
 
 type BaseClassEnvironmentConfig struct {
-	BaseServerUrl   string `json:"BASE_SERVER_URL"`
-	LogInUserName   string `json:"LOGIN_USERNAME"`
-	LogInUserPwd    string `json:"LOGIN_PASSWORD"`
-	SSOClientSecret string `json:"CLIENT_SECRET"`
-	Provider        string `json:"PROVIDER"`
-	GitUsername     string `json:"GIT_USERNAME"`
-	Host            string `json:"HOST"`
-	GitToken        string `json:"GIT_TOKEN"`
-	GitHubOrgId     string `json:"GITHUB_ORG_ID"`
-	PluginId        string `json:"PLUGIN_ID"`
-	RegistryType    string `json:"REGISTRY_TYPE"`
-	RegistryUrl     string `json:"REGISTRY_URL"`
-	DockerUsername  string `json:"DOCKER_USERNAME"`
-	Password        string `json:"PASSWORD"`
+	BaseServerUrl      string `json:"BASE_SERVER_URL"`
+	LogInUserName      string `json:"LOGIN_USERNAME"`
+	LogInUserPwd       string `json:"LOGIN_PASSWORD"`
+	SSOClientSecret    string `json:"CLIENT_SECRET"`
+	Provider           string `json:"PROVIDER"`
+	GitUsername        string `json:"GIT_USERNAME"`
+	Host               string `json:"HOST"`
+	GitToken           string `json:"GIT_TOKEN"`
+	GitHubOrgId        string `json:"GITHUB_ORG_ID"`
+	PluginId           string `json:"PLUGIN_ID"`
+	RegistryType       string `json:"REGISTRY_TYPE"`
+	RegistryUrl        string `json:"REGISTRY_URL"`
+	DockerUsername     string `json:"DOCKER_USERNAME"`
+	Password           string `json:"PASSWORD"`
+	ClusterBearerToken string `json:"CLUSTER_BEARER_TOKEN"`
+	ClusterServerUrl   string `json:"CLUSTER_SERVER_URL"`
 }
 
 func getRestyClient() *resty.Client {
@@ -342,4 +349,50 @@ func ReadBaseEnvConfig() *BaseEnvConfigStruct {
 		return nil
 	}
 	return cfg
+}
+
+func ReadEventStreamsForSpecificApi(apiUrl string, authToken string, t *testing.T) {
+	baseConfig := ReadBaseEnvConfig()
+	fileData := ReadAnyJsonFile(baseConfig.BaseCredentialsFile)
+	url := fileData.BaseServerUrl + apiUrl
+	client := sse.NewClient(url)
+	header := make(map[string]string)
+	header["token"] = authToken
+	client.Headers = header
+	events := make(chan *sse.Event)
+	var cErr error
+	go func() {
+		cErr = client.Subscribe("message", func(msg *sse.Event) {
+			if msg.Data != nil {
+				events <- msg
+				return
+			}
+		})
+	}()
+
+	for i := 0; i < 3; i++ {
+		msg, err := wait(events, time.Second*60)
+		require.Nil(t, err)
+		if i == 0 {
+			assert.True(t, strings.Contains(string(msg.Data), "\"podName\":\"appeicbhw1s3m-devtron-demo-686bf6f465-fpgcq\""))
+		}
+		fmt.Println(i, "=====>", string(msg.Data))
+		dt := time.Now()
+		if strings.Contains(string(msg.Data), "{\"result\":{\"content\"") || strings.Contains(string(msg.Data), dt.Format("01-02-2006")) {
+			assert.True(t, true)
+		}
+	}
+	assert.Nil(t, cErr)
+}
+
+func wait(ch chan *sse.Event, duration time.Duration) (*sse.Event, error) {
+	var err error
+	var msg *sse.Event
+	select {
+	case event := <-ch:
+		msg = event
+	case <-time.After(duration):
+		err = errors.New("timeout")
+	}
+	return msg, err
 }
