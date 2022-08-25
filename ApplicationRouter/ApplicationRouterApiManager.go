@@ -32,9 +32,9 @@ func HitGetManagedResourcesApi(appName string, authToken string) ResponseDTOs.Ma
 
 func HitGetListApi(queryParams map[string]string, authToken string) ResponseDTOs.ListResponseDTO {
 	resp, err := Base.MakeApiCall(ApplicationsRouterBaseUrl, http.MethodGet, "", queryParams, authToken)
-	Base.HandleError(err, ApplicationsRouterBaseUrl)
+	Base.HandleError(err, GetListApi)
 	structAppLabelsRouter := StructApplicationRouter{}
-	applicationRepoRouter := structAppLabelsRouter.UnmarshalGivenResponseBody(resp.Body(), ApplicationsRouterBaseUrl)
+	applicationRepoRouter := structAppLabelsRouter.UnmarshalGivenResponseBody(resp.Body(), GetListApi)
 	return applicationRepoRouter.listResponseDTO
 }
 
