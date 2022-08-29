@@ -1,16 +1,6 @@
 package AppStoreDiscoverRouter
 
-import (
-	"automation-suite/ChartRepositoryRouter"
-	Base "automation-suite/testUtils"
-	"encoding/json"
-	"github.com/stretchr/testify/assert"
-	"log"
-	"strconv"
-	"time"
-)
-
-func (suite *AppStoreDiscoverTestSuite) TestDiscoverHelmAppsViaChartRepoId() {
+/*func (suite *AppStoreDiscoverTestSuite) TestDiscoverHelmAppsViaChartRepoId() {
 	log.Println("=== Here we are Adding a chart repo ===")
 	chartRepoConfig, _ := ChartRepositoryRouter.GetChartRepoRouterConfig()
 	RepoName := Base.GetRandomStringOfGivenLength(8)
@@ -41,3 +31,4 @@ func (suite *AppStoreDiscoverTestSuite) TestDiscoverHelmAppsViaChartRepoId() {
 	deleteChartRepoApiResp := ChartRepositoryRouter.HitDeleteChartRepo(byteValueOfStruct, suite.authToken)
 	assert.Equal(suite.T(), "Chart repo deleted successfully.", deleteChartRepoApiResp.Result)
 }
+*/

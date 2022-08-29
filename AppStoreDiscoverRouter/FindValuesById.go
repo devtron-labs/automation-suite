@@ -9,7 +9,7 @@ import (
 
 func (suite *AppStoreDiscoverTestSuite) TestGetTemplateValuesViaReferenceId() {
 	log.Println("=== Here we are getting airflow chart repo ===")
-	queryParams := map[string]string{"appStoreName": "airflow"}
+	queryParams := map[string]string{"appStoreName": "apache"}
 	PollForGettingHelmAppData(queryParams, suite.authToken)
 	ActiveDiscoveredApps := HitDiscoverAppApi(queryParams, suite.authToken)
 
