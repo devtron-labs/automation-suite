@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func (suite *ApplicationsRouterTestSuite) TestGetInstalledAppDetails() {
+func (suite *ApplicationsRouterTestSuite) TestGetList() {
 	log.Println("=== Here We are installing Helm chart from chart-store ===")
 	expectedPayload, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/AppStoreRouter/InstallAppRequestPayload.json")
 	log.Println("Hitting the InstallAppApi with valid payload")
@@ -47,22 +47,13 @@ func (suite *ApplicationsRouterTestSuite) TestGetInstalledAppDetails() {
 		assert.NotEqual(suite.T(), ResponseOfGetListApi.Result.Metadata.ResourceVersion, "")
 	})
 
-	suite.Run("A=1=GetListWithInCorrectProject", func() {
+	suite.Run("A=2=GetListWithIncorrectName", func() {
 		queryParams := make(map[string]string)
-		queryParams["name"] = installedAppDetails.Result.AppName + "-devtron-demo"
+		queryParams["name"] = installedAppDetails.Result.AppName + "wrong"
 		queryParams["refresh"] = "5"
 		queryParams["project"] = "devtron-demo"
 		ResponseOfGetListApi := HitGetListApi(queryParams, suite.authToken)
-		assert.Equal(suite.T(), ResponseOfGetListApi.Errors[0].InternalMessage, "[{rpc error: code = NotFound desc = application 'automation3guoj-devtron-demoautomation3guoj' not found}]")
-	})
-
-	suite.Run("A=3=GetListWithIncorrectName", func() {
-		queryParams := make(map[string]string)
-		queryParams["name"] = installedAppDetails.Result.AppName
-		queryParams["refresh"] = "5"
-		queryParams["project"] = "devtron-demo"
-		ResponseOfGetListApi := HitGetListApi(queryParams, suite.authToken)
-		assert.Equal(suite.T(), ResponseOfGetListApi.Result.Metadata.ResourceVersion, "[{rpc error: code = NotFound desc = application 'automation3guoj-devtron-demoautomation3guoj' not found}]")
+		assert.True(suite.T(), strings.Contains(ResponseOfGetListApi.Errors[0].InternalMessage, "error: code = NotFound desc = application"))
 	})
 
 	log.Println("Removing the data created via API")

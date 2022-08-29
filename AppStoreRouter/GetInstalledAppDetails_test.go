@@ -18,7 +18,9 @@ func (suite *AppStoreTestSuite) TestGetInstalledAppDetails() {
 	log.Println("Hitting the InstallAppApi with valid payload")
 	installAppRequestDTO := RequestDTOs.InstallAppRequestDTO{}
 	json.Unmarshal(expectedPayload, &installAppRequestDTO)
-	installAppRequestDTO.AppName = "automation" + strings.ToLower(Base.GetRandomStringOfGivenLength(5))
+	AppName := "automation" + strings.ToLower(Base.GetRandomStringOfGivenLength(5))
+	log.Println("=== Helm AppName for this Test Case is :===", AppName)
+	installAppRequestDTO.AppName = AppName
 	requestPayload, _ := json.Marshal(installAppRequestDTO)
 	responseAfterInstallingApp := AppStoreDeploymentRouter.HitInstallAppApi(string(requestPayload), suite.authToken)
 	time.Sleep(2 * time.Second)
@@ -32,7 +34,7 @@ func (suite *AppStoreTestSuite) TestGetInstalledAppDetails() {
 		installedAppDetails := HitGetInstalledAppDetailsApi(queryParamsOfApi, suite.authToken)
 		assert.Equal(suite.T(), "Healthy", installedAppDetails.Result.ResourceTree.Status)
 		assert.Equal(suite.T(), installedAppId, installedAppDetails.Result.InstalledAppId)
-		assert.Equal(suite.T(), "airflow", installedAppDetails.Result.AppStoreAppName)
+		assert.Equal(suite.T(), "apache", installedAppDetails.Result.AppStoreAppName)
 		assert.NotNil(suite.T(), installedAppDetails.Result.ResourceTree.PodMetadata)
 		assert.NotNil(suite.T(), installedAppDetails.Result.ResourceTree.Nodes)
 		assert.NotNil(suite.T(), installedAppDetails.Result.ResourceTree.Hosts[0].ResourcesInfo)

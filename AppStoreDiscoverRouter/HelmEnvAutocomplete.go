@@ -9,7 +9,6 @@ func (suite *AppStoreDiscoverTestSuite) TestHelmEnvAutocomplete() {
 	suite.Run("A=1=GetHelmEnv", func() {
 		HelmEnvAndClusters := HitHelmEnvAutocompleteApi(suite.authToken)
 		assert.NotNil(suite.T(), HelmEnvAndClusters.Result)
-		assert.Equal(suite.T(), "default_cluster", HelmEnvAndClusters.Result[0].ClusterName)
 		assert.NotNil(suite.T(), HelmEnvAndClusters.Result[0].Environments)
 	})
 }

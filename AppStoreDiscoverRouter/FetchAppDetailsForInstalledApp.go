@@ -10,8 +10,8 @@ import (
 )
 
 func (suite *AppStoreDiscoverTestSuite) TestDiscoverPreviouslyInstalledHelmAppsViaRepoId() {
-	log.Println("=== Here we are getting airflow chart repo ===")
-	queryParams := map[string]string{"appStoreName": "airflow"}
+	log.Println("=== Here we are getting apache chart repo ===")
+	queryParams := map[string]string{"appStoreName": "apache"}
 	PollForGettingHelmAppData(queryParams, suite.authToken)
 	DiscoveredApps := HitDiscoverAppApi(queryParams, suite.authToken)
 
@@ -28,7 +28,7 @@ func (suite *AppStoreDiscoverTestSuite) TestDiscoverPreviouslyInstalledHelmAppsV
 		log.Println("Hitting the GetDeploymentOfInstalledApp API with valid payload")
 		deploymentOfInstalledApp := HitGetDeploymentOfInstalledAppApi(strconv.Itoa(DiscoveredApps.Result[0].Id), suite.authToken)
 		assert.NotNil(suite.T(), deploymentOfInstalledApp.Result[0].InstalledAppVersionId)
-		assert.Equal(suite.T(), deploymentOfInstalledApp.Result[0].AppName, "deepak-airflow-test")
+		assert.Equal(suite.T(), deploymentOfInstalledApp.Result[0].AppName, "deepak-apache-cluser")
 		log.Println("Removing the data created via API")
 		respOfDeleteInstallAppApi := AppStoreDeploymentRouter.HitDeleteInstalledAppApi(strconv.Itoa(resp.Result.InstalledAppId), suite.authToken)
 		assert.Equal(suite.T(), resp.Result.InstalledAppId, respOfDeleteInstallAppApi.Result.InstalledAppId)
