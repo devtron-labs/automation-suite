@@ -12,6 +12,7 @@ type StructApplicationRouter struct {
 	resourceTreeResponseDTO     ResponseDTOs.ResourceTreeResponseDTO
 	managedResourcesResponseDTO ResponseDTOs.ManagedResourcesResponseDTO
 	listResponseDTO             ResponseDTOs.ListResponseDTO
+	terminalSessionResponseDTO  ResponseDTOs.TerminalSessionResponseDTO
 }
 
 func HitGetResourceTreeApi(appName string, authToken string) ResponseDTOs.ResourceTreeResponseDTO {
@@ -38,6 +39,14 @@ func HitGetListApi(queryParams map[string]string, authToken string) ResponseDTOs
 	return applicationRepoRouter.listResponseDTO
 }
 
+func HitGetTerminalSessionApi(AppId string, EnvId string, NameSpace string, PodName string, AppName string, authToken string) ResponseDTOs.TerminalSessionResponseDTO {
+	resp, err := Base.MakeApiCall(GetTerminalSessionApiUrl+AppId+"/"+EnvId+"/"+NameSpace+"/"+PodName+"/sh/"+AppName, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetTerminalSessionApi)
+	structAppLabelsRouter := StructApplicationRouter{}
+	applicationRepoRouter := structAppLabelsRouter.UnmarshalGivenResponseBody(resp.Body(), GetTerminalSessionApi)
+	return applicationRepoRouter.terminalSessionResponseDTO
+}
+
 func (structApplicationRouter StructApplicationRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructApplicationRouter {
 	switch apiName {
 	case GetResourceTreeApi:
@@ -46,6 +55,8 @@ func (structApplicationRouter StructApplicationRouter) UnmarshalGivenResponseBod
 		json.Unmarshal(response, &structApplicationRouter.managedResourcesResponseDTO)
 	case GetListApi:
 		json.Unmarshal(response, &structApplicationRouter.listResponseDTO)
+	case GetTerminalSessionApi:
+		json.Unmarshal(response, &structApplicationRouter.terminalSessionResponseDTO)
 	}
 	return structApplicationRouter
 }
