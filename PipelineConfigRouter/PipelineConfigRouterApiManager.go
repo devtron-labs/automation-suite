@@ -17,9 +17,10 @@ import (
 )
 
 type DeleteResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result string `json:"result"`
+	Code   int           `json:"code"`
+	Status string        `json:"status"`
+	Result string        `json:"result"`
+	Errors []Base.Errors `json:"errors"`
 }
 
 type CreateAppRequestDto struct {

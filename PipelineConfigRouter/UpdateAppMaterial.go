@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-func (suite *PipelinesConfigRouterTestSuite) TestClassUpdateAndDeleteAppMaterial() {
+func (suite *PipelinesConfigRouterTestSuite) TestClassUpdateAppMaterial() {
 	log.Println("=== Here we are creating an App ===")
 	createAppApiResponse := Base.CreateApp(suite.authToken).Result
 	appId := createAppApiResponse.Id
