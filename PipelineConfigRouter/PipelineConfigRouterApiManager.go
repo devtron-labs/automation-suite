@@ -220,6 +220,7 @@ type StructPipelineConfigRouter struct {
 	getWorkflowStatusResponseDTO       ResponseDTOs.GetWorkflowStatusResponseDTO
 	getCiPipelineMaterialResponseDTO   ResponseDTOs.GetCiPipelineMaterialResponseDTO
 	triggerCiPipelineResponseDTO       ResponseDTOs.TriggerCiPipelineResponseDTO
+	updateAppMaterialResponseDTO       ResponseDTOs.UpdateAppMaterialResponseDTO
 }
 
 type EnvironmentConfigPipelineConfigRouter struct {
@@ -544,6 +545,24 @@ func getCiPipelineMaterials(commit string, ciPipelineMaterialId int) RequestDTOs
 	return CiPipelineMaterial
 }
 
+func GetPayloadForUpdateAppMaterial(appId int, url string, id int, GitProvidedId int, CheckoutPath string, FetchSubmodules bool) RequestDTOs.UpdateAppMaterialRequestDTO {
+	requestDTO := RequestDTOs.UpdateAppMaterialRequestDTO{}
+	requestDTO.AppId = appId
+	requestDTO.Material.Url = url
+	requestDTO.Material.CheckoutPath = CheckoutPath
+	requestDTO.Material.Id = id
+	requestDTO.Material.GitProviderId = GitProvidedId
+	requestDTO.Material.FetchSubmodules = FetchSubmodules
+	return requestDTO
+}
+func HitUpdateAppMaterialApi(payload []byte, authToken string) ResponseDTOs.UpdateAppMaterialResponseDTO {
+	resp, err := Base.MakeApiCall(CreateAppMaterialApiUrl, http.MethodPut, string(payload), nil, authToken)
+	Base.HandleError(err, UpdateAppMaterial)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), UpdateAppMaterial)
+	return pipelineConfigRouter.updateAppMaterialResponseDTO
+}
+
 func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructPipelineConfigRouter {
 	switch apiName {
 	case DeleteAppMaterialApi:
@@ -592,6 +611,9 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.getCiPipelineMaterialResponseDTO)
 	case TriggerCiPipelineApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.triggerCiPipelineResponseDTO)
+	case UpdateAppMaterial:
+		json.Unmarshal(response, &structPipelineConfigRouter.updateAppMaterialResponseDTO)
+
 	}
 	return structPipelineConfigRouter
 }

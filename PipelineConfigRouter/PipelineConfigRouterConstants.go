@@ -47,4 +47,5 @@ const (
 	GetCiPipelineMaterialApi                  string = "GetCiPipelineMaterialApi"
 	TriggerCiPipelineApiUrl                   string = "/orchestrator/app/ci-pipeline/trigger"
 	TriggerCiPipelineApi                      string = "TriggerCiPipelineApi"
+	UpdateAppMaterial                         string = "UpdateAppMaterial"
 )
