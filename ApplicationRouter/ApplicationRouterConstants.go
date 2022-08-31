@@ -7,4 +7,6 @@ const (
 	GetListApi                string = "GetListApi"
 	GetTerminalSessionApiUrl  string = "/orchestrator/api/v1/applications/pod/exec/session/"
 	GetTerminalSessionApi     string = "GetTerminalSessionApi"
+	GetApplicationApi         string = "GetApplicationApi"
+	GetApplicationApiUrl      string = "/orchestrator/api/v1/applications/"
 )

@@ -9,6 +9,7 @@ import (
 	"github.com/tidwall/sjson"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -94,6 +95,21 @@ func (suite *ApplicationsRouterTestSuite) TestClassGetTerminalSession() {
 		invalidEnvId := strconv.Itoa(Base.GetRandomNumberOf9Digit())
 		TerminalSessionApiResponse := HitGetTerminalSessionApi(strconv.Itoa(createAppApiResponse.Id), invalidEnvId, "devtron-demo", container, createAppApiResponse.AppName, suite.authToken)
 		assert.Equal(suite.T(), TerminalSessionApiResponse.Errors[0].InternalMessage, "[{pg: no rows in result set}]", suite.authToken)
+	})
+
+	suite.Run("A=3=GetApplicationViaValidName", func() {
+		getApplicationApiResponse := HitGetApplicationApi(createAppApiResponse.AppName+"-devtron-demo", suite.authToken)
+		assert.NotNil(suite.T(), getApplicationApiResponse.Result)
+		assert.NotNil(suite.T(), getApplicationApiResponse.Result.Metadata.Uid)
+		assert.Equal(suite.T(), getApplicationApiResponse.Result.Status.Health.Status, "Healthy")
+		assert.True(suite.T(), strings.Contains(getApplicationApiResponse.Result.Spec.Source.RepoURL, createAppApiResponse.AppName))
+		assert.Equal(suite.T(), getApplicationApiResponse.Result.Metadata.ManagedFields[0].Manager, "argocd-application-controller")
+	})
+
+	suite.Run("A=4=GetTerminalSessionWithInvalidName", func() {
+		invalidName := Base.GetRandomStringOfGivenLength(8)
+		getApplicationApiResponse := HitGetApplicationApi(invalidName, suite.authToken)
+		assert.True(suite.T(), strings.Contains(getApplicationApiResponse.Errors[0].InternalMessage, "[{rpc error: code = NotFound desc = error getting application: applications.argoproj.io"))
 	})
 
 	log.Println("=== Here we are Deleting the CD pipeline ===")
