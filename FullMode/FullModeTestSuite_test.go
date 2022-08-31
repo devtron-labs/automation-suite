@@ -4,6 +4,7 @@ import (
 	"automation-suite/AppLabelsRouter"
 	"automation-suite/AppListingRouter"
 	"automation-suite/AppStoreRouter"
+	"automation-suite/ApplicationRouter"
 	"automation-suite/AttributesRouter"
 	"automation-suite/ChartRepositoryRouter"
 	"automation-suite/GitopsConfigRouter"
@@ -69,4 +70,8 @@ func TestAppStoreRouterSuite(t *testing.T) {
 
 func TestPipelineConfigSuite(t *testing.T) {
 	suite.Run(t, new(PipelineConfigRouter.PipelinesConfigRouterTestSuite))
+}
+
+func TestApplicationRouterSuite(t *testing.T) {
+	suite.Run(t, new(ApplicationRouter.ApplicationsRouterTestSuite))
 }
