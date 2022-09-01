@@ -50,4 +50,6 @@ const (
 	UpdateAppMaterial                         string = "UpdateAppMaterial"
 	GetAppListForAutocompleteApi              string = "GetAppListForAutocompleteApi"
 	GetAppListForAutocompleteApiUrl           string = "/orchestrator/app/autocomplete"
+	GetAppListByTeamIdsApi                    string = "GetAppListByTeamIdsApi"
+	GetAppListByTeamIdsApiUrl                 string = "/orchestrator/app/min"
 )
