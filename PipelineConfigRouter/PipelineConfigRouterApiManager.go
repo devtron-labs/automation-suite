@@ -222,6 +222,7 @@ type StructPipelineConfigRouter struct {
 	getCiPipelineMaterialResponseDTO   ResponseDTOs.GetCiPipelineMaterialResponseDTO
 	triggerCiPipelineResponseDTO       ResponseDTOs.TriggerCiPipelineResponseDTO
 	updateAppMaterialResponseDTO       ResponseDTOs.UpdateAppMaterialResponseDTO
+	appListForAutocompleteResponseDTO  ResponseDTOs.AppListForAutocompleteResponseDTO
 }
 
 type EnvironmentConfigPipelineConfigRouter struct {
@@ -338,7 +339,7 @@ type Materials struct {
 	FetchSubmodules bool   `json:"fetchSubmodules"`
 }
 
-func HitGetMaterial(appId int, authToken string) GetAppDetailsResponseDto {
+func HitGetApp(appId int, authToken string) GetAppDetailsResponseDto {
 	id := strconv.Itoa(appId)
 	resp, err := Base.MakeApiCall(GetAppDetailsApiUrl+"/"+id, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, GetAppDetailsApi)
@@ -564,6 +565,14 @@ func HitUpdateAppMaterialApi(payload []byte, authToken string) ResponseDTOs.Upda
 	return pipelineConfigRouter.updateAppMaterialResponseDTO
 }
 
+func HitGetAppListForAutocomplete(authToken string) ResponseDTOs.AppListForAutocompleteResponseDTO {
+	resp, err := Base.MakeApiCall(GetAppListForAutocompleteApiUrl, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetAppListForAutocompleteApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetAppListForAutocompleteApi)
+	return pipelineConfigRouter.appListForAutocompleteResponseDTO
+}
+
 func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructPipelineConfigRouter {
 	switch apiName {
 	case DeleteAppMaterialApi:
@@ -614,7 +623,8 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.triggerCiPipelineResponseDTO)
 	case UpdateAppMaterial:
 		json.Unmarshal(response, &structPipelineConfigRouter.updateAppMaterialResponseDTO)
-
+	case GetAppListForAutocompleteApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.appListForAutocompleteResponseDTO)
 	}
 	return structPipelineConfigRouter
 }
@@ -844,7 +854,7 @@ func HitCreateWorkflowApiWithFullPayload(appId int, authToken string) ResponseDT
 	fetchSuggestedCiPipelineName := HitGetPipelineSuggestedCiCd("ci", appId, authToken)
 	createWorkflowRequestDto.CiPipeline.Name = fetchSuggestedCiPipelineName.Result
 
-	fetchAppGetResponseDto := HitGetMaterial(appId, authToken)
+	fetchAppGetResponseDto := HitGetApp(appId, authToken)
 
 	branchValue := "main"
 

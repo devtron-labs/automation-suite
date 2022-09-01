@@ -48,7 +48,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 	fetchSuggestedCiPipelineName := HitGetPipelineSuggestedCiCd("ci", appId, suite.authToken)
 
 	log.Println("Fetching gitMaterialId ")
-	fetchAppGetResponseDto := HitGetMaterial(appId, suite.authToken)
+	fetchAppGetResponseDto := HitGetApp(appId, suite.authToken)
 
 	log.Println("Retrieving request payload for creating workflow from file")
 	createWorkflowRequestDto := getRequestPayloadForCreateWorkflow(false, "1", appId, 0)

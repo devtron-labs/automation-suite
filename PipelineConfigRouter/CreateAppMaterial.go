@@ -20,7 +20,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA2CreateMaterial() {
 
 		log.Println("Validating the Response of the Create material API...")
 		assert.Equal(suite.T(), appId, createAppMaterialResponseDto.Result.AppId)
-		fetchAppGetResponseDto := HitGetMaterial(createAppMaterialResponseDto.Result.AppId, suite.authToken)
+		fetchAppGetResponseDto := HitGetApp(createAppMaterialResponseDto.Result.AppId, suite.authToken)
 		log.Println("Validating the Response of the Get material API...")
 		assert.Equal(suite.T(), createAppMaterialResponseDto.Result.AppId, fetchAppGetResponseDto.Result.Id)
 		len := len(fetchAppGetResponseDto.Result.Material)
@@ -41,7 +41,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA2CreateMaterial() {
 
 		log.Println("Validating the Response of the Create material API...")
 		assert.Equal(suite.T(), appId, createAppMaterialResponseDto.Result.AppId)
-		fetchAppGetResponseDto := HitGetMaterial(createAppMaterialResponseDto.Result.AppId, suite.authToken)
+		fetchAppGetResponseDto := HitGetApp(createAppMaterialResponseDto.Result.AppId, suite.authToken)
 		log.Println("Validating the Response of the Get material API...")
 		assert.Equal(suite.T(), createAppMaterialResponseDto.Result.AppId, fetchAppGetResponseDto.Result.Id)
 		len := len(fetchAppGetResponseDto.Result.Material)

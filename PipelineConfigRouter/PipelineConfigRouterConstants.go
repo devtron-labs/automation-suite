@@ -48,4 +48,6 @@ const (
 	TriggerCiPipelineApiUrl                   string = "/orchestrator/app/ci-pipeline/trigger"
 	TriggerCiPipelineApi                      string = "TriggerCiPipelineApi"
 	UpdateAppMaterial                         string = "UpdateAppMaterial"
+	GetAppListForAutocompleteApi              string = "GetAppListForAutocompleteApi"
+	GetAppListForAutocompleteApiUrl           string = "/orchestrator/app/autocomplete"
 )

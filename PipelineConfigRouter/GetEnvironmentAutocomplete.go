@@ -21,7 +21,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC6GetEnvironmentAutocomple
 
 	// todo will enable this test case once bug will fix from dev's side
 	/*suite.Run("A=2=GetEnvironmentDetailsWithAuthAsFalse", func() {
-		pipelineSuggestedCDResponse := HitGetMaterial(Base.GetRandomNumberOf9Digit(), suite.authToken)
+		pipelineSuggestedCDResponse := HitGetApp(Base.GetRandomNumberOf9Digit(), suite.authToken)
 		log.Println("Validating the response of GetPipelineSuggestedCD API")
 		assert.Equal(suite.T(), 404, pipelineSuggestedCDResponse.Code)
 		assert.Equal(suite.T(), "pg: no rows in result set", pipelineSuggestedCDResponse.Errors[0].UserMessage)

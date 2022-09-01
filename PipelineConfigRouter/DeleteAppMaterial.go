@@ -59,7 +59,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassDeleteAppMaterial() {
 		responseOfDeleteMaterialApi := HitDeleteAppMaterialApi(byteValueOfDeleteApp, suite.authToken)
 		assert.Equal(suite.T(), responseOfDeleteMaterialApi.Result, "Git material deleted successfully.")
 		log.Println("=== Hitting the Delete material API ===")
-		fetchAppGetResponseDto := HitGetMaterial(createAppMaterialResponseDto.Result.AppId, suite.authToken)
+		fetchAppGetResponseDto := HitGetApp(createAppMaterialResponseDto.Result.AppId, suite.authToken)
 		log.Println("=== Validating the Response of Delete material API ===")
 		assert.Nil(suite.T(), fetchAppGetResponseDto.Result.Material)
 	})

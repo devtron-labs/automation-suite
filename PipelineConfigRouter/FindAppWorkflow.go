@@ -29,7 +29,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC8GetWorkflows() {
 	log.Println("Fetching suggested ci pipeline name ")
 	fetchSuggestedCiPipelineName := HitGetPipelineSuggestedCiCd("ci", appId, suite.authToken)
 	log.Println("Fetching gitMaterialId ")
-	fetchAppGetResponseDto := HitGetMaterial(appId, suite.authToken)
+	fetchAppGetResponseDto := HitGetApp(appId, suite.authToken)
 
 	log.Println("Retrieving request payload from file")
 	createWorkflowRequestDto := getRequestPayloadForCreateWorkflow(false, "1", appId, 0)
