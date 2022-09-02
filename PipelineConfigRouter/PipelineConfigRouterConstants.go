@@ -52,4 +52,6 @@ const (
 	GetAppListForAutocompleteApiUrl           string = "/orchestrator/app/autocomplete"
 	GetAppListByTeamIdsApi                    string = "GetAppListByTeamIdsApi"
 	GetAppListByTeamIdsApiUrl                 string = "/orchestrator/app/min"
+	FindAppsByTeamIdApiUrl                    string = "/orchestrator/app/team/by-id/"
+	FindAppsByTeamNameApiUrl                  string = "/orchestrator/app/team/by-name/"
 )

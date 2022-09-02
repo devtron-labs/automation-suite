@@ -582,6 +582,22 @@ func HitGetAppListByTeamIds(queryParams map[string]string, authToken string) Res
 	return pipelineConfigRouter.appListByTeamIdsResponseDTO
 }
 
+func HitFindAppsByTeamId(teamId string, authToken string) ResponseDTOs.AppListForAutocompleteResponseDTO {
+	resp, err := Base.MakeApiCall(FindAppsByTeamIdApiUrl+teamId, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetAppListForAutocompleteApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetAppListForAutocompleteApi)
+	return pipelineConfigRouter.appListForAutocompleteResponseDTO
+}
+
+func HitFindAppsByTeamName(teamName string, authToken string) ResponseDTOs.AppListForAutocompleteResponseDTO {
+	resp, err := Base.MakeApiCall(FindAppsByTeamNameApiUrl+teamName, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetAppListForAutocompleteApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetAppListForAutocompleteApi)
+	return pipelineConfigRouter.appListForAutocompleteResponseDTO
+}
+
 func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructPipelineConfigRouter {
 	switch apiName {
 	case DeleteAppMaterialApi:
