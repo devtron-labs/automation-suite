@@ -626,7 +626,7 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.environmentDetailsResponseDTO)
 	case SaveDeploymentTemplateApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.saveDeploymentTemplateResponseDTO)
-	case CreateWorkflowApi:
+	case PatchCiPipelinesApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.createWorkflowResponseDto)
 	case FetchSuggestedCiPipelineNameApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.fetchSuggestedCiPipelineName)
@@ -696,11 +696,11 @@ func (suite *PipelinesConfigRouterTestSuite) TearDownSuite() {
 
 /////////////////=== Create Workflow API ====//////////////
 
-func HitCreateWorkflowApi(payload []byte, authToken string) ResponseDTOs.CreateWorkflowResponseDto {
-	resp, err := Base.MakeApiCall(CreateWorkflowApiUrl, http.MethodPost, string(payload), nil, authToken)
-	Base.HandleError(err, CreateWorkflowApi)
+func HitPatchCiPipelinesApi(payload []byte, authToken string) ResponseDTOs.CreateWorkflowResponseDto {
+	resp, err := Base.MakeApiCall(PatchCiPipelinesApiUrl, http.MethodPost, string(payload), nil, authToken)
+	Base.HandleError(err, PatchCiPipelinesApi)
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
-	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), CreateWorkflowApi)
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), PatchCiPipelinesApi)
 	return pipelineConfigRouter.createWorkflowResponseDto
 }
 func workflowTypeProvider(temp string) string {
@@ -898,7 +898,7 @@ func HitCreateWorkflowApiWithFullPayload(appId int, authToken string) ResponseDT
 
 	byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
 	log.Println("Hitting the Create Workflow Api with valid payload")
-	createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, authToken)
+	createWorkflowResponseDto := HitPatchCiPipelinesApi(byteValueOfCreateWorkflow, authToken)
 	return createWorkflowResponseDto
 }
 
@@ -910,7 +910,7 @@ func DeleteCiPipeline(appId int, ciPipelineId int, authToken string) {
 	log.Println("Removing the data created via ci-pipeline API")
 	byteValueOfDeleteCiPipeline, _ := json.Marshal(deleteCiPipelineRequestDto)
 	log.Println("Hitting the Create Workflow Api with action=2 for delete ci-pipeline")
-	HitCreateWorkflowApi(byteValueOfDeleteCiPipeline, authToken)
+	HitPatchCiPipelinesApi(byteValueOfDeleteCiPipeline, authToken)
 	log.Println("Deleting workflow")
 	return
 }

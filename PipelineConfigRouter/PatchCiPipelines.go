@@ -59,7 +59,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 	suite.Run("A=1=CreateWorkflowBranchFixedWithoutBuilds", func() {
 		byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
 		log.Println("Hitting the Create Workflow Api with valid payload")
-		createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, suite.authToken)
+		createWorkflowResponseDto := HitPatchCiPipelinesApi(byteValueOfCreateWorkflow, suite.authToken)
 		log.Println("Validating the Create Workflow Api response with with valid payload")
 		assert.Equal(suite.T(), createWorkflowRequestDto.AppId, createWorkflowResponseDto.Result.AppId)
 		log.Println("=== Here we are Deleting the CI pipeline ===")
@@ -85,7 +85,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 		byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
 		log.Println("Hitting the Create Workflow Api with valid payload")
-		createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, suite.authToken)
+		createWorkflowResponseDto := HitPatchCiPipelinesApi(byteValueOfCreateWorkflow, suite.authToken)
 
 		log.Println("Validating pre-build request payload")
 		for i = 0; i <= numberOfTasks; i++ {
@@ -114,7 +114,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 		byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
 		log.Println("Hitting the Create Workflow Api with valid payload")
-		createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, suite.authToken)
+		createWorkflowResponseDto := HitPatchCiPipelinesApi(byteValueOfCreateWorkflow, suite.authToken)
 
 		log.Println("Validating pre-build request payload")
 		for i = 0; i < numberOfTasks; i++ {
@@ -143,7 +143,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 		byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
 		log.Println("Hitting the Create Workflow Api with valid payload")
-		createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, suite.authToken)
+		createWorkflowResponseDto := HitPatchCiPipelinesApi(byteValueOfCreateWorkflow, suite.authToken)
 
 		log.Println("Validating pre-build request payload")
 		for i = 0; i < numberOfTasks; i++ {
@@ -173,7 +173,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 		byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
 		log.Println("Hitting the Create Workflow Api with valid payload")
-		createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, suite.authToken)
+		createWorkflowResponseDto := HitPatchCiPipelinesApi(byteValueOfCreateWorkflow, suite.authToken)
 
 		log.Println("Validating pre-build request payload")
 		for i = 0; i < numberOfTasks; i++ {
@@ -207,7 +207,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 		byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
 		log.Println("Hitting the Create Workflow Api with valid payload")
-		createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, suite.authToken)
+		createWorkflowResponseDto := HitPatchCiPipelinesApi(byteValueOfCreateWorkflow, suite.authToken)
 
 		log.Println("Validating pre-build request payload")
 		for i = 0; i <= numberOfTasks; i++ {
@@ -236,7 +236,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 		byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
 		log.Println("Hitting the Create Workflow Api with valid payload")
-		createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, suite.authToken)
+		createWorkflowResponseDto := HitPatchCiPipelinesApi(byteValueOfCreateWorkflow, suite.authToken)
 
 		log.Println("Validating pre-build request payload")
 		for i = 0; i < numberOfTasks; i++ {
@@ -267,7 +267,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 		byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
 		log.Println("Hitting the Create Workflow Api with valid payload")
-		createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, suite.authToken)
+		createWorkflowResponseDto := HitPatchCiPipelinesApi(byteValueOfCreateWorkflow, suite.authToken)
 
 		log.Println("Validating pre-build request payload")
 		for i = 0; i < numberOfTasks; i++ {
@@ -298,7 +298,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 		byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
 		log.Println("Hitting the Create Workflow Api with valid payload")
-		createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, suite.authToken)
+		createWorkflowResponseDto := HitPatchCiPipelinesApi(byteValueOfCreateWorkflow, suite.authToken)
 
 		log.Println("Validating pre-build request payload")
 		for i = 0; i < numberOfTasks; i++ {
@@ -331,7 +331,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 		byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
 		log.Println("Hitting the Create Workflow Api with valid payload")
-		createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, suite.authToken)
+		createWorkflowResponseDto := HitPatchCiPipelinesApi(byteValueOfCreateWorkflow, suite.authToken)
 
 		log.Println("Validating pre-build request payload")
 		for i = 0; i < numberOfTasks; i++ {
@@ -364,7 +364,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 		byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
 		log.Println("Hitting the Create Workflow Api with valid payload")
-		createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, suite.authToken)
+		createWorkflowResponseDto := HitPatchCiPipelinesApi(byteValueOfCreateWorkflow, suite.authToken)
 
 		log.Println("Validating pre-build request payload")
 		for i = 0; i < numberOfTasks; i++ {
@@ -396,7 +396,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 		byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
 		log.Println("Hitting the Create Workflow Api with valid payload")
-		createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, suite.authToken)
+		createWorkflowResponseDto := HitPatchCiPipelinesApi(byteValueOfCreateWorkflow, suite.authToken)
 
 		log.Println("Checking output directory")
 		for i = 0; i < numberOfTasks; i++ {
@@ -419,7 +419,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC7CreateWorkflowBranchFixe
 
 		byteValueOfCreateWorkflow, _ := json.Marshal(createWorkflowRequestDto)
 		log.Println("Hitting the Create Workflow Api with valid payload")
-		createWorkflowResponseDto := HitCreateWorkflowApi(byteValueOfCreateWorkflow, suite.authToken)
+		createWorkflowResponseDto := HitPatchCiPipelinesApi(byteValueOfCreateWorkflow, suite.authToken)
 
 		log.Println("Validating pre-build request payload")
 
