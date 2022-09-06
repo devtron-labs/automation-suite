@@ -225,6 +225,7 @@ type StructPipelineConfigRouter struct {
 	appListForAutocompleteResponseDTO  ResponseDTOs.AppListForAutocompleteResponseDTO
 	appListByTeamIdsResponseDTO        ResponseDTOs.AppListByTeamIdsResponseDTO
 	fetchMaterialsResponseDTO          ResponseDTOs.FetchMaterialsResponseDTO
+	getCiPipelineMinResponseDTO        ResponseDTOs.GetCiPipelineMinResponseDTO
 }
 
 type EnvironmentConfigPipelineConfigRouter struct {
@@ -404,7 +405,7 @@ func HitGetCiPipelineViaId(appId string, authToken string) GetCiPipelineViaIdRes
 }
 
 func HitGetContainerRegistry(appId string, authToken string) GetContainerRegistryResponseDTO {
-	resp, err := Base.MakeApiCall(GetContainerRegistryApiUrl+appId+"/autocomplete/docker", http.MethodGet, "", nil, authToken)
+	resp, err := Base.MakeApiCall(PipelineRouterBaseApiUrl+appId+"/autocomplete/docker", http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, GetContainerRegistryApi)
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
 	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetContainerRegistryApi)
@@ -607,6 +608,14 @@ func HitFetchMaterialsApi(pipelineId string, authToken string) ResponseDTOs.Fetc
 	return pipelineConfigRouter.fetchMaterialsResponseDTO
 }
 
+func HitGetCiPipelineMin(appId string, authToken string) ResponseDTOs.GetCiPipelineMinResponseDTO {
+	resp, err := Base.MakeApiCall(PipelineRouterBaseApiUrl+appId+"/ci-pipeline/min", http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetCiPipelineMinApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetCiPipelineMinApi)
+	return pipelineConfigRouter.getCiPipelineMinResponseDTO
+}
+
 func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructPipelineConfigRouter {
 	switch apiName {
 	case DeleteAppMaterialApi:
@@ -663,6 +672,8 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.appListByTeamIdsResponseDTO)
 	case FetchMaterialsApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.fetchMaterialsResponseDTO)
+	case GetCiPipelineMinApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.getCiPipelineMinResponseDTO)
 	}
 	return structPipelineConfigRouter
 }

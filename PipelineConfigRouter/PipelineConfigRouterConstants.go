@@ -14,7 +14,7 @@ const (
 	GetAppDetailsApi                          string = "FetchAppGetApi"
 	GetCiPipelineViaIdApiUrl                  string = "/orchestrator/app/ci-pipeline/"
 	GetContainerRegistryApi                   string = "GetContainerRegistryApi"
-	GetContainerRegistryApiUrl                string = "/orchestrator/app/"
+	PipelineRouterBaseApiUrl                  string = "/orchestrator/app/"
 	GetChartReferenceViaAppIdApi              string = "GetChartReferenceViaAppIdApi"
 	GetChartReferenceViaAppIdApiUrl           string = "/orchestrator/chartref/autocomplete/"
 	GetAppTemplateViaAppIdAndChartRefIdApi    string = "GetAppTemplateViaAppIdAndChartRefIdApi"
@@ -56,4 +56,5 @@ const (
 	FindAppsByTeamNameApiUrl                  string = "/orchestrator/app/team/by-name/"
 	FetchMaterialsApiUrl                      string = "/orchestrator/app/ci-pipeline/"
 	FetchMaterialsApi                         string = "FetchMaterialsApi"
+	GetCiPipelineMinApi                       string = "GetCiPipelineMinApi"
 )
