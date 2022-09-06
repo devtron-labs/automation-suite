@@ -41,34 +41,38 @@ type MountPathMap struct {
 	FilePathOnContainer string `json:"filePathOnContainer"`
 }
 type Step struct {
-	Id                  int      `json:"id"`
-	Name                string   `json:"name"`
-	Description         string   `json:"description"`
-	Index               int      `json:"index"`
-	StepType            string   `json:"stepType"`
-	OutputDirectoryPath []string `json:"outputDirectoryPath"`
-	InlineStepDetail    struct {
-		ScriptType               string             `json:"scriptType"`
-		Script                   string             `json:"script"`
-		StoreScriptAt            string             `json:"storeScriptAt"`
-		CommandArgsMap           []CommandArgsMap   `json:"commandArgsMap"`
-		InputVariables           []InputVariables   `json:"inputVariables"`
-		OutputVariables          []InputVariables   `json:"outputVariables"`
-		ConditionDetails         []ConditionDetails `json:"conditionDetails"`
-		MountCodeToContainer     bool               `json:"mountCodeToContainer,omitempty"`
-		MountCodeToContainerPath string             `json:"mountCodeToContainerPath,omitempty"`
-		MountDirectoryFromHost   bool               `json:"mountDirectoryFromHost"`
-		ContainerImagePath       string             `json:"containerImagePath,omitempty"`
-		MountPathMap             []MountPathMap     `json:"mountPathMap,omitempty"`
-		PortMap                  []PortMap          `json:"portMap,omitempty"`
-		IsMountCustomScript      bool               `json:"isMountCustomScript,omitempty"`
-	} `json:"inlineStepDetail"`
-	PluginRefStepDetail struct {
-		Id               int                `json:"id"`
-		PluginId         int                `json:"pluginId"`
-		ConditionDetails []ConditionDetails `json:"conditionDetails"`
-		InputVariables   []InputVariables   `json:"inputVariables"`
-	} `json:"pluginRefStepDetail"`
+	Id                  int                 `json:"id"`
+	Name                string              `json:"name"`
+	Description         string              `json:"description"`
+	Index               int                 `json:"index"`
+	StepType            string              `json:"stepType"`
+	OutputDirectoryPath []string            `json:"outputDirectoryPath"`
+	InlineStepDetail    InlineStepDetail    `json:"inlineStepDetail"`
+	PluginRefStepDetail PluginRefStepDetail `json:"pluginRefStepDetail"`
+}
+
+type PluginRefStepDetail struct {
+	Id               int                `json:"id"`
+	PluginId         int                `json:"pluginId"`
+	ConditionDetails []ConditionDetails `json:"conditionDetails"`
+	InputVariables   []InputVariables   `json:"inputVariables"`
+}
+
+type InlineStepDetail struct {
+	ScriptType               string             `json:"scriptType"`
+	Script                   string             `json:"script"`
+	StoreScriptAt            string             `json:"storeScriptAt"`
+	CommandArgsMap           []CommandArgsMap   `json:"commandArgsMap"`
+	InputVariables           []InputVariables   `json:"inputVariables"`
+	OutputVariables          []InputVariables   `json:"outputVariables"`
+	ConditionDetails         []ConditionDetails `json:"conditionDetails"`
+	MountCodeToContainer     bool               `json:"mountCodeToContainer,omitempty"`
+	MountCodeToContainerPath string             `json:"mountCodeToContainerPath,omitempty"`
+	MountDirectoryFromHost   bool               `json:"mountDirectoryFromHost"`
+	ContainerImagePath       string             `json:"containerImagePath,omitempty"`
+	MountPathMap             []MountPathMap     `json:"mountPathMap,omitempty"`
+	PortMap                  []PortMap          `json:"portMap,omitempty"`
+	IsMountCustomScript      bool               `json:"isMountCustomScript,omitempty"`
 }
 
 type CommandArgsMap struct {

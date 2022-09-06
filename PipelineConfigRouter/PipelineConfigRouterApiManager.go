@@ -768,36 +768,6 @@ func HitGetPipelineSuggestedCiCd(pipelineType string, appId int, authToken strin
 	return pipelineConfigRouter.pipelineSuggestedCDResponseDTO
 }
 
-func inputVariablesSelector(inputType int) []RequestDTOs.InputVariables {
-	var inputVariable RequestDTOs.InputVariables
-	switch inputType {
-	case 1:
-		inputVariable.Format = "STRING"
-		inputVariable.Value = Base.GetRandomStringOfGivenLength(5)
-		inputVariable.VariableType = "NEW"
-	case 2:
-		inputVariable.Format = "BOOL"
-		inputVariable.Value = "true"
-		inputVariable.VariableType = "NEW"
-	case 3:
-		inputVariable.Format = "NUMBER"
-		inputVariable.Value = strconv.Itoa(Base.GetRandomNumberOf9Digit())
-		inputVariable.VariableType = "NEW"
-	case 4:
-		inputVariable.Format = "DATE"
-		inputVariable.Value = "2006-01-02"
-		inputVariable.VariableType = "NEW"
-	case 5:
-		inputVariable.Format = "STRING"
-		inputVariable.VariableType = "GLOBAL"
-		inputVariable.RefVariableName = "DOCKER_IMAGE_TAG"
-	}
-	inputVariable.Name = Base.GetRandomStringOfGivenLength(5) + "_" + inputVariable.Format
-	inputVariable.Description = inputVariable.Name + "_Desc_" + Base.GetRandomStringOfGivenLength(10)
-	var input []RequestDTOs.InputVariables
-	input = append(input, inputVariable)
-	return input
-}
 func getConditionDetails(id int) []RequestDTOs.ConditionDetails {
 	var conditionDetails RequestDTOs.ConditionDetails
 	conditionDetails.ConditionType = "TRIGGER"
@@ -821,46 +791,140 @@ func getConditionDetails(id int) []RequestDTOs.ConditionDetails {
 	return input
 }
 
-func getPreBuildStepRequestPayloadDto(scriptType int) []RequestDTOs.Step {
+func getPreBuildStepRequestPayloadDto(index int, scriptType string) RequestDTOs.Step {
 	var step RequestDTOs.Step
-	step.Name = Base.GetRandomStringOfGivenLength(10)
-	step.Description = Base.GetRandomStringOfGivenLength(20)
+	step.Name = "TASK" + Base.GetRandomStringOfGivenLength(5)
+	step.Description = "This is Random Description of Step for testing purpose"
+	step.Index = index
 	step.StepType = "INLINE"
-	switch scriptType {
-	case 1:
-		{
-			step.InlineStepDetail.ScriptType = "SHELL"
+	step.OutputDirectoryPath = append(step.OutputDirectoryPath, "/test/output")
+	step.InlineStepDetail = getInlineStepDetails(scriptType)
+	return step
+}
 
-			outputVariables := inputVariablesSelector(1)
-			step.InlineStepDetail.OutputVariables = append(step.InlineStepDetail.OutputVariables, outputVariables[0])
-
-			step.OutputDirectoryPath = append(step.OutputDirectoryPath, "./"+Base.GetRandomStringOfGivenLength(5))
-			break
-		}
-	case 2:
-		{
-			step.InlineStepDetail.ScriptType = "CONTAINER_IMAGE"
-			step.InlineStepDetail.ContainerImagePath = "alpine:latest"
-			break
-		}
+func getInlineStepDetails(scriptType string) RequestDTOs.InlineStepDetail {
+	inlineStepDetail := RequestDTOs.InlineStepDetail{}
+	if scriptType == "SHELL" {
+		inlineStepDetail.ScriptType = scriptType
+		inlineStepDetail.Script = "#!/bin/sh \nset -eo pipefail \n#set -v  ## uncomment this to debug the script \n\necho \"Here I am Printing value of VarString\"\necho $VarString\n\necho \"Here I am Printing value of VarBool\"\necho $VarBool\n\necho \"Here I am Printing value of VarNumber\"\necho $VarNumber\n\necho \"Here I am Printing value of VarDate\"\necho $VarDate\n\necho \"Here I am Printing value of VarDockerImage\"\necho $VarDockerImage\n\necho \"Here I am exporting Var1\"\nexport Var1=$Var1\n\necho \"Here I am exporting Var1\"\nexport VarBool=$VarBool\n\necho \"Here I am exporting Var1\"\nexport VarNumber=$VarNumber\n\necho \"Here I am exporting Var1\"\nexport VarDate=$VarDate\n\necho \"Here I am exporting Var1\"\nexport VarDockerImage=$VarDockerImage"
 
 	}
-	step.InlineStepDetail.Script = "#!/bin/sh \nset -eo pipefail \n#set -v  ## uncomment this to debug the script \n"
-	i := 0
-	log.Println("Adding tasks")
-	for i = 1; i < 6; i++ {
+	if scriptType == "CONTAINER_IMAGE" {
+		inlineStepDetail.ScriptType = "CONTAINER_IMAGE"
+		inlineStepDetail.Script = "#!/bin/sh \nset -eo pipefail \n#set -v  ## uncomment this to debug the script \n\necho \"Here I am Printing value of VarString\"\necho $VarString\n\necho \"Here I am Printing value of VarBool\"\necho $VarBool\n\necho \"Here I am Printing value of VarNumber\"\necho $VarNumber\n\necho \"Here I am Printing value of VarDate\"\necho $VarDate\n\necho \"Here I am Printing value of VarDockerImage\"\necho $VarDockerImage\n\necho \"Here I am exporting Var1\"\nexport Var1=$Var1\n\necho \"Here I am exporting Var1\"\nexport VarBool=$VarBool\n\necho \"Here I am exporting Var1\"\nexport VarNumber=$VarNumber\n\necho \"Here I am exporting Var1\"\nexport VarDate=$VarDate\n\necho \"Here I am exporting Var1\"\nexport VarDockerImage=$VarDockerImage"
+		inlineStepDetail.StoreScriptAt = "mounted/script.sh"
+		commandArgsMap := getCommandArgsMap()
+		inlineStepDetail.CommandArgsMap = append(inlineStepDetail.CommandArgsMap, commandArgsMap)
+		inlineStepDetail.MountCodeToContainerPath = "/sourcecode"
+		inlineStepDetail.MountDirectoryFromHost = true
+		inlineStepDetail.ContainerImagePath = "alpine:latest"
+		inlineStepDetail.IsMountCustomScript = true
+		inlineStepDetail.MountCodeToContainer = true
+		portmap := getPortMap()
+		mountPathMap := getMountPathMap()
+		inlineStepDetail.PortMap = append(inlineStepDetail.PortMap, portmap)
+		inlineStepDetail.MountPathMap = append(inlineStepDetail.MountPathMap, mountPathMap)
+	}
+	for i := 1; i < 6; i++ {
 		inputVariables := inputVariablesSelector(i)
-		conditionDetails := getConditionDetails(i)
-		step.InlineStepDetail.InputVariables = append(step.InlineStepDetail.InputVariables, inputVariables[0])
-		step.InlineStepDetail.ConditionDetails = append(step.InlineStepDetail.ConditionDetails, conditionDetails[0])
-		step.InlineStepDetail.ConditionDetails[0].ConditionOnVariable = step.InlineStepDetail.InputVariables[0].Name
-		step.InlineStepDetail.ConditionDetails[0].ConditionalValue = Base.GetRandomStringOfGivenLength(4)
+		inlineStepDetail.InputVariables = append(inlineStepDetail.InputVariables, inputVariables)
+		inlineStepDetail.OutputVariables = append(inlineStepDetail.OutputVariables, inputVariables)
+		conditionDetails := getConditionDetailsForGivenConditionType(i, "TRIGGER")
+		inlineStepDetail.ConditionDetails = append(inlineStepDetail.ConditionDetails, conditionDetails)
+		conditionDetails = getConditionDetailsForGivenConditionType(i, "PASS")
+		inlineStepDetail.ConditionDetails = append(inlineStepDetail.ConditionDetails, conditionDetails)
 	}
-	step.InlineStepDetail.MountCodeToContainer = false
-	step.InlineStepDetail.MountDirectoryFromHost = false
-	var steps []RequestDTOs.Step
-	steps = append(steps, step)
-	return steps
+	return inlineStepDetail
+}
+func getCommandArgsMap() RequestDTOs.CommandArgsMap {
+	var commandArgsMap RequestDTOs.CommandArgsMap
+	commandArgsMap.Command = "sh"
+	args := []string{"/mounted/test.sh"}
+	commandArgsMap.Args = args
+	return commandArgsMap
+}
+
+func getPortMap() RequestDTOs.PortMap {
+	var portMap RequestDTOs.PortMap
+	portMap.PortOnContainer = 8080
+	portMap.PortOnLocal = 9000
+	return portMap
+}
+
+func getMountPathMap() RequestDTOs.MountPathMap {
+	var mountPathMap RequestDTOs.MountPathMap
+	mountPathMap.FilePathOnDisk = "./"
+	mountPathMap.FilePathOnContainer = "./"
+	return mountPathMap
+}
+func getConditionDetailsForGivenConditionType(id int, ConditionType string) RequestDTOs.ConditionDetails {
+	var conditionDetails RequestDTOs.ConditionDetails
+	conditionDetails.ConditionType = ConditionType
+	switch id {
+	case 1:
+		conditionDetails.ConditionOperator = "=="
+		conditionDetails.ConditionOnVariable = "VarNumber"
+		conditionDetails.ConditionalValue = "1"
+	case 2:
+		conditionDetails.ConditionOperator = "!="
+		conditionDetails.ConditionOnVariable = "VarNumber"
+		conditionDetails.ConditionalValue = "3"
+	case 3:
+		conditionDetails.ConditionOperator = ">"
+		conditionDetails.ConditionOnVariable = "VarNumber"
+		conditionDetails.ConditionalValue = "0"
+	case 4:
+		conditionDetails.ConditionOperator = "<"
+		conditionDetails.ConditionOnVariable = "VarNumber"
+		conditionDetails.ConditionalValue = "5"
+	case 5:
+		conditionDetails.ConditionOperator = "<="
+		conditionDetails.ConditionOnVariable = "VarNumber"
+		conditionDetails.ConditionalValue = "3"
+
+	case 6:
+		conditionDetails.ConditionOperator = ">="
+		conditionDetails.ConditionOnVariable = "VarNumber"
+		conditionDetails.ConditionalValue = "0"
+	}
+	return conditionDetails
+}
+
+func inputVariablesSelector(inputType int) RequestDTOs.InputVariables {
+	var inputVariable RequestDTOs.InputVariables
+	switch inputType {
+	case 1:
+		inputVariable.Format = "STRING"
+		inputVariable.Name = "VarString"
+		inputVariable.Value = "Deepak"
+		inputVariable.VariableType = "NEW"
+		inputVariable.Description = "This is description of Variable ==>" + inputVariable.Name
+	case 2:
+		inputVariable.Format = "BOOL"
+		inputVariable.Value = "true"
+		inputVariable.VariableType = "NEW"
+		inputVariable.Name = "VarBool"
+		inputVariable.Description = "This is description of Variable ==>" + inputVariable.Name
+	case 3:
+		inputVariable.Format = "NUMBER"
+		inputVariable.Value = "1"
+		inputVariable.VariableType = "NEW"
+		inputVariable.Name = "VarNumber"
+		inputVariable.Description = "This is description of Variable ==>" + inputVariable.Name
+	case 4:
+		inputVariable.Format = "DATE"
+		inputVariable.Value = "2006-01-02"
+		inputVariable.VariableType = "NEW"
+		inputVariable.Name = "VarDate"
+		inputVariable.Description = "This is description of Variable ==>" + inputVariable.Name
+	case 5:
+		inputVariable.Format = "STRING"
+		inputVariable.VariableType = "GLOBAL"
+		inputVariable.RefVariableName = "DOCKER_IMAGE_TAG"
+		inputVariable.Name = "VarDockerImage"
+		inputVariable.Description = "This is description of Variable ==>" + inputVariable.Name
+	}
+	return inputVariable
 }
 
 func HitCreateWorkflowApiWithFullPayload(appId int, authToken string) ResponseDTOs.CreateWorkflowResponseDto {
