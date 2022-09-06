@@ -54,4 +54,6 @@ const (
 	GetAppListByTeamIdsApiUrl                 string = "/orchestrator/app/min"
 	FindAppsByTeamIdApiUrl                    string = "/orchestrator/app/team/by-id/"
 	FindAppsByTeamNameApiUrl                  string = "/orchestrator/app/team/by-name/"
+	FetchMaterialsApiUrl                      string = "/orchestrator/app/ci-pipeline/"
+	FetchMaterialsApi                         string = "FetchMaterialsApi"
 )

@@ -224,6 +224,7 @@ type StructPipelineConfigRouter struct {
 	updateAppMaterialResponseDTO       ResponseDTOs.UpdateAppMaterialResponseDTO
 	appListForAutocompleteResponseDTO  ResponseDTOs.AppListForAutocompleteResponseDTO
 	appListByTeamIdsResponseDTO        ResponseDTOs.AppListByTeamIdsResponseDTO
+	fetchMaterialsResponseDTO          ResponseDTOs.FetchMaterialsResponseDTO
 }
 
 type EnvironmentConfigPipelineConfigRouter struct {
@@ -598,6 +599,14 @@ func HitFindAppsByTeamName(teamName string, authToken string) ResponseDTOs.AppLi
 	return pipelineConfigRouter.appListForAutocompleteResponseDTO
 }
 
+func HitFetchMaterialsApi(pipelineId string, authToken string) ResponseDTOs.FetchMaterialsResponseDTO {
+	resp, err := Base.MakeApiCall(FetchMaterialsApiUrl+pipelineId+"/material", http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, FetchMaterialsApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), FetchMaterialsApi)
+	return pipelineConfigRouter.fetchMaterialsResponseDTO
+}
+
 func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructPipelineConfigRouter {
 	switch apiName {
 	case DeleteAppMaterialApi:
@@ -652,6 +661,8 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.appListForAutocompleteResponseDTO)
 	case GetAppListByTeamIdsApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.appListByTeamIdsResponseDTO)
+	case FetchMaterialsApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.fetchMaterialsResponseDTO)
 	}
 	return structPipelineConfigRouter
 }
