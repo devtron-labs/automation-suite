@@ -226,6 +226,7 @@ type StructPipelineConfigRouter struct {
 	appListByTeamIdsResponseDTO        ResponseDTOs.AppListByTeamIdsResponseDTO
 	fetchMaterialsResponseDTO          ResponseDTOs.FetchMaterialsResponseDTO
 	getCiPipelineMinResponseDTO        ResponseDTOs.GetCiPipelineMinResponseDTO
+	refreshMaterialsResponseDTO        ResponseDTOs.RefreshMaterialsResponseDTO
 }
 
 type EnvironmentConfigPipelineConfigRouter struct {
@@ -616,6 +617,14 @@ func HitGetCiPipelineMin(appId string, authToken string) ResponseDTOs.GetCiPipel
 	return pipelineConfigRouter.getCiPipelineMinResponseDTO
 }
 
+func HitRefreshMaterialsApi(gitMaterialId string, authToken string) ResponseDTOs.RefreshMaterialsResponseDTO {
+	resp, err := Base.MakeApiCall(RefreshMaterialsApiUrl+gitMaterialId, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, RefreshMaterialsApi)
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), RefreshMaterialsApi)
+	return pipelineConfigRouter.refreshMaterialsResponseDTO
+}
+
 func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructPipelineConfigRouter {
 	switch apiName {
 	case DeleteAppMaterialApi:
@@ -674,6 +683,8 @@ func (structPipelineConfigRouter StructPipelineConfigRouter) UnmarshalGivenRespo
 		json.Unmarshal(response, &structPipelineConfigRouter.fetchMaterialsResponseDTO)
 	case GetCiPipelineMinApi:
 		json.Unmarshal(response, &structPipelineConfigRouter.getCiPipelineMinResponseDTO)
+	case RefreshMaterialsApi:
+		json.Unmarshal(response, &structPipelineConfigRouter.refreshMaterialsResponseDTO)
 	}
 	return structPipelineConfigRouter
 }

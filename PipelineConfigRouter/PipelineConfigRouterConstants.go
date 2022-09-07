@@ -57,4 +57,6 @@ const (
 	FetchMaterialsApiUrl                      string = "/orchestrator/app/ci-pipeline/"
 	FetchMaterialsApi                         string = "FetchMaterialsApi"
 	GetCiPipelineMinApi                       string = "GetCiPipelineMinApi"
+	RefreshMaterialsApiUrl                    string = "/orchestrator/app/ci-pipeline/refresh-material/"
+	RefreshMaterialsApi                       string = "RefreshMaterialsApi"
 )

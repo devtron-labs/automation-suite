@@ -407,3 +407,13 @@ func CreateUrlForEventStreamsHavingQueryParam(params map[string]string) string {
 	finalTrimmedUrl := strings.TrimSpace(finalUrl)
 	return strings.TrimRight(finalTrimmedUrl, "&")
 }
+
+func ConvertDateStringIntoTimeStamp(timeString string) int64 {
+	dateTime, e := time.Parse(time.RFC3339, timeString)
+	if e != nil {
+		panic("Parse error")
+	}
+	timestamp := dateTime.Unix()
+	fmt.Println("Date to Timestamp : ", timestamp)
+	return timestamp
+}
