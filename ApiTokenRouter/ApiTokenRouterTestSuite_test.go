@@ -5,6 +5,6 @@ import (
 	"testing"
 )
 
-func TestAppLabelsRouterSuite(t *testing.T) {
+func TestApiTokenRouterSuite(t *testing.T) {
 	suite.Run(t, new(ApiTokenRoutersTestSuite))
 }

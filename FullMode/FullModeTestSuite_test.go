@@ -1,6 +1,7 @@
 package FullMode
 
 import (
+	"automation-suite/ApiTokenRouter"
 	"automation-suite/AppLabelsRouter"
 	"automation-suite/AppListingRouter"
 	"automation-suite/AppStoreRouter"
@@ -74,4 +75,8 @@ func TestPipelineConfigSuite(t *testing.T) {
 
 func TestApplicationRouterSuite(t *testing.T) {
 	suite.Run(t, new(ApplicationRouter.ApplicationsRouterTestSuite))
+}
+
+func TestApiTokenRouterSuite(t *testing.T) {
+	suite.Run(t, new(ApiTokenRouter.ApiTokenRoutersTestSuite))
 }
