@@ -3,6 +3,7 @@ package PipelineConfigRouter
 import (
 	Base "automation-suite/testUtils"
 	"encoding/json"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"strconv"
@@ -21,9 +22,12 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassRefreshMaterials() {
 
 	suite.Run("A=1=RefreshAppMaterialsWithCorrectGitMaterialId", func() {
 		currentTimestamp := time.Now().Unix()
+		time.Sleep(5 * time.Second)
 		refreshMaterialResponse := HitRefreshMaterialsApi(strconv.Itoa(appMaterial.Id), suite.authToken)
 		assert.Equal(suite.T(), "successfully refreshed material", refreshMaterialResponse.Result.Message)
 		ts := Base.ConvertDateStringIntoTimeStamp(refreshMaterialResponse.Result.LastFetchTime)
+		fmt.Println("Here I am printing currentTimestamp===>", currentTimestamp)
+		fmt.Println("Here I am printing TimeStampDuringRefresh===>", ts)
 		assert.True(suite.T(), currentTimestamp < ts)
 	})
 

@@ -2,6 +2,7 @@ package ApiTokenRouter
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"strconv"
@@ -27,7 +28,7 @@ func (suite *ApiTokenRoutersTestSuite) TestUpdateApiToken() {
 
 		log.Println("=== Here We updating & verifying the Token After creation ===")
 		var DateStringForUpdateToken string
-		time.Sleep(1 * time.Second)
+		time.Sleep(5 * time.Second)
 		HitUpdateApiToken(strconv.Itoa(tokenId), suite.authToken)
 		responseOfGetAllApiTokens = HitGetAllApiTokens(suite.authToken).Result
 		for _, result := range responseOfGetAllApiTokens {
@@ -38,6 +39,8 @@ func (suite *ApiTokenRoutersTestSuite) TestUpdateApiToken() {
 		}
 
 		timeStampWhenTokenUpdated := ConvertDateStringIntoTimeStamp(DateStringForUpdateToken)
+		fmt.Println("Here I am printing timeStampWhenTokenUpdated===>", timeStampWhenTokenUpdated)
+		fmt.Println("Here I am printing timeStampBeforeUpdating===>", timeStampBeforeUpdating)
 		assert.True(suite.T(), timeStampBeforeUpdating < timeStampWhenTokenUpdated)
 		log.Println("=== Here We Deleting the Token After Verification ===")
 		responseOfDeleteApi := HitDeleteApiToken(strconv.Itoa(tokenId), suite.authToken)
