@@ -61,12 +61,14 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassGetAppListByTeamIds() {
 		log.Println("=== Here we are getting app-list after creating new app for asserting the API ===")
 		getAppListForAutocompleteResponse = HitGetAppListByTeamIds(queryParams, suite.authToken)
 
-		if noOfAppsBeforeCreationNewApp != 0 {
+		if noOfAppsBeforeCreationNewApp == 0 {
+			assert.Equal(suite.T(), len(getAppListForAutocompleteResponse.Result[0].AppList), 1)
+			assert.Equal(suite.T(), getAppListForAutocompleteResponse.Result[0].AppList[0].Name, AppName)
+		} else if noOfAppsBeforeCreationNewApp > 0 {
+			index := len(getAppListForAutocompleteResponse.Result[0].AppList) - 1
 			assert.Equal(suite.T(), noOfAppsBeforeCreationNewApp+1, len(getAppListForAutocompleteResponse.Result[0].AppList))
-			assert.Equal(suite.T(), len(getAppListForAutocompleteResponse.Result[0].AppList[len(getAppListForAutocompleteResponse.Result[0].AppList)].Name), AppName)
+			assert.Equal(suite.T(), getAppListForAutocompleteResponse.Result[0].AppList[index].Name, AppName)
 		}
-		assert.Equal(suite.T(), len(getAppListForAutocompleteResponse.Result[0].AppList), 1)
-		assert.Equal(suite.T(), getAppListForAutocompleteResponse.Result[0].AppList[0].Name, AppName)
 		log.Println("=== Here we are deleting the newly created app after verification ===")
 		log.Println("Removing the data created via API")
 		AppStoreDeploymentRouter.HitDeleteInstalledAppApi(strconv.Itoa(installedAppId), suite.authToken)
