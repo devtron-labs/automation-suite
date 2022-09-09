@@ -13,6 +13,7 @@ func (suite *ApiTokenRoutersTestSuite) TestUpdateApiToken() {
 
 	suite.Run("A=1=CreateApiTokenWithValidArgs", func() {
 		timeStampBeforeUpdating := time.Now().Unix()
+		time.Sleep(5 * time.Second)
 		var tokenId int
 		createApiTokenRequestDTO := getPayLoadForCreateApiToken()
 		payloadForCreateApiTokenRequest, _ := json.Marshal(createApiTokenRequestDTO)
@@ -25,14 +26,13 @@ func (suite *ApiTokenRoutersTestSuite) TestUpdateApiToken() {
 				tokenId = result.Id
 			}
 		}
-
 		log.Println("=== Here We updating & verifying the Token After creation ===")
-		var DateStringForUpdateToken string
-		time.Sleep(5 * time.Second)
 		HitUpdateApiToken(strconv.Itoa(tokenId), suite.authToken)
 		responseOfGetAllApiTokens = HitGetAllApiTokens(suite.authToken).Result
+		var DateStringForUpdateToken string
 		for _, result := range responseOfGetAllApiTokens {
 			if result.UserId == responseOfCreateApiToken.Result.UserId {
+
 				assert.Equal(suite.T(), responseOfCreateApiToken.Result.Token, result.Token)
 				DateStringForUpdateToken = result.UpdatedAt
 			}
