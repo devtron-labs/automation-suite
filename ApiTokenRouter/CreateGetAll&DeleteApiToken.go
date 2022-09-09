@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func (suite *ApiTokenRoutersTestSuite) TestUpdateApiToken() {
+func (suite *ApiTokenRoutersTestSuite) TestCreateGetAllAndDeleteApiToken() {
 
 	suite.Run("A=1=CreateApiTokenWithValidArgs", func() {
 		var tokenId int

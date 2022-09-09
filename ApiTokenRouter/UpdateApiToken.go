@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (suite *ApiTokenRoutersTestSuite) TestCreateApiToken() {
+func (suite *ApiTokenRoutersTestSuite) TestUpdateApiToken() {
 
 	suite.Run("A=1=CreateApiTokenWithValidArgs", func() {
 		timeStampBeforeUpdating := time.Now().Unix()
