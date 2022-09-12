@@ -132,8 +132,22 @@ func triggerAndVerifyCiPipeline(createAppApiResponse Base.CreateAppRequestDto, p
 		assert.Equal(suite.T(), "Running", workflowStatus.Result.CiWorkflowStatus[0].CiStatus)
 	}
 	log.Println("=== Here we are getting workflow and verifying the status after triggering via poll function ===")
-	assert.True(suite.T(), PipelineConfigRouter.PollForGettingCdDeployStatusAfterTrigger(createAppApiResponse.Id, suite.authToken))
+	assert.True(suite.T(), PollForGettingCdDeployStatusAfterTrigger(createAppApiResponse.Id, suite.authToken))
 	updatedWorkflowStatus := PipelineConfigRouter.HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
 	assert.Equal(suite.T(), "Succeeded", updatedWorkflowStatus.Result.CiWorkflowStatus[0].CiStatus)
 	assert.Equal(suite.T(), "Healthy", updatedWorkflowStatus.Result.CdWorkflowStatus[0].DeployStatus)
+}
+
+func PollForGettingCdDeployStatusAfterTrigger(id int, authToken string) bool {
+	count := 0
+	for {
+		updatedWorkflowStatus := PipelineConfigRouter.HitGetWorkflowStatus(id, authToken)
+		deploymentStatus := updatedWorkflowStatus.Result.CdWorkflowStatus[0].DeployStatus
+		time.Sleep(1 * time.Second)
+		count = count + 1
+		if deploymentStatus == "Healthy" || count >= 500 {
+			break
+		}
+	}
+	return true
 }

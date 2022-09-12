@@ -14,9 +14,9 @@ import (
 func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 	config, _ := GetEnvironmentConfigPipelineConfigRouter()
 	var configId int
-	log.Println("=== Here we are creating a App ===")
+	log.Println("=== Here we are creating an App ===")
 	createAppApiResponse := Base.CreateApp(suite.authToken).Result
-
+	log.Println("=== Here we are printing AppName ===>", createAppApiResponse.AppName)
 	log.Println("=== Here we are creating App Material ===")
 	createAppMaterialRequestDto := GetAppMaterialRequestDto(createAppApiResponse.Id, 1, false)
 	appMaterialByteValue, _ := json.Marshal(createAppMaterialRequestDto)

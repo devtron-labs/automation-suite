@@ -87,11 +87,10 @@ func (suite *ApplicationsRouterTestSuite) TestClassGetTerminalSession() {
 
 	suite.Run("A=1=GetTerminalSessionWithValidArgs", func() {
 		TerminalSessionApiResponse := HitGetTerminalSessionApi(strconv.Itoa(createAppApiResponse.Id), "1", "devtron-demo", container, createAppApiResponse.AppName, suite.authToken)
-		assert.NotNil(suite.T(), TerminalSessionApiResponse.Result.SessionID)
 		assert.NotEmpty(suite.T(), TerminalSessionApiResponse.Result.SessionID)
 	})
 
-	suite.Run("A=1=GetTerminalSessionWithInvalidEnvId", func() {
+	suite.Run("A=2=GetTerminalSessionWithInvalidEnvId", func() {
 		invalidEnvId := strconv.Itoa(Base.GetRandomNumberOf9Digit())
 		TerminalSessionApiResponse := HitGetTerminalSessionApi(strconv.Itoa(createAppApiResponse.Id), invalidEnvId, "devtron-demo", container, createAppApiResponse.AppName, suite.authToken)
 		assert.Equal(suite.T(), TerminalSessionApiResponse.Errors[0].InternalMessage, "[{pg: no rows in result set}]", suite.authToken)
@@ -99,8 +98,7 @@ func (suite *ApplicationsRouterTestSuite) TestClassGetTerminalSession() {
 
 	suite.Run("A=3=GetApplicationViaValidName", func() {
 		getApplicationApiResponse := HitGetApplicationApi(createAppApiResponse.AppName+"-devtron-demo", suite.authToken)
-		assert.NotNil(suite.T(), getApplicationApiResponse.Result)
-		assert.NotNil(suite.T(), getApplicationApiResponse.Result.Metadata.Uid)
+		assert.NotEmpty(suite.T(), getApplicationApiResponse.Result.Metadata.Uid)
 		assert.Equal(suite.T(), getApplicationApiResponse.Result.Status.Health.Status, "Healthy")
 		assert.True(suite.T(), strings.Contains(getApplicationApiResponse.Result.Spec.Source.RepoURL, createAppApiResponse.AppName))
 		assert.Equal(suite.T(), getApplicationApiResponse.Result.Metadata.ManagedFields[0].Manager, "argocd-application-controller")
