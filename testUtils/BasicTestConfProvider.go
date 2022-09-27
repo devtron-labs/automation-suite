@@ -1,11 +1,11 @@
 package testUtils
 
 import (
-	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/caarlos0/env"
+	"github.com/go-resty/resty/v2"
 	"github.com/r3labs/sse/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -18,8 +18,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/go-resty/resty/v2"
 )
 
 const createSessionApiUrl string = "/orchestrator/api/v1/session"
@@ -85,6 +83,7 @@ type BaseClassEnvironmentConfig struct {
 	Password           string `json:"PASSWORD"`
 	ClusterBearerToken string `json:"CLUSTER_BEARER_TOKEN"`
 	ClusterServerUrl   string `json:"CLUSTER_SERVER_URL"`
+	BearerToken        string `json:"BEARER_TOKEN"`
 }
 
 func getRestyClient() *resty.Client {
@@ -128,7 +127,7 @@ func GetByteArrayOfGivenJsonFile(filePath string) ([]byte, error) {
 		log.Println("Unable to open the file. Error occurred !!", "err", err)
 	}
 	log.Println("Opened the given json file successfully !!!")
-	defer testDataJsonFile.Close()
+	//defer testDataJsonFile.Close()
 
 	byteValue, err := ioutil.ReadAll(testDataJsonFile)
 	return byteValue, err
@@ -162,117 +161,6 @@ func GetRandomStringOfGivenLength(length int) string {
 
 func GetRandomNumberOf9Digit() int {
 	return 100000000 + rand.Intn(999999999-100000000)
-}
-
-// CreateFile Create File, Pass "example.txt"
-func CreateFile(fileName string) {
-	f, err := os.Create(fileName)
-	defer f.Close()
-	if err != nil {
-		panic(err)
-	}
-}
-
-// DeleteFile Delete File, Pass "example.txt"
-func DeleteFile(fileName string) {
-	fmt.Println("Removing File : ", fileName)
-	f := os.Remove(fileName)
-	if f != nil {
-		log.Fatal(f)
-	}
-}
-
-// CreateFileAndEnterData Create (if not present) & add properties to file
-// Pass ("example.txt","key","value")
-func CreateFileAndEnterData(filename string, key string, value string) {
-	file, err := os.Open(filename)
-	if err != nil {
-		//panic(err)
-		CreateFile(filename)
-	}
-	scanner := bufio.NewScanner(file)
-	var temp string
-	for scanner.Scan() {
-		line := scanner.Text()
-		temp = temp + line
-	}
-	temp = TrimSuffix(temp)
-	split := strings.Split(temp, ",")
-	var result string
-	for _, j := range split {
-		if len(j) != 0 {
-			split2 := strings.Split(j, ":")
-			temp2 := "\"" + key + "\""
-			if split2[0] != temp2 {
-				result = result + "," + j
-			}
-		}
-
-	}
-	result = result + ",\"" + key + "\":" + value + "}"
-	if result[0:1] == "," {
-		result = TrimFirstChar(result)
-	}
-	result = "{" + result
-	f, err := os.Create(filename)
-	if err != nil {
-		panic(err)
-	}
-	f.WriteString(result)
-	defer f.Close()
-}
-
-// ReadDataByFilenameAndKey Return []values
-// Pass comma-seperated keys ("example.txt",key1, key2, key3,...)
-func ReadDataByFilenameAndKey(filename string, keys ...string) []string {
-	var output []string
-	for _, key := range keys {
-		file, err := os.Open(filename)
-		if err != nil {
-			panic(err)
-		}
-		scanner := bufio.NewScanner(file)
-		var temp string
-		for scanner.Scan() {
-			line := scanner.Text()
-			temp = temp + line
-		}
-		temp = TrimSuffix(temp)
-		split := strings.Split(temp, ",")
-		flag := 1
-		for _, j := range split {
-			if len(j) != 0 {
-				split2 := strings.Split(j, ":")
-				temp2 := "\"" + key + "\""
-				if split2[0] == temp2 {
-					output = append(output, split2[1])
-					flag = 0
-					break
-				}
-			}
-		}
-
-		if flag == 1 {
-			log.Println("key NOT found")
-			output = append(output, "")
-		}
-	}
-	return output
-}
-func TrimSuffix(s string) string {
-	if strings.HasSuffix(s, "}") {
-		s = s[:len(s)-len("}")]
-	}
-	s = TrimFirstChar(s)
-	return s
-}
-func TrimFirstChar(s string) string {
-	for i := range s {
-		if i > 0 {
-			return s[i:]
-		}
-	}
-	return ""
 }
 
 func CreateApp(authToken string) CreateAppResponseDto {
@@ -380,6 +268,36 @@ func ReadEventStreamsForSpecificApi(apiUrl string, authToken string, ContainerNa
 		dt := time.Now()
 		if strings.Contains(string(msg.Data), "{\"result\":{\"content\"") || strings.Contains(string(msg.Data), dt.Format("01-02-2006")) {
 			assert.True(t, true)
+		}
+	}
+	assert.Nil(t, cErr)
+}
+
+func ReadEventStreamsForSpecificApiAndVerifyResult(apiUrl string, authToken string, t *testing.T, indexOfMessage int, message string) {
+	baseConfig := ReadBaseEnvConfig()
+	fileData := ReadAnyJsonFile(baseConfig.BaseCredentialsFile)
+	url := fileData.BaseServerUrl + apiUrl
+	client := sse.NewClient(url)
+	header := make(map[string]string)
+	header["token"] = authToken
+	client.Headers = header
+	events := make(chan *sse.Event)
+	var cErr error
+	go func() {
+		cErr = client.Subscribe("message", func(msg *sse.Event) {
+			if msg.Data != nil {
+				events <- msg
+				return
+			}
+		})
+	}()
+
+	for i := 0; i <= indexOfMessage; i++ {
+		msg, err := wait(events, time.Second*60)
+		require.Nil(t, err)
+		fmt.Println(i, "=====>", string(msg.Data))
+		if i == indexOfMessage {
+			assert.Equal(t, string(msg.Data), message)
 		}
 	}
 	assert.Nil(t, cErr)

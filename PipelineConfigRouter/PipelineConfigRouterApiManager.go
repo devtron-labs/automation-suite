@@ -5,6 +5,8 @@ import (
 	"automation-suite/PipelineConfigRouter/ResponseDTOs"
 	"os"
 	"strings"
+	"testing"
+	"time"
 
 	Base "automation-suite/testUtils"
 	"encoding/json"
@@ -21,6 +23,66 @@ type DeleteResponseDto struct {
 	Status string        `json:"status"`
 	Result string        `json:"result"`
 	Errors []Base.Errors `json:"errors"`
+}
+
+type GetCdWorkflowsDto struct {
+	Code   int                     `json:"code"`
+	Status string                  `json:"status"`
+	Result []CdWorkflowResponseDto `json:"result"`
+}
+
+type GetCdWorkflowsDetailsDto struct {
+	Code   int                   `json:"code"`
+	Status string                `json:"status"`
+	Result CdWorkflowResponseDto `json:"result"`
+}
+
+type CiWorkflowDetailsDto struct {
+	Code   int                  `json:"code"`
+	Status string               `json:"status"`
+	Result []CiWorkflowResponse `json:"result"`
+}
+
+type CiWorkflowResponse struct {
+	Id                 int       `json:"id"`
+	Name               string    `json:"name"`
+	Status             string    `json:"status"`
+	PodStatus          string    `json:"podStatus"`
+	Message            string    `json:"message"`
+	StartedOn          time.Time `json:"startedOn"`
+	FinishedOn         time.Time `json:"finishedOn"`
+	CiPipelineId       int       `json:"ciPipelineId"`
+	Namespace          string    `json:"namespace"`
+	LogLocation        string    `json:"logLocation"`
+	BlobStorageEnabled bool      `json:"blobStorageEnabled"`
+	TriggeredBy        int32     `json:"triggeredBy"`
+	Artifact           string    `json:"artifact"`
+	TriggeredByEmail   string    `json:"triggeredByEmail"`
+	Stage              string    `json:"stage"`
+	ArtifactId         int       `json:"artifactId"`
+}
+
+type CdWorkflowResponseDto struct {
+	Id                 int       `json:"id"`
+	CdWorkflowId       int       `json:"cd_workflow_id"`
+	Name               string    `json:"name"`
+	Status             string    `json:"status"`
+	PodStatus          string    `json:"pod_status"`
+	Message            string    `json:"message"`
+	StartedOn          time.Time `json:"started_on"`
+	FinishedOn         time.Time `json:"finished_on"`
+	PipelineId         int       `json:"pipeline_id"`
+	Namespace          string    `json:"namespace"`
+	LogFilePath        string    `json:"log_file_path"`
+	TriggeredBy        int32     `json:"triggered_by"`
+	EmailId            string    `json:"email_id"`
+	Image              string    `json:"image"`
+	MaterialInfo       string    `json:"material_info,omitempty"`
+	DataSource         string    `json:"data_source,omitempty"`
+	CiArtifactId       int       `json:"ci_artifact_id,omitempty"`
+	WorkflowType       string    `json:"workflow_type,omitempty"`
+	ExecutorType       string    `json:"executor_type,omitempty"`
+	BlobStorageEnabled bool      `json:"blobStorageEnabled"`
 }
 
 type CreateAppRequestDto struct {
@@ -486,6 +548,56 @@ func HitForceDeleteCdPipelineApi(payload []byte, authToken string) RequestDTOs.D
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
 	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), DeleteCdPipelineApi)
 	return pipelineConfigRouter.deleteCdPipelineRequestDTO
+}
+
+func HitLogsDownloadApi(url string, authToken string, t *testing.T, indexOfLog int, logString string) {
+	Base.ReadEventStreamsForSpecificApiAndVerifyResult(url, authToken, t, indexOfLog, logString)
+}
+
+func FetchCiWorkflows(url string, authToken string) (*CiWorkflowDetailsDto, error) {
+	queryParams := make(map[string]string)
+	queryParams["offset"] = "0"
+	queryParams["size"] = "5"
+	apiCall, err := Base.MakeApiCall(url, http.MethodGet, "", queryParams, authToken)
+	if err != nil {
+		return nil, err
+	}
+	ciWorkflowDetailsDto := &CiWorkflowDetailsDto{}
+	err = json.Unmarshal(apiCall.Body(), ciWorkflowDetailsDto)
+	return ciWorkflowDetailsDto, err
+
+}
+
+func HitCiArtifactsDownloadApi(url string, authToken string) (int, error) {
+	apiCall, err := Base.MakeApiCall(url, http.MethodGet, "", nil, authToken)
+	if err != nil {
+		return 0, err
+	}
+	statusCode := apiCall.StatusCode()
+	return statusCode, err
+}
+
+func FetchCdWorkflowRunnerDetails(url string, authToken string) (*GetCdWorkflowsDetailsDto, error) {
+	apiCall, err := Base.MakeApiCall(url, http.MethodGet, "", nil, authToken)
+	if err != nil {
+		return nil, err
+	}
+	cdWorkflowDetails := &GetCdWorkflowsDetailsDto{}
+	err = json.Unmarshal(apiCall.Body(), cdWorkflowDetails)
+	return cdWorkflowDetails, err
+}
+
+func FetchCdPipelineWorkflows(url string, authToken string) (*GetCdWorkflowsDto, error) {
+	queryParams := make(map[string]string)
+	queryParams["offset"] = "0"
+	queryParams["size"] = "5"
+	apiCall, err := Base.MakeApiCall(url, http.MethodGet, "", queryParams, authToken)
+	if err != nil {
+		return nil, err
+	}
+	getCdWorkflowsDto := &GetCdWorkflowsDto{}
+	err = json.Unmarshal(apiCall.Body(), getCdWorkflowsDto)
+	return getCdWorkflowsDto, err
 }
 
 func GetPayloadForDeleteCdPipeline(AppId int, pipelineId int) RequestDTOs.DeleteCdPipelineRequestDTO {

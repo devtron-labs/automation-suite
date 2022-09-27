@@ -31,11 +31,11 @@ func HitDiscoverAppApi(queryParams map[string]string, authToken string) Response
 	return appStoreDiscoverRouter.discoverAppApiResponse
 }
 
-func HitGetDeploymentOfInstalledAppApi(appId string, authToken string) ResponseDTOs.DeploymentOfInstalledAppResponseDTO {
-	resp, err := Base.MakeApiCall(GetDeploymentOfInstalledAppApiUrl+appId, http.MethodGet, "", nil, authToken)
-	Base.HandleError(err, GetDeploymentOfInstalledAppApi)
+func GetInstalledAppsByAppStoreId(appStoreId string, authToken string) ResponseDTOs.DeploymentOfInstalledAppResponseDTO {
+	resp, err := Base.MakeApiCall(GetInstalledAppsByAppStoreIdApiUrl+appStoreId, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetInstalledAppsByAppStoreIdApi)
 	structAppStoreDiscoverRouter := StructAppStoreDiscoverRouter{}
-	appStoreDiscoverRouter := structAppStoreDiscoverRouter.UnmarshalGivenResponseBody(resp.Body(), GetDeploymentOfInstalledAppApi)
+	appStoreDiscoverRouter := structAppStoreDiscoverRouter.UnmarshalGivenResponseBody(resp.Body(), GetInstalledAppsByAppStoreIdApi)
 	return appStoreDiscoverRouter.deploymentOfInstalledAppResponseDTO
 }
 
@@ -107,7 +107,7 @@ func (structAppStoreDiscoverRouter StructAppStoreDiscoverRouter) UnmarshalGivenR
 	switch apiName {
 	case DiscoverAppApi:
 		json.Unmarshal(response, &structAppStoreDiscoverRouter.discoverAppApiResponse)
-	case GetDeploymentOfInstalledAppApi:
+	case GetInstalledAppsByAppStoreIdApi:
 		json.Unmarshal(response, &structAppStoreDiscoverRouter.deploymentOfInstalledAppResponseDTO)
 	case GetVersionsAutocompleteApi:
 		json.Unmarshal(response, &structAppStoreDiscoverRouter.helmAppVersionsDTO)

@@ -1,7 +1,6 @@
 package PipelineConfigRouter
 
 import (
-	"automation-suite/testUtils"
 	"github.com/stretchr/testify/assert"
 	"strconv"
 )
@@ -16,8 +15,6 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA7GetChartReference() {
 		indexOfLastResult := len(getChartReferenceResponse.Result.ChartRefs) - 1
 		assert.NotNil(suite.T(), getChartReferenceResponse.Result.ChartRefs[indexOfLastResult].Id)
 		assert.NotNil(suite.T(), getChartReferenceResponse.Result.ChartRefs[indexOfLastResult].Version)
-		latestChartRef := strconv.Itoa(getChartReferenceResponse.Result.LatestChartRef)
 		assert.Equal(suite.T(), 0, getChartReferenceResponse.Result.LatestAppChartRef)
-		testUtils.CreateFileAndEnterData("OutputDataGetChartReferenceViaAppId", "latestChartRef", latestChartRef)
 	})
 }

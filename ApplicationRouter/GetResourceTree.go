@@ -111,7 +111,8 @@ func (suite *ApplicationsRouterTestSuite) TestClassGetResourceTree() {
 	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 }
 
-func triggerAndVerifyCiPipeline(createAppApiResponse Base.CreateAppRequestDto, pipelineMaterial PipelineConfigRouterResponseDTOs.GetCiPipelineMaterialResponseDTO, CiPipelineID int, suite *ApplicationsRouterTestSuite) {
+func triggerAndVerifyCiPipeline(createAppApiResponse Base.CreateAppRequestDto, pipelineMaterial PipelineConfigRouterResponseDTOs.GetCiPipelineMaterialResponseDTO, CiPipelineID int, suite *ApplicationsRouterTestSuite) string {
+	ciTriggerWorkflowId := ""
 	payloadForTriggerCiPipeline := PipelineConfigRouter.CreatePayloadForTriggerCiPipeline(pipelineMaterial.Result[0].History[0].Commit, CiPipelineID, pipelineMaterial.Result[0].Id, true)
 	bytePayloadForTriggerCiPipeline, _ := json.Marshal(payloadForTriggerCiPipeline)
 	triggerCiPipelineResponse := PipelineConfigRouter.HitTriggerCiPipelineApi(bytePayloadForTriggerCiPipeline, suite.authToken)
@@ -121,6 +122,7 @@ func triggerAndVerifyCiPipeline(createAppApiResponse Base.CreateAppRequestDto, p
 		assert.Equal(suite.T(), "allowed for all pipelines", triggerCiPipelineResponse.Result.AuthStatus)
 		assert.NotNil(suite.T(), triggerCiPipelineResponse.Result.ApiResponse)
 	}
+	ciTriggerWorkflowId = triggerCiPipelineResponse.Result.ApiResponse
 	time.Sleep(10 * time.Second)
 	log.Println("=== Here we are getting workflow after triggering ===")
 	workflowStatus := PipelineConfigRouter.HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
@@ -136,6 +138,7 @@ func triggerAndVerifyCiPipeline(createAppApiResponse Base.CreateAppRequestDto, p
 	updatedWorkflowStatus := PipelineConfigRouter.HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
 	assert.Equal(suite.T(), "Succeeded", updatedWorkflowStatus.Result.CiWorkflowStatus[0].CiStatus)
 	assert.Equal(suite.T(), "Healthy", updatedWorkflowStatus.Result.CdWorkflowStatus[0].DeployStatus)
+	return ciTriggerWorkflowId
 }
 
 func PollForGettingCdDeployStatusAfterTrigger(id int, authToken string) bool {

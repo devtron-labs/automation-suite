@@ -66,6 +66,6 @@ func (suite *AppStoreDeploymentTestSuite) TestInstallApp() {
 		latestResponse := HitInstallAppApi(string(expectedPayload), suite.authToken)
 
 		log.Println("Validating the InstallAppApi response with already existed name in payload")
-		assert.Equal(suite.T(), "applications.argoproj.io \"deepak-airflow-test-already-installed-devtron-demo\" already exists", latestResponse.Errors[0].UserMessage)
+		assert.Equal(suite.T(), "app already exists with name deepak-airflow-test-already-installed", latestResponse.Errors[0].UserMessage)
 	})
 }
