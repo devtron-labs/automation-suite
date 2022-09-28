@@ -1,6 +1,7 @@
 package AppStoreRouter
 
 import (
+	"automation-suite/AppStoreRouter/RequestDTOs"
 	"automation-suite/AppStoreRouter/ResponseDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
@@ -13,6 +14,8 @@ import (
 type StructAppStoreRouter struct {
 	getApplicationValuesListResponseDto ResponseDTOs.GetApplicationValuesListResponseDTO
 	installedAppDetailsResponseDTO      ResponseDTOs.InstalledAppDetailsResponseDTO
+	checkAppExistsResponseDTO           ResponseDTOs.CheckAppExistsResponseDTO
+	checkAppExistsRequestDTO            RequestDTOs.CheckAppExistsRequestDTO
 }
 
 func HitGetApplicationValuesList(appStoreId string, authToken string) ResponseDTOs.GetApplicationValuesListResponseDTO {
@@ -31,12 +34,33 @@ func HitGetInstalledAppDetailsApi(queryParams map[string]string, authToken strin
 	return appStoreDiscoverRouter.installedAppDetailsResponseDTO
 }
 
+func HitCheckAppExistsOrNot(payload string, authToken string) ResponseDTOs.CheckAppExistsResponseDTO {
+	resp, err := Base.MakeApiCall(CheckAppExistsApiUrl, http.MethodPost, payload, nil, authToken)
+	Base.HandleError(err, CheckAppExistsApi)
+	structAppStoreRouter := StructAppStoreRouter{}
+	appStoreRouter := structAppStoreRouter.UnmarshalGivenResponseBody(resp.Body(), CheckAppExistsApi)
+	return appStoreRouter.checkAppExistsResponseDTO
+}
+
+func getCheckAppExistsApi(AppNames []string) []RequestDTOs.CheckAppExistsRequestDTO {
+	var listOfCheckAppExistsRequestDTOs []RequestDTOs.CheckAppExistsRequestDTO
+	for _, name := range AppNames {
+		CheckAppExistsRequestDTO := RequestDTOs.CheckAppExistsRequestDTO{}
+		CheckAppExistsRequestDTO.Name = name
+		listOfCheckAppExistsRequestDTOs = append(listOfCheckAppExistsRequestDTOs, CheckAppExistsRequestDTO)
+	}
+
+	return listOfCheckAppExistsRequestDTOs
+}
+
 func (structAppStoreRouter StructAppStoreRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructAppStoreRouter {
 	switch apiName {
 	case GetApplicationValuesListApi:
 		json.Unmarshal(response, &structAppStoreRouter.getApplicationValuesListResponseDto)
 	case GetInstalledAppDetailsApi:
 		json.Unmarshal(response, &structAppStoreRouter.installedAppDetailsResponseDTO)
+	case CheckAppExistsApi:
+		json.Unmarshal(response, &structAppStoreRouter.checkAppExistsResponseDTO)
 	}
 	return structAppStoreRouter
 }
