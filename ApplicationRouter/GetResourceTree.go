@@ -148,7 +148,7 @@ func PollForGettingCdDeployStatusAfterTrigger(id int, authToken string) bool {
 		deploymentStatus := updatedWorkflowStatus.Result.CdWorkflowStatus[0].DeployStatus
 		time.Sleep(1 * time.Second)
 		count = count + 1
-		if deploymentStatus == "Healthy" || count >= 500 {
+		if deploymentStatus == "Healthy" || count >= 800 {
 			break
 		}
 	}

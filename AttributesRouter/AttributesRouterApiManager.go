@@ -9,23 +9,24 @@ import (
 )
 
 type StructAttributesRouter struct {
-	getAttributesRespDto ResponseDTOs.GetAttributesResponseDTO
+	getAttributesRespDto            ResponseDTOs.GetAttributesResponseDTO
+	attributesActiveListResponseDTO ResponseDTOs.AttributesActiveListResponseDTO
 }
 
 func HitGetAttributesApi(queryParams map[string]string, authToken string) ResponseDTOs.GetAttributesResponseDTO {
-	resp, err := Base.MakeApiCall(GetAttributesApiUrl, http.MethodGet, "", queryParams, authToken)
+	resp, err := Base.MakeApiCall(AttributesApiBaseUrl, http.MethodGet, "", queryParams, authToken)
 	Base.HandleError(err, GetAttributesApi)
 	structAttributesRouter := StructAttributesRouter{}
-	chartRepoRouter := structAttributesRouter.UnmarshalGivenResponseBody(resp.Body(), GetAttributesApi)
-	return chartRepoRouter.getAttributesRespDto
+	attributesRouter := structAttributesRouter.UnmarshalGivenResponseBody(resp.Body(), GetAttributesApi)
+	return attributesRouter.getAttributesRespDto
 }
 
 func HitAddAttributesApi(payloadOfApi []byte, authToken string) ResponseDTOs.GetAttributesResponseDTO {
 	resp, err := Base.MakeApiCall(AddAttributesApiUrl, http.MethodPost, string(payloadOfApi), nil, authToken)
 	Base.HandleError(err, AddAttributesApi)
 	structAttributesRouter := StructAttributesRouter{}
-	chartRepoRouter := structAttributesRouter.UnmarshalGivenResponseBody(resp.Body(), GetAttributesApi)
-	return chartRepoRouter.getAttributesRespDto
+	attributesRouter := structAttributesRouter.UnmarshalGivenResponseBody(resp.Body(), GetAttributesApi)
+	return attributesRouter.getAttributesRespDto
 }
 
 func GetPayloadForAddAttributes(value string) ResponseDTOs.AttributesDTO {
@@ -36,10 +37,20 @@ func GetPayloadForAddAttributes(value string) ResponseDTOs.AttributesDTO {
 	return attributesDTO
 }
 
+func HitGetAttributesActiveListApi(authToken string) ResponseDTOs.AttributesActiveListResponseDTO {
+	resp, err := Base.MakeApiCall(GetAttributesActiveListApiUrl, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetAttributesActiveListApi)
+	structAttributesRouter := StructAttributesRouter{}
+	attributesRouter := structAttributesRouter.UnmarshalGivenResponseBody(resp.Body(), GetAttributesActiveListApi)
+	return attributesRouter.attributesActiveListResponseDTO
+}
+
 func (structAttributesRouter StructAttributesRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructAttributesRouter {
 	switch apiName {
 	case GetAttributesApi:
 		json.Unmarshal(response, &structAttributesRouter.getAttributesRespDto)
+	case GetAttributesActiveListApi:
+		json.Unmarshal(response, &structAttributesRouter.attributesActiveListResponseDTO)
 	}
 	return structAttributesRouter
 }

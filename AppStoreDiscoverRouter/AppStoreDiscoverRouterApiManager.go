@@ -21,6 +21,7 @@ type StructAppStoreDiscoverRouter struct {
 	saveTemplateValuesResponseDTO           ResponseDTOs.SaveTemplateValuesResponseDTO
 	saveTemplateValuesRequestDTO            RequestDTOs.SaveTemplateValuesRequestDTO
 	deleteTemplateValuesResponseDTO         ResponseDTOs.DeleteTemplateValuesResponseDTO
+	appStoreChartByNameResponseDTO          ResponseDTOs.AppStoreChartByNameResponseDTO
 }
 
 func HitDiscoverAppApi(queryParams map[string]string, authToken string) ResponseDTOs.DiscoverAppApiResponse {
@@ -103,6 +104,14 @@ func getPayloadForSaveTemplateValues(name string, values string, appStoreVersion
 	return structAppStoreDiscoverRouter.saveTemplateValuesRequestDTO
 }
 
+func HitSearchAppStoreChartByNameApi(queryParams map[string]string, authToken string) ResponseDTOs.AppStoreChartByNameResponseDTO {
+	resp, err := Base.MakeApiCall(SearchAppStoreChartByNameApiUrl, http.MethodGet, "", queryParams, authToken)
+	Base.HandleError(err, SearchAppStoreChartByNameApi)
+	structAppStoreDiscoverRouter := StructAppStoreDiscoverRouter{}
+	appStoreDiscoverRouter := structAppStoreDiscoverRouter.UnmarshalGivenResponseBody(resp.Body(), SearchAppStoreChartByNameApi)
+	return appStoreDiscoverRouter.appStoreChartByNameResponseDTO
+}
+
 func (structAppStoreDiscoverRouter StructAppStoreDiscoverRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructAppStoreDiscoverRouter {
 	switch apiName {
 	case DiscoverAppApi:
@@ -123,6 +132,8 @@ func (structAppStoreDiscoverRouter StructAppStoreDiscoverRouter) UnmarshalGivenR
 		json.Unmarshal(response, &structAppStoreDiscoverRouter.saveTemplateValuesResponseDTO)
 	case DeleteTemplateValuesApi:
 		json.Unmarshal(response, &structAppStoreDiscoverRouter.deleteTemplateValuesResponseDTO)
+	case SearchAppStoreChartByNameApi:
+		json.Unmarshal(response, &structAppStoreDiscoverRouter.appStoreChartByNameResponseDTO)
 	}
 	return structAppStoreDiscoverRouter
 }

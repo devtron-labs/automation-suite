@@ -6,6 +6,7 @@ require (
 	github.com/argoproj/argo-workflows/v3 v3.4.0
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/go-resty/resty/v2 v2.7.0
+	github.com/lib/pq v1.10.4
 	github.com/r3labs/sse/v2 v2.8.1
 	github.com/stretchr/testify v1.8.0
 	github.com/tidwall/sjson v1.2.5

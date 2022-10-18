@@ -18,4 +18,6 @@ const (
 	SaveTemplateValuesApiUrl                      string = "/orchestrator/app-store/values/template/values"
 	SaveTemplateValuesApi                         string = "SaveTemplateValuesApi"
 	DeleteTemplateValuesApi                       string = "DeleteTemplateValuesApi"
+	SearchAppStoreChartByNameApi                  string = "SearchAppStoreChartByNameApi"
+	SearchAppStoreChartByNameApiUrl               string = "/orchestrator/app-store/discover/search"
 )
