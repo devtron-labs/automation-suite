@@ -4,7 +4,6 @@ import (
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
-	"strconv"
 )
 
 func (suite *AttributeRouterTestSuite) TestClassA1AddAttributes() {
@@ -19,8 +18,8 @@ func (suite *AttributeRouterTestSuite) TestClassA1AddAttributes() {
 		queryParams := map[string]string{"key": "url"}
 		attributesApiResp := HitGetAttributesApi(queryParams, suite.authToken)
 		assert.Equal(suite.T(), baseCredentials.BaseServerUrl, attributesApiResp.Result.Value)
-		query := "delete from \"attributes\" where id =" + strconv.Itoa(ApiResp.Result.Id)
-		Base.ConnectToDB("UpdateOrDeleteData", query)
+		/*query := "delete from \"attributes\" where id =" + strconv.Itoa(ApiResp.Result.Id)
+		Base.ConnectToDB("UpdateOrDeleteData", query)*/
 	})
 }
 
