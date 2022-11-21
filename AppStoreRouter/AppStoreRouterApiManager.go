@@ -1,6 +1,8 @@
 package AppStoreRouter
 
 import (
+	"automation-suite/AppStoreRouter/RequestDTOs"
+	"automation-suite/AppStoreRouter/ResponseDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"errors"
@@ -9,64 +11,14 @@ import (
 	"net/http"
 )
 
-type GetApplicationValuesListResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result struct {
-		Values []struct {
-			Values []struct {
-				Id                int    `json:"id"`
-				Name              string `json:"name"`
-				ChartVersion      string `json:"chartVersion"`
-				AppStoreVersionId int    `json:"appStoreVersionId,omitempty"`
-				EnvironmentName   string `json:"environmentName,omitempty"`
-			} `json:"values"`
-			Kind string `json:"kind"`
-		} `json:"values"`
-	} `json:"result"`
-}
-
-type InstallAppResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Errors []struct {
-		Code            string `json:"code"`
-		InternalMessage string `json:"internalMessage"`
-		UserMessage     string `json:"userMessage"`
-	} `json:"errors"`
-	InstallAppRequestDto *InstallAppRequestDto `json:"result"`
-}
-
-type InstallAppRequestDto struct {
-	Id                    int    `json:"id"`
-	AppId                 int    `json:"appId"`
-	AppName               string `json:"appName"`
-	TeamId                int    `json:"teamId"`
-	EnvironmentId         int    `json:"environmentId"`
-	InstalledAppId        int    `json:"installedAppId"`
-	InstalledAppVersionId int    `json:"installedAppVersionId"`
-	AppStoreVersion       int    `json:"appStoreVersion"`
-	ValuesOverrideYaml    string `json:"valuesOverrideYaml"`
-	ReferenceValueId      int    `json:"referenceValueId"`
-	ReferenceValueKind    string `json:"referenceValueKind"`
-	AppStoreId            int    `json:"appStoreId"`
-	AppStoreName          string `json:"appStoreName"`
-	Deprecated            bool   `json:"deprecated"`
-	ClusterId             int    `json:"clusterId"`
-	Namespace             string `json:"namespace"`
-	AppOfferingMode       string `json:"appOfferingMode"`
-	GitOpsRepoName        string `json:"gitOpsRepoName"`
-	GitOpsPath            string `json:"gitOpsPath"`
-	GitHash               string `json:"gitHash"`
-}
-
 type StructAppStoreRouter struct {
-	getApplicationValuesListResponseDto GetApplicationValuesListResponseDto
-	installAppResponseDto               InstallAppResponseDto
-	installAppRequestDto                InstallAppRequestDto
+	getApplicationValuesListResponseDto ResponseDTOs.GetApplicationValuesListResponseDTO
+	installedAppDetailsResponseDTO      ResponseDTOs.InstalledAppDetailsResponseDTO
+	checkAppExistsResponseDTO           ResponseDTOs.CheckAppExistsResponseDTO
+	checkAppExistsRequestDTO            RequestDTOs.CheckAppExistsRequestDTO
 }
 
-func HitGetApplicationValuesList(appStoreId string, authToken string) GetApplicationValuesListResponseDto {
+func HitGetApplicationValuesList(appStoreId string, authToken string) ResponseDTOs.GetApplicationValuesListResponseDTO {
 	resp, err := Base.MakeApiCall(GetApplicationValuesListApiUrl+appStoreId, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, GetApplicationValuesListApi)
 	structAppStoreRouter := StructAppStoreRouter{}
@@ -74,28 +26,41 @@ func HitGetApplicationValuesList(appStoreId string, authToken string) GetApplica
 	return appStoreRouter.getApplicationValuesListResponseDto
 }
 
-func HitInstallAppApi(requestPayload string, authToken string) InstallAppResponseDto {
-	resp, err := Base.MakeApiCall(InstallAppApiUrl, http.MethodPost, requestPayload, nil, authToken)
-	Base.HandleError(err, InstallAppApi)
-	structAppStoreRouter := StructAppStoreRouter{}
-	appStoreRouter := structAppStoreRouter.UnmarshalGivenResponseBody(resp.Body(), InstallAppApi)
-	return appStoreRouter.installAppResponseDto
+func HitGetInstalledAppDetailsApi(queryParams map[string]string, authToken string) ResponseDTOs.InstalledAppDetailsResponseDTO {
+	resp, err := Base.MakeApiCall(GetInstalledAppDetailsApiUrl, http.MethodGet, "", queryParams, authToken)
+	Base.HandleError(err, GetInstalledAppDetailsApi)
+	structAppStoreDiscoverRouter := StructAppStoreRouter{}
+	appStoreDiscoverRouter := structAppStoreDiscoverRouter.UnmarshalGivenResponseBody(resp.Body(), GetInstalledAppDetailsApi)
+	return appStoreDiscoverRouter.installedAppDetailsResponseDTO
 }
 
-func HitDeleteInstalledAppApi(id string, authToken string) InstallAppResponseDto {
-	resp, err := Base.MakeApiCall(DeleteInstalledAppApiUrl+id, http.MethodDelete, " ", nil, authToken)
-	Base.HandleError(err, DeleteInstalledAppApi)
+func HitCheckAppExistsOrNot(payload string, authToken string) ResponseDTOs.CheckAppExistsResponseDTO {
+	resp, err := Base.MakeApiCall(CheckAppExistsApiUrl, http.MethodPost, payload, nil, authToken)
+	Base.HandleError(err, CheckAppExistsApi)
 	structAppStoreRouter := StructAppStoreRouter{}
-	appStoreRouter := structAppStoreRouter.UnmarshalGivenResponseBody(resp.Body(), InstallAppApi)
-	return appStoreRouter.installAppResponseDto
+	appStoreRouter := structAppStoreRouter.UnmarshalGivenResponseBody(resp.Body(), CheckAppExistsApi)
+	return appStoreRouter.checkAppExistsResponseDTO
+}
+
+func getCheckAppExistsApi(AppNames []string) []RequestDTOs.CheckAppExistsRequestDTO {
+	var listOfCheckAppExistsRequestDTOs []RequestDTOs.CheckAppExistsRequestDTO
+	for _, name := range AppNames {
+		CheckAppExistsRequestDTO := RequestDTOs.CheckAppExistsRequestDTO{}
+		CheckAppExistsRequestDTO.Name = name
+		listOfCheckAppExistsRequestDTOs = append(listOfCheckAppExistsRequestDTOs, CheckAppExistsRequestDTO)
+	}
+
+	return listOfCheckAppExistsRequestDTOs
 }
 
 func (structAppStoreRouter StructAppStoreRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructAppStoreRouter {
 	switch apiName {
 	case GetApplicationValuesListApi:
 		json.Unmarshal(response, &structAppStoreRouter.getApplicationValuesListResponseDto)
-	case InstallAppApi:
-		json.Unmarshal(response, &structAppStoreRouter.installAppResponseDto)
+	case GetInstalledAppDetailsApi:
+		json.Unmarshal(response, &structAppStoreRouter.installedAppDetailsResponseDTO)
+	case CheckAppExistsApi:
+		json.Unmarshal(response, &structAppStoreRouter.checkAppExistsResponseDTO)
 	}
 	return structAppStoreRouter
 }

@@ -1,6 +1,8 @@
 package HelmAppRouter
 
 import (
+	"automation-suite/HelmAppRouter/RequestDTOs"
+	"automation-suite/HelmAppRouter/ResponseDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"errors"
@@ -9,169 +11,16 @@ import (
 	"net/http"
 )
 
-type DeploymentHistoryResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result struct {
-		InstalledAppInfo  InstalledAppInfo    `json:"installedAppInfo"`
-		DeploymentHistory []DeploymentHistory `json:"deploymentHistory"`
-	} `json:"result"`
-}
-
-type RollbackApplicationApiResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result struct {
-		Success bool `json:"success"`
-	} `json:"result"`
-	Errors []Errors `json:"errors"`
-}
-
-type ReleaseInfoApiResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result struct {
-		InstalledAppInfo InstalledAppInfo `json:"installedAppInfo"`
-		ReleaseInfo      ReleaseInfo      `json:"releaseInfo"`
-	} `json:"result"`
-}
-
-type HibernateApiResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result []struct {
-		ErrorMessage string       `json:"errorMessage"`
-		Success      bool         `json:"success"`
-		TargetObject TargetObject `json:"targetObject"`
-	} `json:"result"`
-	Errors []Errors `json:"errors"`
-}
-
-type GetApplicationDetailResponseDto struct {
-	Code   int      `json:"code"`
-	Status string   `json:"status"`
-	Errors []Errors `json:"errors"`
-	Result struct {
-		AppDetail AppDetail `json:"appDetail"`
-	} `json:"result"`
-}
-
-type InstalledAppInfo struct {
-	AppId                 int    `json:"appId"`
-	InstalledAppId        int    `json:"installedAppId"`
-	InstalledAppVersionId int    `json:"installedAppVersionId"`
-	AppStoreChartId       int    `json:"appStoreChartId"`
-	EnvironmentName       string `json:"environmentName"`
-	AppOfferingMode       string `json:"appOfferingMode"`
-	ClusterId             int    `json:"clusterId"`
-	EnvironmentId         int    `json:"environmentId"`
-}
-
-type DeploymentHistory struct {
-	ChartMetadata ChartMetadata `json:"chartMetadata"`
-	DockerImages  []string      `json:"dockerImages"`
-	Version       int           `json:"version"`
-	DeployedAt    DeployedAt    `json:"deployedAt"`
-}
-
-type RollbackApplicationApiRequestDto struct {
-	HAppId  string `json:"hAppId"`
-	Version int    `json:"version"`
-}
-
-type ApplicationUpdateRequestDto struct {
-	Id                 int    `json:"id"`
-	ReferenceValueId   int    `json:"referenceValueId"`
-	ReferenceValueKind string `json:"referenceValueKind"`
-	ValuesOverrideYaml string `json:"valuesOverrideYaml"`
-	InstalledAppId     int    `json:"installedAppId"`
-	AppStoreVersion    int    `json:"appStoreVersion"`
-}
-
-type ReleaseInfo struct {
-	DeployedAppDetail DeployedAppDetail `json:"deployedAppDetail"`
-	DefaultValues     string            `json:"defaultValues"`
-	OverrideValues    string            `json:"overrideValues"`
-	MergedValues      string            `json:"mergedValues"`
-	Readme            string            `json:"readme"`
-}
-
-type DeployedAppDetail struct {
-	AppId             string             `json:"appId"`
-	AppName           string             `json:"appName"`
-	ChartName         string             `json:"chartName"`
-	EnvironmentDetail EnvironmentDetails `json:"environmentDetail"`
-	LastDeployed      DeployedAt         `json:"LastDeployed"`
-	ChartVersion      string             `json:"chartVersion"`
-}
-type HibernateApiRequestDto struct {
-	AppId     string     `json:"appId"`
-	Resources []Resource `json:"resources"`
-}
-
-type Resource struct {
-	Kind      string `json:"kind"`
-	Name      string `json:"name"`
-	Group     string `json:"group"`
-	Version   string `json:"version"`
-	Namespace string `json:"namespace"`
-}
-
-type Errors struct {
-	Code            string `json:"code"`
-	InternalMessage string `json:"internalMessage"`
-	UserMessage     string `json:"userMessage"`
-}
-type TargetObject struct {
-	Group     string `json:"group"`
-	Kind      string `json:"kind"`
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
-	Version   string `json:"version"`
-}
-
-type AppDetail struct {
-	ApplicationStatus  string             `json:"applicationStatus"`
-	ReleaseStatus      ReleaseStatus      `json:"releaseStatus"`
-	ChartMetadata      ChartMetadata      `json:"chartMetadata"`
-	EnvironmentDetails EnvironmentDetails `json:"environmentDetails"`
-}
-
-type ReleaseStatus struct {
-	Status      string `json:"status"`
-	Message     string `json:"message"`
-	Description string `json:"description"`
-}
-
-type ChartMetadata struct {
-	ChartName    string   `json:"chartName"`
-	ChartVersion string   `json:"chartVersion"`
-	Home         string   `json:"home"`
-	Sources      []string `json:"sources"`
-	Description  string   `json:"description"`
-}
-
-type EnvironmentDetails struct {
-	ClusterName string `json:"clusterName"`
-	ClusterId   int    `json:"clusterId"`
-	Namespace   string `json:"namespace"`
-}
-
-type DeployedAt struct {
-	Seconds int `json:"seconds"`
-	Nanos   int `json:"nanos"`
-}
-
 type StructHelmAppRouter struct {
-	deploymentHistoryResponseDto      DeploymentHistoryResponseDto
-	rollbackApplicationApiResponseDto RollbackApplicationApiResponseDto
-	applicationUpdateRequestDto       ApplicationUpdateRequestDto
-	releaseInfoApiResponseDto         ReleaseInfoApiResponseDto
-	hibernateApiResponseDto           HibernateApiResponseDto
-	getApplicationDetailResponseDto   GetApplicationDetailResponseDto
+	deploymentHistoryResponseDto      ResponseDTOs.DeploymentHistoryResponseDTO
+	rollbackApplicationApiResponseDto ResponseDTOs.RollbackApplicationApiResponseDTO
+	applicationUpdateRequestDto       RequestDTOs.ApplicationUpdateRequestDTO
+	releaseInfoApiResponseDto         ResponseDTOs.ReleaseInfoApiResponseDTO
+	hibernateApiResponseDto           ResponseDTOs.HibernateApiResponseDTO
+	getApplicationDetailResponseDto   ResponseDTOs.GetApplicationDetailResponseDTO
 }
 
-func HitGetDeploymentHistoryById(queryParams map[string]string, authToken string) DeploymentHistoryResponseDto {
+func HitGetDeploymentHistoryById(queryParams map[string]string, authToken string) ResponseDTOs.DeploymentHistoryResponseDTO {
 	resp, err := Base.MakeApiCall(GetDeploymentHistoryApiUrl, http.MethodGet, "", queryParams, authToken)
 	Base.HandleError(err, GetDeploymentHistory)
 
@@ -180,7 +29,7 @@ func HitGetDeploymentHistoryById(queryParams map[string]string, authToken string
 	return helmAppRouter.deploymentHistoryResponseDto
 }
 
-func HitRollbackApplicationApi(payload string, authToken string) RollbackApplicationApiResponseDto {
+func HitRollbackApplicationApi(payload string, authToken string) ResponseDTOs.RollbackApplicationApiResponseDTO {
 	resp, err := Base.MakeApiCall(RollbackApplicationApiUrl, http.MethodPut, payload, nil, authToken)
 	Base.HandleError(err, RollbackApplication)
 
@@ -189,7 +38,7 @@ func HitRollbackApplicationApi(payload string, authToken string) RollbackApplica
 	return helmAppRouter.rollbackApplicationApiResponseDto
 }
 
-func HitGetReleaseInfoApi(queryParams map[string]string, authToken string) ReleaseInfoApiResponseDto {
+func HitGetReleaseInfoApi(queryParams map[string]string, authToken string) ResponseDTOs.ReleaseInfoApiResponseDTO {
 	resp, err := Base.MakeApiCall(GetReleaseInfoApiUrl, http.MethodGet, "", queryParams, authToken)
 	Base.HandleError(err, GetReleaseInfoApi)
 
@@ -198,7 +47,7 @@ func HitGetReleaseInfoApi(queryParams map[string]string, authToken string) Relea
 	return helmAppRouter.releaseInfoApiResponseDto
 }
 
-func HitApplicationUpdateApi(queryParams map[string]string, authToken string) DeploymentHistoryResponseDto {
+func HitApplicationUpdateApi(queryParams map[string]string, authToken string) ResponseDTOs.DeploymentHistoryResponseDTO {
 	resp, err := Base.MakeApiCall(ApplicationUpdateApiUrl, http.MethodPut, "", queryParams, authToken)
 	Base.HandleError(err, ApplicationUpdate)
 
@@ -207,7 +56,7 @@ func HitApplicationUpdateApi(queryParams map[string]string, authToken string) De
 	return helmAppRouter.deploymentHistoryResponseDto
 }
 
-func HitHibernateWorkloadApi(payload string, authToken string) HibernateApiResponseDto {
+func HitHibernateWorkloadApi(payload string, authToken string) ResponseDTOs.HibernateApiResponseDTO {
 	resp, err := Base.MakeApiCall(HibernateWorkLoadsApiUrl, http.MethodPost, payload, nil, authToken)
 	Base.HandleError(err, Hibernate)
 
@@ -216,7 +65,7 @@ func HitHibernateWorkloadApi(payload string, authToken string) HibernateApiRespo
 	return helmAppRouter.hibernateApiResponseDto
 }
 
-func HitUnHibernateWorkloadApi(payload string, authToken string) HibernateApiResponseDto {
+func HitUnHibernateWorkloadApi(payload string, authToken string) ResponseDTOs.HibernateApiResponseDTO {
 	resp, err := Base.MakeApiCall(UnHibernateWorkLoadsApiUrl, http.MethodPost, payload, nil, authToken)
 	Base.HandleError(err, Unhibernate)
 
@@ -225,7 +74,7 @@ func HitUnHibernateWorkloadApi(payload string, authToken string) HibernateApiRes
 	return helmAppRouter.hibernateApiResponseDto
 }
 
-func HitGetApplicationDetailApi(queryParams map[string]string, authToken string) GetApplicationDetailResponseDto {
+func HitGetApplicationDetailApi(queryParams map[string]string, authToken string) ResponseDTOs.GetApplicationDetailResponseDTO {
 	resp, err := Base.MakeApiCall(GetApplicationDetailUrl, http.MethodGet, "", queryParams, authToken)
 	Base.HandleError(err, GetApplicationDetail)
 
@@ -252,8 +101,8 @@ func (structHelmAppRouter StructHelmAppRouter) UnmarshalGivenResponseBody(respon
 	return structHelmAppRouter
 }
 
-func GetRollbackAppApiRequestDto(HAppId string, version int) RollbackApplicationApiRequestDto {
-	rollbackApplicationApiRequestDto := RollbackApplicationApiRequestDto{}
+func GetRollbackAppApiRequestDto(HAppId string, version int) RequestDTOs.RollbackApplicationApiRequestDto {
+	rollbackApplicationApiRequestDto := RequestDTOs.RollbackApplicationApiRequestDto{}
 	rollbackApplicationApiRequestDto.HAppId = HAppId
 	rollbackApplicationApiRequestDto.Version = version
 	return rollbackApplicationApiRequestDto
@@ -274,16 +123,16 @@ func GetEnvironmentConfigForHelmApp() (*EnvironmentConfigHelmApp, error) {
 }
 
 //Installed envoy already for test data having single Resource of deployment Kind
-func createRequestPayloadForHibernateApi(appId string, kind string, name string, version string, group string, namespace string) HibernateApiRequestDto {
-	hibernateApiRequestDto := HibernateApiRequestDto{}
+func createRequestPayloadForHibernateApi(appId string, kind string, name string, version string, group string, namespace string) RequestDTOs.HibernateApiRequestDTO {
+	hibernateApiRequestDto := RequestDTOs.HibernateApiRequestDTO{}
 	hibernateApiRequestDto.AppId = appId
 	hibernateApiRequestDto.Resources = getResources(kind, name, version, group, namespace)
 	return hibernateApiRequestDto
 }
 
-func getResources(kind string, name string, version string, group string, namespace string) []Resource {
-	Resources := []Resource{}
-	resource := Resource{}
+func getResources(kind string, name string, version string, group string, namespace string) []RequestDTOs.Resource {
+	Resources := []RequestDTOs.Resource{}
+	resource := RequestDTOs.Resource{}
 	resource.Kind = kind
 	resource.Name = name
 	resource.Version = version

@@ -5,6 +5,6 @@ import (
 	"testing"
 )
 
-func TestSSOLoginRouterSuite(t *testing.T) {
-	suite.Run(t, new(GitopsConfigRouter))
+func TestGitOpsRouterSuite(t *testing.T) {
+	suite.Run(t, new(GitOpsRouterTestSuite))
 }

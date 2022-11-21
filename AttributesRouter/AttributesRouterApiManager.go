@@ -1,59 +1,58 @@
 package AttributesRouter
 
 import (
+	"automation-suite/AttributesRouter/ResponseDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
-	"errors"
-	"github.com/caarlos0/env"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 )
 
-type AttributesDto struct {
-	Id     int    `json:"id"`
-	Key    string `json:"key,omitempty"`
-	Value  string `json:"value,omitempty"`
-	Active bool   `json:"active"`
-	UserId int32  `json:"-"`
-}
-
-type GetAttributesRespDto struct {
-	Code   int           `json:"code"`
-	Status string        `json:"status"`
-	Result AttributesDto `json:"result"`
-}
-
 type StructAttributesRouter struct {
-	getAttributesRespDto GetAttributesRespDto
+	getAttributesRespDto            ResponseDTOs.GetAttributesResponseDTO
+	attributesActiveListResponseDTO ResponseDTOs.AttributesActiveListResponseDTO
 }
 
-func HitGetAttributesApi(queryParams map[string]string, authToken string) GetAttributesRespDto {
-	resp, err := Base.MakeApiCall(GetAttributesApiUrl, http.MethodGet, "", queryParams, authToken)
+func HitGetAttributesApi(queryParams map[string]string, authToken string) ResponseDTOs.GetAttributesResponseDTO {
+	resp, err := Base.MakeApiCall(AttributesApiBaseUrl, http.MethodGet, "", queryParams, authToken)
 	Base.HandleError(err, GetAttributesApi)
 	structAttributesRouter := StructAttributesRouter{}
-	chartRepoRouter := structAttributesRouter.UnmarshalGivenResponseBody(resp.Body(), GetAttributesApi)
-	return chartRepoRouter.getAttributesRespDto
+	attributesRouter := structAttributesRouter.UnmarshalGivenResponseBody(resp.Body(), GetAttributesApi)
+	return attributesRouter.getAttributesRespDto
+}
+
+func HitAddAttributesApi(payloadOfApi []byte, authToken string) ResponseDTOs.GetAttributesResponseDTO {
+	resp, err := Base.MakeApiCall(AddAttributesApiUrl, http.MethodPost, string(payloadOfApi), nil, authToken)
+	Base.HandleError(err, AddAttributesApi)
+	structAttributesRouter := StructAttributesRouter{}
+	attributesRouter := structAttributesRouter.UnmarshalGivenResponseBody(resp.Body(), GetAttributesApi)
+	return attributesRouter.getAttributesRespDto
+}
+
+func GetPayloadForAddAttributes(value string) ResponseDTOs.AttributesDTO {
+	var attributesDTO ResponseDTOs.AttributesDTO
+	attributesDTO.Key = "url"
+	attributesDTO.Value = value
+	attributesDTO.Active = true
+	return attributesDTO
+}
+
+func HitGetAttributesActiveListApi(authToken string) ResponseDTOs.AttributesActiveListResponseDTO {
+	resp, err := Base.MakeApiCall(GetAttributesActiveListApiUrl, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetAttributesActiveListApi)
+	structAttributesRouter := StructAttributesRouter{}
+	attributesRouter := structAttributesRouter.UnmarshalGivenResponseBody(resp.Body(), GetAttributesActiveListApi)
+	return attributesRouter.attributesActiveListResponseDTO
 }
 
 func (structAttributesRouter StructAttributesRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructAttributesRouter {
 	switch apiName {
 	case GetAttributesApi:
 		json.Unmarshal(response, &structAttributesRouter.getAttributesRespDto)
+	case GetAttributesActiveListApi:
+		json.Unmarshal(response, &structAttributesRouter.attributesActiveListResponseDTO)
 	}
 	return structAttributesRouter
-}
-
-type EnvironmentConfigAttributesRouter struct {
-	ValueAttribute string `env:"VALUE_ATTRIBUTE" envDefault:"https://staging.devtron.info"`
-}
-
-func GetEnvironmentConfigForHelmApp() (*EnvironmentConfigAttributesRouter, error) {
-	cfg := &EnvironmentConfigAttributesRouter{}
-	err := env.Parse(cfg)
-	if err != nil {
-		return nil, errors.New("could not get config from environment")
-	}
-	return cfg, err
 }
 
 type AttributeRouterTestSuite struct {

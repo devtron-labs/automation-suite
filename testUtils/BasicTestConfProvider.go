@@ -1,18 +1,22 @@
 package testUtils
 
 import (
-	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/caarlos0/env"
 	"github.com/go-resty/resty/v2"
+	"github.com/r3labs/sse/v2"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
+	"testing"
 	"time"
 )
 
@@ -43,17 +47,50 @@ type ApiErrorDto struct {
 	} `json:"errors"`
 }
 
-type EnvironmentConfig struct {
-	BaseServerUrl   string `env:"BASE_SERVER_URL" envDefault:""`
-	LogInUserName   string `env:"LOGIN_USERNAME" envDefault:""`
-	LogInUserPwd    string `env:"LOGIN_PASSWORD" envDefault:""`
-	SSOClientSecret string `env:"CLIENT_SECRET" envDefault:""`
+type CreateAppResponseDto struct {
+	Code   int                 `json:"code"`
+	Status string              `json:"status"`
+	Result CreateAppRequestDto `json:"result"`
+	Errors []Errors            `json:"errors"`
+}
+type CreateAppRequestDto struct {
+	Id         int    `json:"id"`
+	AppName    string `json:"appName"`
+	TeamId     int    `json:"teamId"`
+	TemplateId int    `json:"templateId"`
+}
+
+type DeleteResponseDto struct {
+	Code   int    `json:"code"`
+	Status string `json:"status"`
+	Result string `json:"result"`
+}
+
+type BaseClassEnvironmentConfig struct {
+	BaseServerUrl      string `json:"BASE_SERVER_URL"`
+	LogInUserName      string `json:"LOGIN_USERNAME"`
+	LogInUserPwd       string `json:"LOGIN_PASSWORD"`
+	SSOClientSecret    string `json:"CLIENT_SECRET"`
+	Provider           string `json:"PROVIDER"`
+	GitUsername        string `json:"GIT_USERNAME"`
+	Host               string `json:"HOST"`
+	GitToken           string `json:"GIT_TOKEN"`
+	GitHubOrgId        string `json:"GITHUB_ORG_ID"`
+	PluginId           string `json:"PLUGIN_ID"`
+	RegistryType       string `json:"REGISTRY_TYPE"`
+	RegistryUrl        string `json:"REGISTRY_URL"`
+	DockerUsername     string `json:"DOCKER_USERNAME"`
+	Password           string `json:"PASSWORD"`
+	ClusterBearerToken string `json:"CLUSTER_BEARER_TOKEN"`
+	ClusterServerUrl   string `json:"CLUSTER_SERVER_URL"`
+	BearerToken        string `json:"BEARER_TOKEN"`
 }
 
 func getRestyClient() *resty.Client {
-	envConf, _ := GetEnvironmentConfig()
+	baseConfig := ReadBaseEnvConfig()
+	fileData := ReadAnyJsonFile(baseConfig.BaseCredentialsFile)
 	client := resty.New()
-	client.SetBaseURL(envConf.BaseServerUrl)
+	client.SetBaseURL(fileData.BaseServerUrl)
 	return client
 }
 
@@ -90,30 +127,22 @@ func GetByteArrayOfGivenJsonFile(filePath string) ([]byte, error) {
 		log.Println("Unable to open the file. Error occurred !!", "err", err)
 	}
 	log.Println("Opened the given json file successfully !!!")
-	defer testDataJsonFile.Close()
+	//defer testDataJsonFile.Close()
 
 	byteValue, err := ioutil.ReadAll(testDataJsonFile)
 	return byteValue, err
 }
 
-//support function to return auth token after log in
+// GetAuthToken support function to return auth token after log in
 func GetAuthToken() string {
-	envConf, _ := GetEnvironmentConfig()
-	jsonString := fmt.Sprintf(`{"username": "%s", "password": "%s"}`, envConf.LogInUserName, envConf.LogInUserPwd)
+	envConf := ReadBaseEnvConfig()
+	file := ReadAnyJsonFile(envConf.BaseCredentialsFile)
+	jsonString := fmt.Sprintf(`{"username": "%s", "password": "%s"}`, file.LogInUserName, file.LogInUserPwd)
 	resp, err := MakeApiCall(createSessionApiUrl, http.MethodPost, jsonString, nil, "")
 	HandleError(err, "getAuthToken")
 	var logInResponse LogInResponse
 	json.Unmarshal(resp.Body(), &logInResponse)
 	return logInResponse.Result.Token
-}
-
-func GetEnvironmentConfig() (*EnvironmentConfig, error) {
-	cfg := &EnvironmentConfig{}
-	err := env.Parse(cfg)
-	if err != nil {
-		return nil, errors.New("could not get config from environment")
-	}
-	return cfg, err
 }
 
 const charset = "abcdefghijklmnopqrstuvwxyz" +
@@ -133,97 +162,176 @@ func GetRandomStringOfGivenLength(length int) string {
 func GetRandomNumberOf9Digit() int {
 	return 100000000 + rand.Intn(999999999-100000000)
 }
-func CreateFile(fileName string) {
-	f, err := os.Create(fileName)
-	defer f.Close()
-	if err != nil {
-		panic(err)
-	}
-}
-func CreateFileAndEnterData(filename string, key string, value string) {
-	filename = "../" + filename + ".txt"
-	file, err := os.Open(filename)
-	if err != nil {
-		//panic(err)
-		CreateFile(filename)
-	}
-	scanner := bufio.NewScanner(file)
-	var temp string
-	for scanner.Scan() {
-		line := scanner.Text()
-		temp = temp + line
-	}
-	temp = TrimSuffix(temp)
-	split := strings.Split(temp, ",")
-	var result string
-	for _, j := range split {
-		if len(j) != 0 {
-			split2 := strings.Split(j, ":")
-			temp2 := "\"" + key + "\""
-			if split2[0] != temp2 {
-				result = result + "," + j
-			}
-		}
 
-	}
-	result = result + ",\"" + key + "\":" + "\"" + value + "\"}"
-	if result[0:1] == "," {
-		result = TrimFirstChar(result)
-	}
-	result = "{" + result
-	f, err := os.Create(filename)
-	if err != nil {
-		panic(err)
-	}
-	f.WriteString(result)
-	defer f.Close()
+func CreateApp(authToken string) CreateAppResponseDto {
+	appName := strings.ToLower(GetRandomStringOfGivenLength(10))
+	createAppRequestDto := GetAppRequestDto("app"+appName, 1, 0)
+	byteValueOfCreateApp, _ := json.Marshal(createAppRequestDto)
+
+	response, err := MakeApiCall("/orchestrator/app", http.MethodPost, string(byteValueOfCreateApp), nil, authToken)
+	HandleError(err, "CreateAppApi")
+	baseConfigRouter := BaseConfigRouter{}
+	pipelineConfigRouter := baseConfigRouter.UnmarshalGivenResponseBody(response.Body(), "SaveConfigmapApi")
+	return pipelineConfigRouter.createAppResponseDto
 }
 
-func ReadDataByFilenameAndKey(filename string, key string) string {
-	filename = "../" + filename + ".txt"
-	file, err := os.Open(filename)
+func GetAppRequestDto(appName string, teamId int, templateId int) CreateAppRequestDto {
+	var createAppRequestDto CreateAppRequestDto
+	createAppRequestDto.AppName = appName
+	createAppRequestDto.TeamId = teamId
+	createAppRequestDto.TemplateId = templateId
+	return createAppRequestDto
+}
+
+func (baseConfigRouter BaseConfigRouter) UnmarshalGivenResponseBody(response []byte, apiName string) BaseConfigRouter {
+	switch apiName {
+	case "SaveConfigmapApi":
+		json.Unmarshal(response, &baseConfigRouter.createAppResponseDto)
+	}
+	return baseConfigRouter
+}
+
+type BaseConfigRouter struct {
+	createAppResponseDto CreateAppResponseDto
+	deleteResponseDto    DeleteResponseDto
+}
+
+func GetPayLoadForDeleteAppAPI(id int, appName string, teamId int, templateId int) []byte {
+	var createAppRequestDto CreateAppRequestDto
+	createAppRequestDto.Id = id
+	createAppRequestDto.AppName = appName
+	createAppRequestDto.TeamId = teamId
+	createAppRequestDto.TemplateId = templateId
+	byteValueOfStruct, _ := json.Marshal(createAppRequestDto)
+	return byteValueOfStruct
+}
+
+func DeleteApp(appId int, appName string, TeamId int, TemplateId int, authToken string) DeleteResponseDto {
+	byteValueOfDeleteApp := GetPayLoadForDeleteAppAPI(appId, appName, TeamId, TemplateId)
+	resp, err := MakeApiCall("/orchestrator/app/"+strconv.Itoa(appId), http.MethodDelete, string(byteValueOfDeleteApp), nil, authToken)
+	HandleError(err, "DeleteAppApi")
+	baseConfigRouter := BaseConfigRouter{}
+	apiRouter := baseConfigRouter.UnmarshalGivenResponseBody(resp.Body(), "DeleteAppApi")
+	return apiRouter.deleteResponseDto
+}
+
+func ReadAnyJsonFile(filename string) BaseClassEnvironmentConfig {
+	file, err := ioutil.ReadFile(filename)
 	if err != nil {
-		panic(err)
+		log.Panicf("failed reading data from file: %s", err)
 	}
-	scanner := bufio.NewScanner(file)
-	var temp string
-	for scanner.Scan() {
-		line := scanner.Text()
-		temp = temp + line
+	data := BaseClassEnvironmentConfig{}
+	_ = json.Unmarshal([]byte(file), &data)
+	return data
+}
+
+type BaseEnvConfigStruct struct {
+	BaseCredentialsFile  string `env:"BASE_CREDENTIALS_FILE" envDefault:"/base-test/credentials.json"`
+	ClassCredentialsFile string `env:"CLASS_CREDENTIALS_FILE" envDefault:"/class-test/credentials.json"`
+}
+
+func ReadBaseEnvConfig() *BaseEnvConfigStruct {
+	cfg := &BaseEnvConfigStruct{}
+	err := env.Parse(cfg)
+	if err != nil {
+		return nil
 	}
-	temp = TrimSuffix(temp)
-	split := strings.Split(temp, ",")
-	var output string
-	flag := 1
-	for _, j := range split {
-		if len(j) != 0 {
-			split2 := strings.Split(j, ":")
-			temp2 := "\"" + key + "\""
-			if split2[0] == temp2 {
-				output = split2[1]
-				flag = 0
-				break
+	return cfg
+}
+
+func ReadEventStreamsForSpecificApi(apiUrl string, authToken string, ContainerName string, t *testing.T) {
+	baseConfig := ReadBaseEnvConfig()
+	fileData := ReadAnyJsonFile(baseConfig.BaseCredentialsFile)
+	url := fileData.BaseServerUrl + apiUrl
+	client := sse.NewClient(url)
+	header := make(map[string]string)
+	header["token"] = authToken
+	client.Headers = header
+	events := make(chan *sse.Event)
+	var cErr error
+	go func() {
+		cErr = client.Subscribe("message", func(msg *sse.Event) {
+			if msg.Data != nil {
+				events <- msg
+				return
 			}
+		})
+	}()
+
+	for i := 0; i < 3; i++ {
+		msg, err := wait(events, time.Second*60)
+		require.Nil(t, err)
+		if i == 0 {
+			assert.True(t, strings.Contains(string(msg.Data), ContainerName))
+		}
+		fmt.Println(i, "=====>", string(msg.Data))
+		dt := time.Now()
+		if strings.Contains(string(msg.Data), "{\"result\":{\"content\"") || strings.Contains(string(msg.Data), dt.Format("01-02-2006")) {
+			assert.True(t, true)
 		}
 	}
-	defer file.Close()
-	if flag == 1 {
-		panic("key NOT found")
-	}
-	return output
+	assert.Nil(t, cErr)
 }
-func TrimSuffix(s string) string {
-	if strings.HasSuffix(s, "}") {
-		s = s[:len(s)-len("}")]
-	}
-	s = TrimFirstChar(s)
-	return s
-}
-func TrimFirstChar(s string) string {
-	for i := range s {
-		if i > 0 {
-			return s[i:]
+
+func ReadEventStreamsForSpecificApiAndVerifyResult(apiUrl string, authToken string, t *testing.T, indexOfMessage int, message string) {
+	baseConfig := ReadBaseEnvConfig()
+	fileData := ReadAnyJsonFile(baseConfig.BaseCredentialsFile)
+	url := fileData.BaseServerUrl + apiUrl
+	client := sse.NewClient(url)
+	header := make(map[string]string)
+	header["token"] = authToken
+	client.Headers = header
+	events := make(chan *sse.Event)
+	var cErr error
+	go func() {
+		cErr = client.Subscribe("message", func(msg *sse.Event) {
+			if msg.Data != nil {
+				events <- msg
+				return
+			}
+		})
+	}()
+
+	for i := 0; i <= indexOfMessage; i++ {
+		msg, err := wait(events, time.Second*60)
+		require.Nil(t, err)
+		fmt.Println(i, "=====>", string(msg.Data))
+		if i == indexOfMessage {
+			assert.Equal(t, string(msg.Data), message)
 		}
 	}
-	return ""
+	assert.Nil(t, cErr)
+}
+
+func wait(ch chan *sse.Event, duration time.Duration) (*sse.Event, error) {
+	var err error
+	var msg *sse.Event
+	select {
+	case event := <-ch:
+		msg = event
+	case <-time.After(duration):
+		err = errors.New("timeout")
+	}
+	return msg, err
+}
+
+func CreateUrlForEventStreamsHavingQueryParam(params map[string]string) string {
+	var url string = ""
+	var finalUrl string = ""
+	for key, value := range params {
+		url = key + "=" + value
+		finalUrl = url + "&" + finalUrl
+	}
+	finalTrimmedUrl := strings.TrimSpace(finalUrl)
+	return strings.TrimRight(finalTrimmedUrl, "&")
+}
+
+func ConvertDateStringIntoTimeStamp(timeString string) int64 {
+	dateTime, e := time.Parse(time.RFC3339, timeString)
+	if e != nil {
+		panic("Parse error")
+	}
+	timestamp := dateTime.Unix()
+	fmt.Println("Date to Timestamp : ", timestamp)
+	return timestamp
 }

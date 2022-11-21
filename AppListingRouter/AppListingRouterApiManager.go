@@ -1,47 +1,23 @@
 package AppListingRouter
 
 import (
+	"automation-suite/AppListingRouter/ResponseDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/suite"
+	"log"
 	"net/http"
+	"strconv"
 )
 
-type AppListingRouter struct {
-	suite.Suite
-	authToken string
-}
-
-func (suite *AppListingRouter) SetupSuite() {
-	suite.authToken = Base.GetAuthToken()
-}
-
 type StructAppListingRouter struct {
-	fetchAllStageStatusResponseDto FetchAllStageStatusResponseDto
-}
-type FetchAllStageStatusResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result []struct {
-		Stage     int    `json:"stage"`
-		StageName string `json:"stageName"`
-		Status    bool   `json:"status"`
-		Required  bool   `json:"required"`
-	} `json:"result"`
-	Errors []Base.Errors `json:"errors"`
+	fetchAllStageStatusResponseDto ResponseDTOs.FetchAllStageStatusResponseDTO
+	fetchOtherEnvResponseDto       ResponseDTOs.FetchOtherEnvResponseDTO
 }
 
-func (structAppListingRouter StructAppListingRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructAppListingRouter {
-	switch apiName {
-	case FetchAllStageStatusApi:
-		json.Unmarshal(response, &structAppListingRouter.fetchAllStageStatusResponseDto)
-	}
-	return structAppListingRouter
-}
-
-func FetchAllStageStatus(id string, authToken string) FetchAllStageStatusResponseDto {
+func FetchAllStageStatus(id int, authToken string) ResponseDTOs.FetchAllStageStatusResponseDTO {
 	AppId := map[string]string{
-		"id": id,
+		"app-id": strconv.Itoa(id),
 	}
 	resp, err := Base.MakeApiCall(GetStageStatusApiUrl, http.MethodGet, "", AppId, authToken)
 	Base.HandleError(err, FetchAllStageStatusApi)
@@ -49,4 +25,36 @@ func FetchAllStageStatus(id string, authToken string) FetchAllStageStatusRespons
 	structAppListingRouter := StructAppListingRouter{}
 	apiRouter := structAppListingRouter.UnmarshalGivenResponseBody(resp.Body(), FetchAllStageStatusApi)
 	return apiRouter.fetchAllStageStatusResponseDto
+}
+
+func FetchOtherEnv(id int, authToken string) ResponseDTOs.FetchOtherEnvResponseDTO {
+	AppId := map[string]string{
+		"app-id": strconv.Itoa(id),
+	}
+	resp, err := Base.MakeApiCall(GetOtherEnvApiUrl, http.MethodGet, "", AppId, authToken)
+	Base.HandleError(err, FetchOtherEnvApi)
+
+	structAppListingRouter := StructAppListingRouter{}
+	apiRouter := structAppListingRouter.UnmarshalGivenResponseBody(resp.Body(), FetchOtherEnvApi)
+	return apiRouter.fetchOtherEnvResponseDto
+}
+func (structAppListingRouter StructAppListingRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructAppListingRouter {
+	switch apiName {
+	case FetchAllStageStatusApi:
+		json.Unmarshal(response, &structAppListingRouter.fetchAllStageStatusResponseDto)
+	case FetchOtherEnvApi:
+		json.Unmarshal(response, &structAppListingRouter.fetchOtherEnvResponseDto)
+	}
+	return structAppListingRouter
+}
+
+type AppsListingRouterTestSuite struct {
+	suite.Suite
+	authToken string
+}
+
+// SetupSuite This method runs on first priority before starting the suite means before executing any test case of the suite
+func (suite *AppsListingRouterTestSuite) SetupSuite() {
+	log.Println("=== Running Before Suite Method ===")
+	suite.authToken = Base.GetAuthToken()
 }
