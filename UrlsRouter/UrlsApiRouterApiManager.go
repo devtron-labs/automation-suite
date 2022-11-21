@@ -4,9 +4,12 @@ import (
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/caarlos0/env"
 	"github.com/stretchr/testify/suite"
+	"io/ioutil"
 	"net/http"
+	"os"
 )
 
 type UrlsDto struct {
@@ -72,4 +75,21 @@ func GetEnvironmentConfigForInstalledApp() (*InstalledAppConfig, error) {
 		return nil, errors.New("could not get config from environment")
 	}
 	return cfg, err
+}
+
+func GetTestExpectedUrlsData() []UrlsResponse {
+	testFile, err := os.Open("urlsTestData.json")
+	if err != nil {
+		fmt.Println(err)
+		return []UrlsResponse{}
+	}
+	defer testFile.Close()
+	data, _ := ioutil.ReadAll(testFile)
+	res := make([]UrlsResponse, 0)
+	err = json.Unmarshal(data, &res)
+	if err != nil {
+		fmt.Println(err)
+		return []UrlsResponse{}
+	}
+	return res
 }

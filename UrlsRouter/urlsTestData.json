@@ -1,0 +1,19 @@
+[
+  {
+    "kind":"Service",
+    "name":"ajay-test-devtron-demo-preview-service",
+    "pointsTo":"",
+    "urls":[]
+  },
+  {
+    "kind":"Service",
+    "name":"ajay-test-devtron-demo-service",
+    "pointsTo":"","urls":[]
+},
+  {
+    "kind":"Ingress",
+    "name":"ajay-test-devtron-demo-ingress",
+    "pointsTo":"10.152.183.208",
+    "urls":["chart-example1.local/example1","chart-example2.local/example2","chart-example2.local/example2/example2/healthz"]
+  }
+]

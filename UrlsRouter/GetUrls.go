@@ -58,7 +58,7 @@ func (suite *UrlsTestSuite) TestGetUrlsForInstalledAppWithIncorrectAppId() {
 }
 
 func (suite *UrlsTestSuite) TestGetUrlsdata() {
-	expected := getTestExpectedUrlsData()
+	expected := GetTestExpectedUrlsData()
 	envConf, _ := GetEnvironmentConfigForDevtronApp()
 	queryParams := map[string]string{"appId": envConf.AppId, "envId": envConf.EnvId}
 	log.Println("Hitting Get urls API")
@@ -68,32 +68,9 @@ func (suite *UrlsTestSuite) TestGetUrlsdata() {
 	for j, _ := range resp.Result {
 		respData := resp.Result[j]
 		assert.Equal(suite.T(), respData.Name, expected[j].Name)
-		assert.Equal(suite.T(), respData.PointsTo, expected[j].PointsTo)
 		assert.Equal(suite.T(), respData.Kind, expected[j].Kind)
 		for i, url := range respData.Urls {
 			assert.Equal(suite.T(), url, expected[j].Urls[i])
 		}
 	}
-}
-
-func getTestExpectedUrlsData() []UrlsResponse {
-	res := make([]UrlsResponse, 0)
-	res = append(res, UrlsResponse{
-		Kind:     "Service",
-		Name:     "ajay-test-devtron-demo-preview-service",
-		PointsTo: "",
-	})
-	res = append(res, UrlsResponse{
-		Kind:     "Service",
-		Name:     "ajay-test-devtron-demo-service",
-		PointsTo: "",
-	})
-	res = append(res, UrlsResponse{
-		Kind:     "Ingress",
-		Name:     "ajay-test-devtron-demo-ingress",
-		PointsTo: "10.152.183.5",
-		Urls:     []string{"chart-example1.local/example1", "chart-example2.local/example2", "chart-example2.local/example2/example2/healthz"},
-	})
-
-	return res
 }

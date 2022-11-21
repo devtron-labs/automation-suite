@@ -5,6 +5,10 @@ import (
 	"testing"
 )
 
-func TestUrlsTestSuite(t *testing.T) {
+func TestUrlsTestSuiteSuperAdmin(t *testing.T) {
+	suite.Run(t, new(UrlsTestSuite))
+}
+
+func TestUrlsTestSuiteNonSuperAdmin(t *testing.T) {
 	suite.Run(t, new(UrlsTestSuite))
 }
