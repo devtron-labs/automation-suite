@@ -10,14 +10,9 @@ import (
 )
 
 type UrlsDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result struct {
-		Kind     string   `json:"kind"`
-		Name     string   `json:"name"`
-		PointsTo string   `json:"pointsTo"`
-		Urls     []string `json:"urls"`
-	} `json:"result"`
+	Code   int            `json:"code"`
+	Status string         `json:"status"`
+	Result []UrlsResponse `json:"result"`
 }
 
 type DevtronAppConfig struct {
@@ -39,8 +34,19 @@ type UrlsTestSuite struct {
 	authToken string
 }
 
-func HitGetUrls(queryParams map[string]string, authToken string) UrlsDto {
-	resp, err := Base.MakeApiCall(GetUrlsUrl, http.MethodGet, "", queryParams, authToken)
+type UrlsResponse struct {
+	Kind     string   `json:"kind"`
+	Name     string   `json:"name"`
+	PointsTo string   `json:"pointsTo"`
+	Urls     []string `json:"urls"`
+}
+
+func (suite *UrlsTestSuite) SetupSuite() {
+	suite.authToken = Base.GetAuthToken()
+}
+
+func HitGetUrls(queryParams map[string]string, authToken string, url string) UrlsDto {
+	resp, err := Base.MakeApiCall(url, http.MethodGet, "", queryParams, authToken)
 	Base.HandleError(err, GetUrls)
 
 	structUrlsRouter := StructUrlsRouter{}
