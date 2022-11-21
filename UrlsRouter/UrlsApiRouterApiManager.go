@@ -78,7 +78,7 @@ func GetEnvironmentConfigForInstalledApp() (*InstalledAppConfig, error) {
 }
 
 func GetTestExpectedUrlsData() []UrlsResponse {
-	testFile, err := os.Open("urlsTestData.json")
+	testFile, err := os.Open("../testdata/UrlsRouter/urlsTestData.json")
 	if err != nil {
 		fmt.Println(err)
 		return []UrlsResponse{}
