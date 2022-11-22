@@ -1,8 +1,13 @@
 package UrlsRouter
 
 import (
+	"automation-suite/ApiTokenRouter"
 	helmRouter "automation-suite/HelmAppRouter"
+	userRouter "automation-suite/UserRouter"
+	"automation-suite/UserRouter/RequestDTOs"
+	"automation-suite/UserRouter/ResponseDTOs"
 	"automation-suite/testUtils"
+	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"strconv"
@@ -115,42 +120,56 @@ func testGetUrlsdata(suite *UrlsTestSuite, token string) {
 	}
 }
 
-//func (suite *UrlsTestSuite) TestUrlsdata() {
-//	//create api-token
-//	createApiTokenRequestDTO := ApiTokenRouter.GetPayLoadForCreateApiToken()
-//	payloadForCreateApiTokenRequest, _ := json.Marshal(createApiTokenRequestDTO)
-//	responseOfCreateApiToken := ApiTokenRouter.HitCreateApiTokenApi(string(payloadForCreateApiTokenRequest), suite.authToken)
-//	token := responseOfCreateApiToken.Result.Token
-//	//update user with permissions
-//	updateUserDto, roleGroupId := userRouter.CreateUserRequestPayload("GroupsAndRoleFilter", suite.authToken)
-//	updateUserDto.Id = int32(responseOfCreateApiToken.Result.UserId)
-//	updateUserDto.EmailId = "API-TOKEN:" + createApiTokenRequestDTO.Name
-//	byteValueOfStruct, _ = json.Marshal(updateUserDto)
-//
-//	//test with token user
-//	suite.TestGetUrlsdata(token)
-//	suite.TestGetUrlsForInstalledAppWithIncorrectAppId(token)
-//	suite.TestGetUrlsForInstalledApp(token)
-//	suite.TestGetUrlsForDevtronAppWithIncorrectAppId(token)
-//	suite.TestGetUrlsForDevtronApp(token)
-//	suite.TestGetUrlsForHelmAppWithIncorrectAppId(token)
-//	suite.TestGetUrlsForHelmApp(token)
-//
-//	//delete user before deleting token
-//
-//	//delete created token
-//	var tokenId int
-//	responseOfGetAllApiTokens := ApiTokenRouter.HitGetAllApiTokens(suite.authToken).Result
-//	for _, result := range responseOfGetAllApiTokens {
-//		if result.UserId == responseOfCreateApiToken.Result.UserId {
-//			assert.Equal(suite.T(), responseOfCreateApiToken.Result.Token, result.Token)
-//			assert.Equal(suite.T(), createApiTokenRequestDTO.ExpireAtInMs, result.ExpireAtInMs)
-//			assert.Equal(suite.T(), createApiTokenRequestDTO.Name, result.Name)
-//			tokenId = result.Id
-//		}
-//	}
-//	log.Println("=== Here We Deleting the Token After Verification")
-//	responseOfDeleteApi := ApiTokenRouter.HitDeleteApiToken(strconv.Itoa(tokenId), suite.authToken)
-//	assert.True(suite.T(), responseOfDeleteApi.Result.Success)
-//
-//}
+func createUserRequestPayloadViewOnly() RequestDTOs.UserInfo {
+	var listOfRoleFilter []ResponseDTOs.RoleFilter
+	var userInfo RequestDTOs.UserInfo
+	roleFilter := userRouter.CreateRoleFilterWithDevtronAppsOnly()
+	listOfRoleFilter = append(listOfRoleFilter, roleFilter)
+	userInfo.EmailId = "@yopmail"
+	userInfo.SuperAdmin = false
+	userInfo.RoleFilters = listOfRoleFilter
+	userInfo.Groups = []string{}
+	return userInfo
+}
+
+func (suite *UrlsTestSuite) TestUrlsdata() {
+	//create api-token
+	createApiTokenRequestDTO := ApiTokenRouter.GetPayLoadForCreateApiToken()
+	payloadForCreateApiTokenRequest, _ := json.Marshal(createApiTokenRequestDTO)
+	responseOfCreateApiToken := ApiTokenRouter.HitCreateApiTokenApi(string(payloadForCreateApiTokenRequest), suite.authToken)
+	token := responseOfCreateApiToken.Result.Token
+	//update user with permissions
+
+	updateUserDto := createUserRequestPayloadViewOnly()
+	updateUserDto.Id = int32(responseOfCreateApiToken.Result.UserId)
+	byteValueOfStruct, _ := json.Marshal(updateUserDto)
+	responseOfUpdateUserApi := userRouter.HitUpdateUserApi(byteValueOfStruct, suite.authToken)
+	assert.Equal(suite.T(), responseOfUpdateUserApi.Code, 200)
+	//test with token user
+	testGetUrlsdata(suite, token)
+	testGetUrlsForInstalledAppWithIncorrectAppId(suite, token)
+	testGetUrlsForInstalledApp(suite, token)
+	testGetUrlsForDevtronAppWithIncorrectAppId(suite, token)
+	testGetUrlsForDevtronApp(suite, token)
+	testGetUrlsForHelmAppWithIncorrectAppId(suite, token)
+	testGetUrlsForHelmApp(suite, token)
+
+	//delete user before deleting token
+	responseOfDeleteUserApi := userRouter.HitDeleteUserApi(strconv.Itoa(int(updateUserDto.Id)), suite.authToken)
+	assert.Equal(suite.T(), responseOfDeleteUserApi.Code, 200)
+	//delete created token
+	var tokenId int
+	responseOfGetAllApiTokens := ApiTokenRouter.HitGetAllApiTokens(suite.authToken).Result
+	for _, result := range responseOfGetAllApiTokens {
+		if result.UserId == responseOfCreateApiToken.Result.UserId {
+			assert.Equal(suite.T(), responseOfCreateApiToken.Result.Token, result.Token)
+			assert.Equal(suite.T(), createApiTokenRequestDTO.ExpireAtInMs, result.ExpireAtInMs)
+			assert.Equal(suite.T(), createApiTokenRequestDTO.Name, result.Name)
+			tokenId = result.Id
+		}
+	}
+	log.Println("=== Here We Deleting the Token After Verification")
+	responseOfDeleteApi := ApiTokenRouter.HitDeleteApiToken(strconv.Itoa(tokenId), suite.authToken)
+	assert.True(suite.T(), responseOfDeleteApi.Result.Success)
+
+}
