@@ -6,7 +6,7 @@ import (
 	userRouter "automation-suite/UserRouter"
 	"automation-suite/UserRouter/RequestDTOs"
 	"automation-suite/UserRouter/ResponseDTOs"
-	"automation-suite/testUtils"
+	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"log"
@@ -30,7 +30,7 @@ func (suite *UrlsTestSuite) TestGetUrlsForHelmAppWithIncorrectAppId() {
 	testGetUrlsForHelmAppWithIncorrectAppId(suite, suite.authToken)
 }
 func testGetUrlsForHelmAppWithIncorrectAppId(suite *UrlsTestSuite, token string) {
-	randomHAppId := testUtils.GetRandomNumberOf9Digit()
+	randomHAppId := Base.GetRandomNumberOf9Digit()
 	queryParams := map[string]string{"appId": strconv.Itoa(randomHAppId)}
 	if token == "" {
 		token = suite.authToken
@@ -125,14 +125,14 @@ func createUserRequestPayloadViewOnly() RequestDTOs.UserInfo {
 	var userInfo RequestDTOs.UserInfo
 	roleFilter := userRouter.CreateRoleFilterWithDevtronAppsOnly()
 	listOfRoleFilter = append(listOfRoleFilter, roleFilter)
-	userInfo.EmailId = "@yopmail"
+	userInfo.EmailId = Base.GetRandomStringOfGivenLength(10) + "@yopmail"
 	userInfo.SuperAdmin = false
 	userInfo.RoleFilters = listOfRoleFilter
 	userInfo.Groups = []string{}
 	return userInfo
 }
 
-func (suite *UrlsTestSuite) TestUrlsdata() {
+func (suite *UrlsTestSuite) TestUrlsdataWithViewOnlyAccess() {
 	//create api-token
 	createApiTokenRequestDTO := ApiTokenRouter.GetPayLoadForCreateApiToken()
 	payloadForCreateApiTokenRequest, _ := json.Marshal(createApiTokenRequestDTO)
@@ -148,11 +148,9 @@ func (suite *UrlsTestSuite) TestUrlsdata() {
 	//test with token user
 	testGetUrlsdata(suite, token)
 	testGetUrlsForInstalledAppWithIncorrectAppId(suite, token)
-	testGetUrlsForInstalledApp(suite, token)
 	testGetUrlsForDevtronAppWithIncorrectAppId(suite, token)
 	testGetUrlsForDevtronApp(suite, token)
 	testGetUrlsForHelmAppWithIncorrectAppId(suite, token)
-	testGetUrlsForHelmApp(suite, token)
 
 	//delete user before deleting token
 	responseOfDeleteUserApi := userRouter.HitDeleteUserApi(strconv.Itoa(int(updateUserDto.Id)), suite.authToken)
@@ -169,7 +167,5 @@ func (suite *UrlsTestSuite) TestUrlsdata() {
 		}
 	}
 	log.Println("=== Here We Deleting the Token After Verification")
-	responseOfDeleteApi := ApiTokenRouter.HitDeleteApiToken(strconv.Itoa(tokenId), suite.authToken)
-	assert.True(suite.T(), responseOfDeleteApi.Result.Success)
-
+	_ = ApiTokenRouter.HitDeleteApiToken(strconv.Itoa(tokenId), suite.authToken)
 }
