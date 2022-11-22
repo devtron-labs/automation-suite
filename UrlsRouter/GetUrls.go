@@ -1,18 +1,9 @@
 package UrlsRouter
 
-import (
-	userRouter "automation-suite/UserRouter"
-	"automation-suite/UserRouter/ResponseDTOs"
-)
-
 func (suite *UrlsTestSuite) TestGetUrlsForHelmApp() {
 	testGetUrlsForHelmApp(suite, suite.authToken)
 }
-func CreateRoleFilterWithDevtronAppsOnly(role string) ResponseDTOs.RoleFilter {
-	var roleFilter ResponseDTOs.RoleFilter
-	roleFilter = userRouter.CreateRoleFilter("", "devtron-demo", "", role, "")
-	return roleFilter
-}
+
 func (suite *UrlsTestSuite) TestUrlsdataWithViewOnlyAccess() {
 	testUrlsdataWithRoleAccess(suite, "view")
 }

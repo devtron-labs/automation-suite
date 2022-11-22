@@ -102,6 +102,13 @@ func GetTestExpectedUrlsData() []UrlsResponse {
 	return res
 }
 
+func CreateRoleFilterWithDevtronAppsOnly(role string) ResponseDTOs.RoleFilter {
+	var roleFilter ResponseDTOs.RoleFilter
+	roleFilter = userRouter.CreateRoleFilter("", "devtron-demo", "", role, "")
+	return roleFilter
+}
+
+//test cases utils
 func testGetUrlsForHelmApp(suite *UrlsTestSuite, token string) {
 	envConf, _ := helmRouter.GetEnvironmentConfigForHelmApp()
 	queryParams := map[string]string{"appId": envConf.HAppId}
