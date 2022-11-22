@@ -217,12 +217,8 @@ func testUrlsdataWithRoleAccess(suite *UrlsTestSuite, role string) {
 	responseOfUpdateUserApi := userRouter.HitUpdateUserApi(byteValueOfStruct, suite.authToken)
 	assert.Equal(suite.T(), responseOfUpdateUserApi.Code, 200)
 	//test with token user
-	testGetUrlsdata(suite, token)
-	testGetUrlsForInstalledAppWithIncorrectAppId(suite, token)
-	testGetUrlsForDevtronAppWithIncorrectAppId(suite, token)
 	testGetUrlsForDevtronApp(suite, token)
-	testGetUrlsForHelmAppWithIncorrectAppId(suite, token)
-
+	testGetUrlsdata(suite, token)
 	//delete user before deleting token
 	responseOfDeleteUserApi := userRouter.HitDeleteUserApi(strconv.Itoa(int(updateUserDto.Id)), suite.authToken)
 	assert.Equal(suite.T(), responseOfDeleteUserApi.Code, 200)
