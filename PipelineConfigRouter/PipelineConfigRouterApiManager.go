@@ -257,7 +257,7 @@ type EnvironmentDetailsResponseDTO struct {
 }
 
 type StructPipelineConfigRouter struct {
-	saveAppCiPipelineRequestDTO        SaveAppCiPipelineRequestDTO
+	//saveAppCiPipelineRequestDTO        SaveAppCiPipelineRequestDTO
 	createAppResponseDto               CreateAppResponseDto
 	deleteResponseDto                  DeleteResponseDto
 	createAppMaterialRequestDto        CreateAppMaterialRequestDto
@@ -289,6 +289,7 @@ type StructPipelineConfigRouter struct {
 	fetchMaterialsResponseDTO          ResponseDTOs.FetchMaterialsResponseDTO
 	getCiPipelineMinResponseDTO        ResponseDTOs.GetCiPipelineMinResponseDTO
 	refreshMaterialsResponseDTO        ResponseDTOs.RefreshMaterialsResponseDTO
+	saveAppCiPipelineRequestDTO        RequestDTOs.SaveAppCiPipelineRequestDTO
 }
 
 type EnvironmentConfigPipelineConfigRouter struct {
@@ -439,16 +440,29 @@ func HitDeleteAppMaterialApi(byteValueOfStruct []byte, authToken string) DeleteR
 	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), DeleteAppMaterialApi)
 	return pipelineConfigRouter.deleteResponseDto
 }
-func GetRequestPayloadForSaveAppCiPipeline(AppId int, dockerRegistry string, dockerRepository string, dockerfilePath string, dockerfileRepository string, dockerfileRelativePath string, gitMaterialId int) SaveAppCiPipelineRequestDTO {
-	saveAppCiPipelineRequestDTO := SaveAppCiPipelineRequestDTO{}
+func GetRequestPayloadForSaveAppCiPipeline(AppId int, dockerRegistry string, dockerRepository string, dockerfilePath string, dockerfileRepository string, dockerfileRelativePath string, gitMaterialId int) RequestDTOs.SaveAppCiPipelineRequestDTO {
+	CiBuildConfig := GetCiBuildConfig(dockerfilePath, dockerfileRepository, dockerfileRelativePath, gitMaterialId)
+	saveAppCiPipelineRequestDTO := RequestDTOs.SaveAppCiPipelineRequestDTO{}
+
+	saveAppCiPipelineRequestDTO.BeforeDockerBuild = nil
+	saveAppCiPipelineRequestDTO.AfterDockerBuild = nil
 	saveAppCiPipelineRequestDTO.AppId = AppId
+	saveAppCiPipelineRequestDTO.CiBuildConfig = CiBuildConfig
 	saveAppCiPipelineRequestDTO.DockerRepository = dockerRepository
 	saveAppCiPipelineRequestDTO.DockerRegistry = dockerRegistry
-	saveAppCiPipelineRequestDTO.DockerBuildConfig.DockerfilePath = dockerfilePath
-	saveAppCiPipelineRequestDTO.DockerBuildConfig.DockerfileRepository = dockerfileRepository
-	saveAppCiPipelineRequestDTO.DockerBuildConfig.DockerfileRelativePath = dockerfileRelativePath
-	saveAppCiPipelineRequestDTO.DockerBuildConfig.GitMaterialId = gitMaterialId
 	return saveAppCiPipelineRequestDTO
+}
+
+func GetCiBuildConfig(dockerfilePath string, dockerfileRepository string, dockerfileRelativePath string, gitMaterialId int) RequestDTOs.CiBuildConfig {
+	CiBuildConfig := RequestDTOs.CiBuildConfig{}
+	CiBuildConfig.GitMaterialId = gitMaterialId
+	CiBuildConfig.CiBuildType = "self-dockerfile-build"
+	CiBuildConfig.DockerBuildConfig.DockerfileContent = ""
+	CiBuildConfig.DockerBuildConfig.DockerfilePath = dockerfilePath
+	CiBuildConfig.DockerBuildConfig.DockerfileRepository = dockerfileRepository
+	CiBuildConfig.DockerBuildConfig.DockerfileRelativePath = dockerfileRelativePath
+	//CiBuildConfig.DockerBuildConfig.TargetPlatform = "linux/arm64"
+	return CiBuildConfig
 }
 
 func HitSaveAppCiPipeline(payload []byte, authToken string) SaveAppCiPipelineResponseDTO {
