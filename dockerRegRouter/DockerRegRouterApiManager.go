@@ -13,7 +13,7 @@ import (
 type StructDockerRegRouter struct {
 	saveDockerRegistryResponseDto ResponseDTOs.SaveDockerRegistryResponseDto
 	deleteDockerRegistryResponse  ResponseDTOs.DeleteDockerRegistryResponse
-	dockerRequestDTOs             RequestDTOs.SaveDockerRegistryRequestDto
+	dockerRequestDTOs             RequestDTOs.SaveDockerRegistryRequestDTO
 }
 
 func (structDockerRegRouter StructDockerRegRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructDockerRegRouter {
@@ -45,19 +45,29 @@ func GetDockerRegistry() (*DockerRegistry, error) {
 }
 */
 
-func GetDockerRegistryRequestDto(isDefault bool) RequestDTOs.SaveDockerRegistryRequestDto {
-	var saveDockerRegistryRequestDto RequestDTOs.SaveDockerRegistryRequestDto
+func GetDockerRegistryRequestDto(isDefault bool) RequestDTOs.SaveDockerRegistryRequestDTO {
+	var saveDockerRegistryRequestDto RequestDTOs.SaveDockerRegistryRequestDTO
+	ipsConfig := GetIpsConfig(0)
 	//dockerRegistry, _ := GetDockerRegistry()
 	envConf := Base.ReadBaseEnvConfig()
 	file := Base.ReadAnyJsonFile(envConf.ClassCredentialsFile)
-	saveDockerRegistryRequestDto.Id = file.DockerUsername
+	saveDockerRegistryRequestDto.Id = "automation" + Base.GetRandomStringOfGivenLength(5)
+	saveDockerRegistryRequestDto.IpsConfig = ipsConfig
+	saveDockerRegistryRequestDto.IsDefault = isDefault
 	saveDockerRegistryRequestDto.PluginId = file.PluginId
 	saveDockerRegistryRequestDto.RegistryType = file.RegistryType
 	saveDockerRegistryRequestDto.RegistryUrl = file.RegistryUrl
-	saveDockerRegistryRequestDto.IsDefault = isDefault
 	saveDockerRegistryRequestDto.Username = file.DockerUsername
 	saveDockerRegistryRequestDto.Password = file.Password
 	return saveDockerRegistryRequestDto
+}
+
+func GetIpsConfig(id int) RequestDTOs.IpsConfig {
+	var IpsConfig RequestDTOs.IpsConfig
+	IpsConfig.Id = id
+	IpsConfig.CredentialType = "SAME_AS_REGISTRY"
+	IpsConfig.IgnoredClusterIdsCsv = "-1"
+	return IpsConfig
 }
 
 func HitSaveContainerRegistryApi(payloadOfApi []byte, authToken string) ResponseDTOs.SaveDockerRegistryResponseDto {
@@ -69,15 +79,17 @@ func HitSaveContainerRegistryApi(payloadOfApi []byte, authToken string) Response
 	return dockerRegRouter.saveDockerRegistryResponseDto
 }
 
-func GetPayLoadForDeleteDockerRegistryAPI(id string, pluginId string, regUrl string, regType string, username string, password string, isDefault bool) []byte {
-	var saveDockerRegistryRequestDto RequestDTOs.SaveDockerRegistryRequestDto
-	saveDockerRegistryRequestDto.Id = id
+func GetPayLoadForDeleteDockerRegistryAPI(registryName string, id int, pluginId string, regUrl string, regType string, username string, password string, isDefault bool) []byte {
+	var saveDockerRegistryRequestDto RequestDTOs.SaveDockerRegistryRequestDTO
+	ipsConfig := GetIpsConfig(id)
+	saveDockerRegistryRequestDto.Id = registryName
+	saveDockerRegistryRequestDto.IpsConfig = ipsConfig
+	saveDockerRegistryRequestDto.IsDefault = isDefault
 	saveDockerRegistryRequestDto.PluginId = pluginId
-	saveDockerRegistryRequestDto.RegistryUrl = regUrl
 	saveDockerRegistryRequestDto.RegistryType = regType
+	saveDockerRegistryRequestDto.RegistryUrl = regUrl
 	saveDockerRegistryRequestDto.Username = username
 	saveDockerRegistryRequestDto.Password = password
-	saveDockerRegistryRequestDto.IsDefault = isDefault
 	byteValueOfStruct, _ := json.Marshal(saveDockerRegistryRequestDto)
 	return byteValueOfStruct
 }

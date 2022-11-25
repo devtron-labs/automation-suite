@@ -1,7 +1,7 @@
 package AppStoreDiscoverRouter
 
 import (
-	Base "automation-suite/testUtils"
+	"automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"github.com/tidwall/sjson"
@@ -11,7 +11,9 @@ import (
 	"time"
 )
 
-func (suite *AppStoreDiscoverTestSuite) TestDiscoverPreviouslyInstalledHelmAppsViaRepoId() {
+//todo need to add more assertions after setup of stage Environment and deploying a chart for permanent test data
+
+func (suite *AppStoreDiscoverTestSuite) TestGetApplicationValuesList() {
 	var valuesOverrideInterface interface{}
 	var AppStoreId int
 	log.Println("=== Getting apache chart repo via DiscoverApp API ===")
@@ -33,7 +35,7 @@ func (suite *AppStoreDiscoverTestSuite) TestDiscoverPreviouslyInstalledHelmAppsV
 	if err := yaml.Unmarshal([]byte(valuesOverrideYaml), &valuesOverrideInterface); err != nil {
 		panic(err)
 	}
-	Base.ConvertYamlIntoJson(valuesOverrideInterface)
+	testUtils.ConvertYamlIntoJson(valuesOverrideInterface)
 	valuesOverrideJson, _ := json.Marshal(valuesOverrideInterface)
 	jsonOfSaveDeploymentTemp := string(valuesOverrideJson)
 	jsonWithTypeAsClusterIP, _ := sjson.Set(jsonOfSaveDeploymentTemp, "service.type", "ClusterIP")
@@ -48,12 +50,22 @@ func (suite *AppStoreDiscoverTestSuite) TestDiscoverPreviouslyInstalledHelmAppsV
 	updatedByteValueOfInstallAppRequestPayload := []byte(jsonWithTypeAsClusterIP1)
 	responseAfterInstallingApp := HitInstallAppApi(string(updatedByteValueOfInstallAppRequestPayload), suite.authToken)
 	installedAppId = responseAfterInstallingApp.Result.InstalledAppId
-	time.Sleep(10 * time.Second)
-	suite.Run("A=1=GetInstalledAppsByAppStoreId", func() {
-		log.Println("Hitting the GetDeploymentOfInstalledApp API with valid payload")
-		deploymentOfInstalledApp := GetInstalledAppsByAppStoreId(strconv.Itoa(AppStoreId), suite.authToken)
-		assert.NotNil(suite.T(), deploymentOfInstalledApp.Result[len(deploymentOfInstalledApp.Result)-1].InstalledAppVersionId)
-		assert.Equal(suite.T(), installedAppId, deploymentOfInstalledApp.Result[len(deploymentOfInstalledApp.Result)-1].InstalledAppId)
+	time.Sleep(5 * time.Second)
+	suite.Run("A=1=FetchAppValuesWithValidAppStoreId", func() {
+		resp := HitGetApplicationValuesList(strconv.Itoa(AppStoreId), suite.authToken)
+		log.Println("Asserting the API Response...")
+		assert.Equal(suite.T(), 4, len(resp.Result.Values))
+		assert.Equal(suite.T(), "DEFAULT", resp.Result.Values[0].Kind)
+		assert.Equal(suite.T(), "EXISTING", resp.Result.Values[3].Kind)
+	})
+	suite.Run("A=2=FetchAppValuesWithInvalidAppStoreId", func() {
+		randomNumber := testUtils.GetRandomNumberOf9Digit()
+		resp := HitGetApplicationValuesList(strconv.Itoa(randomNumber), suite.authToken)
+		log.Println("Asserting the API Response...")
+		assert.Nil(suite.T(), resp.Result.Values[0].Values)
+		assert.Nil(suite.T(), resp.Result.Values[1].Values)
+		assert.Empty(suite.T(), resp.Result.Values[2].Values)
+		assert.Empty(suite.T(), resp.Result.Values[3].Values)
 	})
 	log.Println("Removing the data created via API")
 	respOfDeleteInstallAppApi := HitDeleteInstalledAppApi(strconv.Itoa(installedAppId), suite.authToken)

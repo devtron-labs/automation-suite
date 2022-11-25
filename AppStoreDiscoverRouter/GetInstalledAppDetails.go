@@ -1,31 +1,52 @@
-package AppStoreRouter
+package AppStoreDiscoverRouter
 
 import (
-	"automation-suite/AppStoreDeploymentRouter"
-	"automation-suite/AppStoreRouter/RequestDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
+	"github.com/tidwall/sjson"
 	"log"
+	"sigs.k8s.io/yaml"
 	"strconv"
-	"strings"
 	"time"
 )
 
-func (suite *AppStoreTestSuite) TestGetInstalledAppDetails() {
-	log.Println("=== Here We are installing Helm chart from chart-store ===")
-	expectedPayload, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/AppStoreRouter/InstallAppRequestPayload.json")
-	log.Println("Hitting the InstallAppApi with valid payload")
-	installAppRequestDTO := RequestDTOs.InstallAppRequestDTO{}
-	json.Unmarshal(expectedPayload, &installAppRequestDTO)
-	AppName := "automation" + strings.ToLower(Base.GetRandomStringOfGivenLength(5))
-	log.Println("=== Helm AppName for this Test Case is :===", AppName)
-	installAppRequestDTO.AppName = AppName
-	requestPayload, _ := json.Marshal(installAppRequestDTO)
-	responseAfterInstallingApp := AppStoreDeploymentRouter.HitInstallAppApi(string(requestPayload), suite.authToken)
-	time.Sleep(2 * time.Second)
+func (suite *AppStoreDiscoverTestSuite) TestGetInstalledAppDetails() {
+	var valuesOverrideInterface interface{}
+	log.Println("=== Getting apache chart repo via DiscoverApp API ===")
+	queryParams := map[string]string{"appStoreName": "apache"}
+	PollForGettingHelmAppData(queryParams, suite.authToken)
+	ActiveDiscoveredApps := HitDiscoverAppApi(queryParams, suite.authToken)
+	var requiredReferenceId int
+	for _, DiscoveredApp := range ActiveDiscoveredApps.Result {
+		if DiscoveredApp.ChartName == "bitnami" {
+			requiredReferenceId = DiscoveredApp.AppStoreApplicationVersionId
+			break
+		}
+	}
+	log.Println("=== Getting Template values for apache chart===")
+	queryParamsOfApiGetTemplateValuesViaReferenceId := map[string]string{"referenceId": strconv.Itoa(requiredReferenceId), "kind": "DEFAULT"}
+	referenceTemplate := HitGetTemplateValuesViaReferenceIdApi(queryParamsOfApiGetTemplateValuesViaReferenceId, suite.authToken)
+	valuesOverrideYaml := referenceTemplate.Result.Values
+	if err := yaml.Unmarshal([]byte(valuesOverrideYaml), &valuesOverrideInterface); err != nil {
+		panic(err)
+	}
+	Base.ConvertYamlIntoJson(valuesOverrideInterface)
+	valuesOverrideJson, _ := json.Marshal(valuesOverrideInterface)
+	jsonOfSaveDeploymentTemp := string(valuesOverrideJson)
+	jsonWithTypeAsClusterIP, _ := sjson.Set(jsonOfSaveDeploymentTemp, "service.type", "ClusterIP")
+	updatedValuesOverrideJson := []byte(jsonWithTypeAsClusterIP)
+	log.Println("=== converting Json into YAML for Values Override in Install API===")
+	updatedValuesOverrideYaml, _ := yaml.JSONToYAML(updatedValuesOverrideJson)
+	installAppRequestDTO := GetRequestDtoForInstallApp(requiredReferenceId, requiredReferenceId, valuesOverrideInterface, string(updatedValuesOverrideYaml))
+	byteValueOfInstallAppRequestPayload, _ := json.Marshal(installAppRequestDTO)
+	jsonOfSaveDeploymentTemp1 := string(byteValueOfInstallAppRequestPayload)
+	jsonWithTypeAsClusterIP1, _ := sjson.Set(jsonOfSaveDeploymentTemp1, "valuesOverride.service.type", "ClusterIP")
+	updatedByteValueOfInstallAppRequestPayload := []byte(jsonWithTypeAsClusterIP1)
+	responseAfterInstallingApp := HitInstallAppApi(string(updatedByteValueOfInstallAppRequestPayload), suite.authToken)
 	installedAppId := responseAfterInstallingApp.Result.InstalledAppId
 	environmentId := strconv.Itoa(responseAfterInstallingApp.Result.EnvironmentId)
+
 	suite.Run("A=1=GetDetailsWithCorrectAppIdAndEnvId", func() {
 		queryParamsOfApi := make(map[string]string)
 		queryParamsOfApi["installed-app-id"] = strconv.Itoa(installedAppId)
@@ -68,7 +89,7 @@ func (suite *AppStoreTestSuite) TestGetInstalledAppDetails() {
 	})
 
 	log.Println("Removing the data created via API")
-	respOfDeleteInstallAppApi := AppStoreDeploymentRouter.HitDeleteInstalledAppApi(strconv.Itoa(responseAfterInstallingApp.Result.InstalledAppId), suite.authToken)
+	respOfDeleteInstallAppApi := HitDeleteInstalledAppApi(strconv.Itoa(responseAfterInstallingApp.Result.InstalledAppId), suite.authToken)
 	assert.Equal(suite.T(), responseAfterInstallingApp.Result.InstalledAppId, respOfDeleteInstallAppApi.Result.InstalledAppId)
 }
 

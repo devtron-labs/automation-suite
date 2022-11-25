@@ -258,13 +258,13 @@ type EnvironmentDetailsResponseDTO struct {
 
 type StructPipelineConfigRouter struct {
 	//saveAppCiPipelineRequestDTO        SaveAppCiPipelineRequestDTO
-	createAppResponseDto               CreateAppResponseDto
-	deleteResponseDto                  DeleteResponseDto
-	createAppMaterialRequestDto        CreateAppMaterialRequestDto
-	createAppMaterialResponseDto       CreateAppMaterialResponseDto
-	getAppDetailsResponseDto           GetAppDetailsResponseDto
-	saveAppCiPipelineResponseDTO       SaveAppCiPipelineResponseDTO
-	getCiPipelineViaIdResponseDTO      GetCiPipelineViaIdResponseDTO
+	createAppResponseDto         CreateAppResponseDto
+	deleteResponseDto            DeleteResponseDto
+	createAppMaterialRequestDto  CreateAppMaterialRequestDto
+	createAppMaterialResponseDto CreateAppMaterialResponseDto
+	getAppDetailsResponseDto     GetAppDetailsResponseDto
+	saveAppCiPipelineResponseDTO SaveAppCiPipelineResponseDTO
+	//getCiPipelineViaIdResponseDTO      GetCiPipelineViaIdResponseDTO
 	getContainerRegistryResponseDTO    GetContainerRegistryResponseDTO
 	getChartReferenceResponseDTO       GetChartReferenceResponseDTO
 	getAppTemplateResponseDto          GetAppTemplateResponseDto
@@ -290,6 +290,7 @@ type StructPipelineConfigRouter struct {
 	getCiPipelineMinResponseDTO        ResponseDTOs.GetCiPipelineMinResponseDTO
 	refreshMaterialsResponseDTO        ResponseDTOs.RefreshMaterialsResponseDTO
 	saveAppCiPipelineRequestDTO        RequestDTOs.SaveAppCiPipelineRequestDTO
+	getCiPipelineViaIdResponseDTO      ResponseDTOs.GetCiPipelineViaIdResponseDTO
 }
 
 type EnvironmentConfigPipelineConfigRouter struct {
@@ -444,8 +445,8 @@ func GetRequestPayloadForSaveAppCiPipeline(AppId int, dockerRegistry string, doc
 	CiBuildConfig := GetCiBuildConfig(dockerfilePath, dockerfileRepository, dockerfileRelativePath, gitMaterialId)
 	saveAppCiPipelineRequestDTO := RequestDTOs.SaveAppCiPipelineRequestDTO{}
 
-	saveAppCiPipelineRequestDTO.BeforeDockerBuild = nil
-	saveAppCiPipelineRequestDTO.AfterDockerBuild = nil
+	//saveAppCiPipelineRequestDTO.BeforeDockerBuild = myslice
+	//saveAppCiPipelineRequestDTO.AfterDockerBuild = myslice
 	saveAppCiPipelineRequestDTO.AppId = AppId
 	saveAppCiPipelineRequestDTO.CiBuildConfig = CiBuildConfig
 	saveAppCiPipelineRequestDTO.DockerRepository = dockerRepository
@@ -473,7 +474,7 @@ func HitSaveAppCiPipeline(payload []byte, authToken string) SaveAppCiPipelineRes
 	return pipelineConfigRouter.saveAppCiPipelineResponseDTO
 }
 
-func HitGetCiPipelineViaId(appId string, authToken string) GetCiPipelineViaIdResponseDTO {
+func HitGetCiPipelineViaId(appId string, authToken string) ResponseDTOs.GetCiPipelineViaIdResponseDTO {
 	resp, err := Base.MakeApiCall(GetCiPipelineViaIdApiUrl+appId, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, GetCiPipelineViaIdApi)
 	structPipelineConfigRouter := StructPipelineConfigRouter{}

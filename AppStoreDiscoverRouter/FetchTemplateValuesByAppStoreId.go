@@ -1,53 +1,73 @@
 package AppStoreDiscoverRouter
 
 import (
-	"automation-suite/AppStoreDeploymentRouter"
-	"automation-suite/AppStoreRouter/RequestDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
+	"github.com/tidwall/sjson"
 	"log"
+	"sigs.k8s.io/yaml"
 	"strconv"
 	"strings"
 	"time"
 )
 
-func (suite *AppStoreDiscoverTestSuite) TestGetApplicationValuesList() {
-	log.Println("=== Here we are getting airflow chart repo ===")
+func (suite *AppStoreDiscoverTestSuite) TestGetTemplateValuesList() {
+	var valuesOverrideInterface interface{}
+	var AppStoreId int
+	log.Println("=== Getting apache chart repo via DiscoverApp API ===")
 	queryParams := map[string]string{"appStoreName": "apache"}
 	PollForGettingHelmAppData(queryParams, suite.authToken)
-	DiscoveredApps := HitDiscoverAppApi(queryParams, suite.authToken)
+	ActiveDiscoveredApps := HitDiscoverAppApi(queryParams, suite.authToken)
+	var requiredReferenceId int
+	for _, DiscoveredApp := range ActiveDiscoveredApps.Result {
+		if DiscoveredApp.ChartName == "bitnami" {
+			requiredReferenceId = DiscoveredApp.AppStoreApplicationVersionId
+			AppStoreId = DiscoveredApp.Id
+			break
+		}
+	}
+	log.Println("=== Getting Template values for apache chart===")
+	queryParamsOfApi := map[string]string{"referenceId": strconv.Itoa(requiredReferenceId), "kind": "DEFAULT"}
+	referenceTemplate := HitGetTemplateValuesViaReferenceIdApi(queryParamsOfApi, suite.authToken)
+	valuesOverrideYaml := referenceTemplate.Result.Values
+	if err := yaml.Unmarshal([]byte(valuesOverrideYaml), &valuesOverrideInterface); err != nil {
+		panic(err)
+	}
+	Base.ConvertYamlIntoJson(valuesOverrideInterface)
+	valuesOverrideJson, _ := json.Marshal(valuesOverrideInterface)
+	jsonOfSaveDeploymentTemp := string(valuesOverrideJson)
+	jsonWithTypeAsClusterIP, _ := sjson.Set(jsonOfSaveDeploymentTemp, "service.type", "ClusterIP")
+	updatedValuesOverrideJson := []byte(jsonWithTypeAsClusterIP)
+	log.Println("=== converting Json into YAML for Values Override in Install API===")
+	updatedValuesOverrideYaml, _ := yaml.JSONToYAML(updatedValuesOverrideJson)
 
 	suite.Run("A=1=GetValuesListForKindDeploy", func() {
 		log.Println("=== Here We are getting noOfDeployedCharts before new deployment ===")
-		ApplicationValuesList := HitGetApplicationValuesListApi(strconv.Itoa(DiscoveredApps.Result[0].Id), suite.authToken)
+		ApplicationValuesList := HitGetApplicationValuesListApi(strconv.Itoa(AppStoreId), suite.authToken)
 		noOfDeployedCharts := len(ApplicationValuesList.Result.Values[2].Values)
-		log.Println("=== Here We are installing Helm chart from chart-store ===")
-		expectedPayload, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/AppStoreRouter/InstallAppRequestPayload.json")
-		log.Println("=== Here we are installing the app ===")
-		installAppRequestDTO := RequestDTOs.InstallAppRequestDTO{}
-		json.Unmarshal(expectedPayload, &installAppRequestDTO)
-		installAppRequestDTO.AppName = "deepak-helm-airflow" + strings.ToLower(Base.GetRandomStringOfGivenLength(5))
-		requestPayload, _ := json.Marshal(installAppRequestDTO)
-		responseAfterInstallingApp := AppStoreDeploymentRouter.HitInstallAppApi(string(requestPayload), suite.authToken)
-		time.Sleep(2 * time.Second)
+
+		installAppRequestDTO := GetRequestDtoForInstallApp(requiredReferenceId, requiredReferenceId, valuesOverrideInterface, string(updatedValuesOverrideYaml))
+		byteValueOfInstallAppRequestPayload, _ := json.Marshal(installAppRequestDTO)
+		jsonOfSaveDeploymentTemp1 := string(byteValueOfInstallAppRequestPayload)
+		jsonWithTypeAsClusterIP1, _ := sjson.Set(jsonOfSaveDeploymentTemp1, "valuesOverride.service.type", "ClusterIP")
+		updatedByteValueOfInstallAppRequestPayload := []byte(jsonWithTypeAsClusterIP1)
+		responseAfterInstallingApp := HitInstallAppApi(string(updatedByteValueOfInstallAppRequestPayload), suite.authToken)
+		time.Sleep(5 * time.Second)
 		appName := responseAfterInstallingApp.Result.AppName
 		log.Println("=== Here We are getting noOfDeployedCharts after new deployment ===")
-		ApplicationValuesList = HitGetApplicationValuesListApi(strconv.Itoa(DiscoveredApps.Result[0].Id), suite.authToken)
-		assert.Equal(suite.T(), "DEFAULT", ApplicationValuesList.Result.Values[0].Kind)
-		assert.Equal(suite.T(), "TEMPLATE", ApplicationValuesList.Result.Values[1].Kind)
+		ApplicationValuesList = HitGetApplicationValuesListApi(strconv.Itoa(AppStoreId), suite.authToken)
 		indexOfLastDeployed := len(ApplicationValuesList.Result.Values[2].Values)
 		assert.Equal(suite.T(), appName, ApplicationValuesList.Result.Values[2].Values[indexOfLastDeployed-1].Name)
 		assert.Equal(suite.T(), noOfDeployedCharts+1, len(ApplicationValuesList.Result.Values[2].Values))
-		assert.Equal(suite.T(), "EXISTING", ApplicationValuesList.Result.Values[3].Kind)
 
 		log.Println("Removing the data created via API")
-		respOfDeleteInstallAppApi := AppStoreDeploymentRouter.HitDeleteInstalledAppApi(strconv.Itoa(responseAfterInstallingApp.Result.InstalledAppId), suite.authToken)
+		respOfDeleteInstallAppApi := HitDeleteInstalledAppApi(strconv.Itoa(responseAfterInstallingApp.Result.InstalledAppId), suite.authToken)
 		assert.Equal(suite.T(), responseAfterInstallingApp.Result.InstalledAppId, respOfDeleteInstallAppApi.Result.InstalledAppId)
 	})
 
 	suite.Run("A=2=GetValuesListForKindDefault", func() {
-		deploymentOfInstalledApp := HitGetApplicationValuesListApi(strconv.Itoa(DiscoveredApps.Result[0].Id), suite.authToken)
+		deploymentOfInstalledApp := HitGetApplicationValuesListApi(strconv.Itoa(AppStoreId), suite.authToken)
 		assert.True(suite.T(), len(deploymentOfInstalledApp.Result.Values[0].Values) >= 1)
 	})
 
@@ -55,16 +75,16 @@ func (suite *AppStoreDiscoverTestSuite) TestGetApplicationValuesList() {
 		log.Println("=== Here we are saving template values   ===")
 		appName := "automation-preset-" + strings.ToLower(Base.GetRandomStringOfGivenLength(5))
 		valueForPayload, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/AppStoreRouter/SaveTemplateValuesRequestPayload.txt")
-		requestPayload := getPayloadForSaveTemplateValues(appName, string(valueForPayload), DiscoveredApps.Result[0].AppStoreApplicationVersionId)
+		requestPayload := getPayloadForSaveTemplateValues(appName, string(valueForPayload), ActiveDiscoveredApps.Result[0].AppStoreApplicationVersionId)
 		payloadByteArray, _ := json.Marshal(requestPayload)
 		responseOfSaveTemplateApi := HitSaveTemplateValuesApi(string(payloadByteArray), suite.authToken)
 		log.Println("=== Here We are getting noOfTemplate before deleting it ===")
-		ApplicationValuesList := HitGetApplicationValuesListApi(strconv.Itoa(DiscoveredApps.Result[0].Id), suite.authToken)
+		ApplicationValuesList := HitGetApplicationValuesListApi(strconv.Itoa(AppStoreId), suite.authToken)
 		noOfDeployedCharts := len(ApplicationValuesList.Result.Values[1].Values)
 		deleteTemplateValueApiResponse := HitDeleteTemplateValuesApi(strconv.Itoa(responseOfSaveTemplateApi.Result.Id), suite.authToken)
 		assert.True(suite.T(), deleteTemplateValueApiResponse.Result)
 		log.Println("=== Here We are getting noOfTemplate after deleting it ===")
-		ApplicationValuesList = HitGetApplicationValuesListApi(strconv.Itoa(DiscoveredApps.Result[0].Id), suite.authToken)
+		ApplicationValuesList = HitGetApplicationValuesListApi(strconv.Itoa(AppStoreId), suite.authToken)
 		assert.Equal(suite.T(), noOfDeployedCharts-1, len(ApplicationValuesList.Result.Values[1].Values))
 	})
 

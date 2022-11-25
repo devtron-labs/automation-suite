@@ -2,7 +2,7 @@ package PipelineConfigRouter
 
 import (
 	"automation-suite/AppStoreDeploymentRouter"
-	"automation-suite/AppStoreDeploymentRouter/RequestDTOs"
+	"automation-suite/AppStoreDiscoverRouter/RequestDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"

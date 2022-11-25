@@ -6,7 +6,9 @@ import (
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/suite"
+	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -22,6 +24,11 @@ type StructAppStoreDiscoverRouter struct {
 	saveTemplateValuesRequestDTO            RequestDTOs.SaveTemplateValuesRequestDTO
 	deleteTemplateValuesResponseDTO         ResponseDTOs.DeleteTemplateValuesResponseDTO
 	appStoreChartByNameResponseDTO          ResponseDTOs.AppStoreChartByNameResponseDTO
+	installAppResponseDto                   ResponseDTOs.InstallAppResponseDTO
+	installedAppVersionResponseDTO          ResponseDTOs.InstalledAppVersionResponseDTO
+	installedAppDetailsResponseDTO          ResponseDTOs.InstalledAppDetailsResponseDTO
+	checkAppExistsResponseDTO               ResponseDTOs.CheckAppExistsResponseDTO
+	checkAppExistsRequestDTO                RequestDTOs.CheckAppExistsRequestDTO
 }
 
 func HitDiscoverAppApi(queryParams map[string]string, authToken string) ResponseDTOs.DiscoverAppApiResponse {
@@ -112,6 +119,80 @@ func HitSearchAppStoreChartByNameApi(queryParams map[string]string, authToken st
 	return appStoreDiscoverRouter.appStoreChartByNameResponseDTO
 }
 
+func HitInstallAppApi(requestPayload string, authToken string) ResponseDTOs.InstallAppResponseDTO {
+	resp, err := Base.MakeApiCall(InstallAppApiUrl, http.MethodPost, requestPayload, nil, authToken)
+	Base.HandleError(err, InstallAppApi)
+	structAppStoreDiscoverRouter := StructAppStoreDiscoverRouter{}
+	appStoreDiscoverRouter := structAppStoreDiscoverRouter.UnmarshalGivenResponseBody(resp.Body(), InstallAppApi)
+	return appStoreDiscoverRouter.installAppResponseDto
+}
+
+func HitDeleteInstalledAppApi(id string, authToken string) ResponseDTOs.InstallAppResponseDTO {
+	resp, err := Base.MakeApiCall(DeleteInstalledAppApiUrl+id, http.MethodDelete, " ", nil, authToken)
+	Base.HandleError(err, DeleteInstalledAppApi)
+	structAppStoreDiscoverRouter := StructAppStoreDiscoverRouter{}
+	appStoreDiscoverRouter := structAppStoreDiscoverRouter.UnmarshalGivenResponseBody(resp.Body(), InstallAppApi)
+	return appStoreDiscoverRouter.installAppResponseDto
+}
+
+func HitGetInstalledAppVersionApi(appId string, authToken string) ResponseDTOs.InstalledAppVersionResponseDTO {
+	resp, err := Base.MakeApiCall(GetInstalledAppVersionApiUrl+appId, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetInstalledAppVersionApi)
+	structAppStoreDiscoverRouter := StructAppStoreDiscoverRouter{}
+	appStoreDiscoverRouter := structAppStoreDiscoverRouter.UnmarshalGivenResponseBody(resp.Body(), GetInstalledAppVersionApi)
+	return appStoreDiscoverRouter.installedAppVersionResponseDTO
+}
+
+func GetRequestDtoForInstallApp(ReferenceValueId int, AppStoreVersion int, ValuesOverride interface{}, ValuesOverrideYaml string) RequestDTOs.InstallAppRequestDTO {
+	installAppRequestDTO1 := RequestDTOs.InstallAppRequestDTO{}
+	installAppRequestDTO1.TeamId = 1
+	installAppRequestDTO1.ReferenceValueId = ReferenceValueId
+	installAppRequestDTO1.ReferenceValueKind = "DEFAULT"
+	installAppRequestDTO1.EnvironmentId = 1
+	installAppRequestDTO1.Namespace = "devtron-demo"
+	installAppRequestDTO1.AppStoreVersion = AppStoreVersion
+	installAppRequestDTO1.ValuesOverride = ValuesOverride
+	installAppRequestDTO1.ValuesOverrideYaml = ValuesOverrideYaml
+	appName := "automation" + strings.ToLower(Base.GetRandomStringOfGivenLength(5))
+	installAppRequestDTO1.AppName = appName
+	log.Println("=== name for the helm app is ===", appName)
+	return installAppRequestDTO1
+}
+
+func HitGetApplicationValuesList(appStoreId string, authToken string) ResponseDTOs.GetApplicationValuesListResponseDTO {
+	resp, err := Base.MakeApiCall(GetApplicationValuesListApiUrl+appStoreId, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetApplicationValuesListApi)
+	structAppStoreDiscoverRouter := StructAppStoreDiscoverRouter{}
+	appStoreDiscoverRouter := structAppStoreDiscoverRouter.UnmarshalGivenResponseBody(resp.Body(), GetApplicationValuesListApi)
+	return appStoreDiscoverRouter.getApplicationValuesListResponseDTO
+}
+
+func HitGetInstalledAppDetailsApi(queryParams map[string]string, authToken string) ResponseDTOs.InstalledAppDetailsResponseDTO {
+	resp, err := Base.MakeApiCall(GetInstalledAppDetailsApiUrl, http.MethodGet, "", queryParams, authToken)
+	Base.HandleError(err, GetInstalledAppDetailsApi)
+	structAppStoreDiscoverRouter := StructAppStoreDiscoverRouter{}
+	appStoreDiscoverRouter := structAppStoreDiscoverRouter.UnmarshalGivenResponseBody(resp.Body(), GetInstalledAppDetailsApi)
+	return appStoreDiscoverRouter.installedAppDetailsResponseDTO
+}
+
+func HitCheckAppExistsOrNot(payload string, authToken string) ResponseDTOs.CheckAppExistsResponseDTO {
+	resp, err := Base.MakeApiCall(CheckAppExistsApiUrl, http.MethodPost, payload, nil, authToken)
+	Base.HandleError(err, CheckAppExistsApi)
+	structAppStoreRouter := StructAppStoreDiscoverRouter{}
+	appStoreRouter := structAppStoreRouter.UnmarshalGivenResponseBody(resp.Body(), CheckAppExistsApi)
+	return appStoreRouter.checkAppExistsResponseDTO
+}
+
+func getCheckAppExistsApi(AppNames []string) []RequestDTOs.CheckAppExistsRequestDTO {
+	var listOfCheckAppExistsRequestDTOs []RequestDTOs.CheckAppExistsRequestDTO
+	for _, name := range AppNames {
+		CheckAppExistsRequestDTO := RequestDTOs.CheckAppExistsRequestDTO{}
+		CheckAppExistsRequestDTO.Name = name
+		listOfCheckAppExistsRequestDTOs = append(listOfCheckAppExistsRequestDTOs, CheckAppExistsRequestDTO)
+	}
+	return listOfCheckAppExistsRequestDTOs
+}
+
 func (structAppStoreDiscoverRouter StructAppStoreDiscoverRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructAppStoreDiscoverRouter {
 	switch apiName {
 	case DiscoverAppApi:
@@ -134,6 +215,14 @@ func (structAppStoreDiscoverRouter StructAppStoreDiscoverRouter) UnmarshalGivenR
 		json.Unmarshal(response, &structAppStoreDiscoverRouter.deleteTemplateValuesResponseDTO)
 	case SearchAppStoreChartByNameApi:
 		json.Unmarshal(response, &structAppStoreDiscoverRouter.appStoreChartByNameResponseDTO)
+	case InstallAppApi:
+		json.Unmarshal(response, &structAppStoreDiscoverRouter.installAppResponseDto)
+	case GetInstalledAppVersionApi:
+		json.Unmarshal(response, &structAppStoreDiscoverRouter.installedAppVersionResponseDTO)
+	case GetInstalledAppDetailsApi:
+		json.Unmarshal(response, &structAppStoreDiscoverRouter.installedAppDetailsResponseDTO)
+	case CheckAppExistsApi:
+		json.Unmarshal(response, &structAppStoreDiscoverRouter.checkAppExistsResponseDTO)
 	}
 	return structAppStoreDiscoverRouter
 }

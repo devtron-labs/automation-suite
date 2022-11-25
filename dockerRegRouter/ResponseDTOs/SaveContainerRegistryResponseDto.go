@@ -8,7 +8,7 @@ import (
 type SaveDockerRegistryResponseDto struct {
 	Code   int                                      `json:"code"`
 	Status string                                   `json:"status"`
-	Result RequestDTOs.SaveDockerRegistryRequestDto `json:"result"`
+	Result RequestDTOs.SaveDockerRegistryRequestDTO `json:"result"`
 	Errors []Base.Errors                            `json:"errors"`
 }
 

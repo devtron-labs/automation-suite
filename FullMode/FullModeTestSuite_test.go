@@ -4,7 +4,6 @@ import (
 	"automation-suite/ApiTokenRouter"
 	"automation-suite/AppLabelsRouter"
 	"automation-suite/AppListingRouter"
-	"automation-suite/AppStoreRouter"
 	"automation-suite/ApplicationRouter"
 	"automation-suite/AttributesRouter"
 	"automation-suite/ChartRepositoryRouter"
@@ -16,9 +15,8 @@ import (
 	"automation-suite/UserRouter"
 	"automation-suite/dockerRegRouter"
 	"automation-suite/externalLinkoutRouter"
-	"testing"
-
 	"github.com/stretchr/testify/suite"
+	"testing"
 )
 
 func TestSSOLoginRouterSuite(t *testing.T) {
@@ -63,10 +61,6 @@ func TestLinkOutRouterSuite(t *testing.T) {
 
 func TestHelmAppRouterSuite(t *testing.T) {
 	suite.Run(t, new(HelmAppRouter.HelmAppTestSuite))
-}
-
-func TestAppStoreRouterSuite(t *testing.T) {
-	suite.Run(t, new(AppStoreRouter.AppStoreTestSuite))
 }
 
 func TestPipelineConfigSuite(t *testing.T) {

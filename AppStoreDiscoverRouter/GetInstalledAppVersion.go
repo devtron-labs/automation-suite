@@ -8,12 +8,10 @@ import (
 	"log"
 	"sigs.k8s.io/yaml"
 	"strconv"
-	"time"
 )
 
-func (suite *AppStoreDiscoverTestSuite) TestDiscoverPreviouslyInstalledHelmAppsViaRepoId() {
+func (suite *AppStoreDiscoverTestSuite) TestGetInstalledAppVersion() {
 	var valuesOverrideInterface interface{}
-	var AppStoreId int
 	log.Println("=== Getting apache chart repo via DiscoverApp API ===")
 	queryParams := map[string]string{"appStoreName": "apache"}
 	PollForGettingHelmAppData(queryParams, suite.authToken)
@@ -22,7 +20,6 @@ func (suite *AppStoreDiscoverTestSuite) TestDiscoverPreviouslyInstalledHelmAppsV
 	for _, DiscoveredApp := range ActiveDiscoveredApps.Result {
 		if DiscoveredApp.ChartName == "bitnami" {
 			requiredReferenceId = DiscoveredApp.AppStoreApplicationVersionId
-			AppStoreId = DiscoveredApp.Id
 			break
 		}
 	}
@@ -40,22 +37,30 @@ func (suite *AppStoreDiscoverTestSuite) TestDiscoverPreviouslyInstalledHelmAppsV
 	updatedValuesOverrideJson := []byte(jsonWithTypeAsClusterIP)
 	log.Println("=== converting Json into YAML for Values Override in Install API===")
 	updatedValuesOverrideYaml, _ := yaml.JSONToYAML(updatedValuesOverrideJson)
-	var installedAppId int
 	installAppRequestDTO := GetRequestDtoForInstallApp(requiredReferenceId, requiredReferenceId, valuesOverrideInterface, string(updatedValuesOverrideYaml))
 	byteValueOfInstallAppRequestPayload, _ := json.Marshal(installAppRequestDTO)
 	jsonOfSaveDeploymentTemp1 := string(byteValueOfInstallAppRequestPayload)
 	jsonWithTypeAsClusterIP1, _ := sjson.Set(jsonOfSaveDeploymentTemp1, "valuesOverride.service.type", "ClusterIP")
 	updatedByteValueOfInstallAppRequestPayload := []byte(jsonWithTypeAsClusterIP1)
 	responseAfterInstallingApp := HitInstallAppApi(string(updatedByteValueOfInstallAppRequestPayload), suite.authToken)
-	installedAppId = responseAfterInstallingApp.Result.InstalledAppId
-	time.Sleep(10 * time.Second)
-	suite.Run("A=1=GetInstalledAppsByAppStoreId", func() {
-		log.Println("Hitting the GetDeploymentOfInstalledApp API with valid payload")
-		deploymentOfInstalledApp := GetInstalledAppsByAppStoreId(strconv.Itoa(AppStoreId), suite.authToken)
-		assert.NotNil(suite.T(), deploymentOfInstalledApp.Result[len(deploymentOfInstalledApp.Result)-1].InstalledAppVersionId)
-		assert.Equal(suite.T(), installedAppId, deploymentOfInstalledApp.Result[len(deploymentOfInstalledApp.Result)-1].InstalledAppId)
+	installedAppVersionId := responseAfterInstallingApp.Result.InstalledAppVersionId
+
+	suite.Run("A=1=GetDetailsWithCorrectAppId", func() {
+		installedAppVersion := HitGetInstalledAppVersionApi(strconv.Itoa(installedAppVersionId), suite.authToken)
+		assert.Equal(suite.T(), responseAfterInstallingApp.Result.AppName, installedAppVersion.Result.AppName)
+		assert.Equal(suite.T(), responseAfterInstallingApp.Result.AppStoreVersion, installedAppVersion.Result.AppStoreVersion)
+		assert.Equal(suite.T(), responseAfterInstallingApp.Result.GitOpsRepoName, installedAppVersion.Result.GitOpsRepoName)
+		assert.Equal(suite.T(), responseAfterInstallingApp.Result.ValuesOverrideYaml, installedAppVersion.Result.ValuesOverrideYaml)
 	})
+
+	suite.Run("A=2=GetDetailsWithIncorrectAppId", func() {
+		randomAppId := Base.GetRandomNumberOf9Digit()
+		installedAppVersion := HitGetInstalledAppVersionApi(strconv.Itoa(randomAppId), suite.authToken)
+		assert.Equal(suite.T(), 404, installedAppVersion.Code)
+		assert.Equal(suite.T(), "pg: no rows in result set", installedAppVersion.Error[0].UserMessage)
+	})
+
 	log.Println("Removing the data created via API")
-	respOfDeleteInstallAppApi := HitDeleteInstalledAppApi(strconv.Itoa(installedAppId), suite.authToken)
-	assert.Equal(suite.T(), installedAppId, respOfDeleteInstallAppApi.Result.InstalledAppId)
+	respOfDeleteInstallAppApi := HitDeleteInstalledAppApi(strconv.Itoa(responseAfterInstallingApp.Result.InstalledAppId), suite.authToken)
+	assert.Equal(suite.T(), responseAfterInstallingApp.Result.InstalledAppId, respOfDeleteInstallAppApi.Result.InstalledAppId)
 }

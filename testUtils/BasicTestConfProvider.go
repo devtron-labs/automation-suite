@@ -335,3 +335,19 @@ func ConvertDateStringIntoTimeStamp(timeString string) int64 {
 	fmt.Println("Date to Timestamp : ", timestamp)
 	return timestamp
 }
+
+func ConvertYamlIntoJson(i interface{}) interface{} {
+	switch x := i.(type) {
+	case map[interface{}]interface{}:
+		m2 := map[string]interface{}{}
+		for k, v := range x {
+			m2[k.(string)] = ConvertYamlIntoJson(v)
+		}
+		return m2
+	case []interface{}:
+		for i, v := range x {
+			x[i] = ConvertYamlIntoJson(v)
+		}
+	}
+	return i
+}

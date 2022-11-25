@@ -41,7 +41,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA4GetCiPipeline() {
 		log.Println("=== Hitting the GetCiPipelineViaValidID API ====")
 		getCiPipelineResponse := HitGetCiPipelineViaId(strconv.Itoa(createAppApiResponse.Id), suite.authToken)
 		assert.Equal(suite.T(), getCiPipelineResponse.Result.AppName, createAppApiResponse.AppName)
-		assert.Equal(suite.T(), getCiPipelineResponse.Result.DockerBuildConfig.GitMaterialId, materialId)
+		assert.Equal(suite.T(), getCiPipelineResponse.Result.Materials[0].GitMaterialId, materialId)
 	})
 
 	suite.Run("A=3=GetCiPipelineViaInValidAppID", func() {

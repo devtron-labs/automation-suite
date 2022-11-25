@@ -1,8 +1,14 @@
 package AppStoreDiscoverRouter
 
 const (
+	InstallAppApiUrl                              string = "/orchestrator/app-store/deployment/application/install"
+	InstallAppApi                                 string = "InstallAppApi"
+	DeleteInstalledAppApiUrl                      string = "/orchestrator/app-store/deployment/application/delete/"
+	DeleteInstalledAppApi                         string = "DeleteInstalledAppApi"
 	DiscoverAppApiUrl                             string = "/orchestrator/app-store/discover/"
 	DiscoverAppApi                                string = "DiscoverAppApi"
+	GetInstalledAppVersionApiUrl                  string = "/orchestrator/app-store/deployment/application/version/"
+	GetInstalledAppVersionApi                     string = "GetInstalledAppVersionApi"
 	AuthModeAnonymous                             string = "ANONYMOUS"
 	GetInstalledAppsByAppStoreIdApiUrl            string = "/orchestrator/app-store/deployment/installed-app/"
 	GetInstalledAppsByAppStoreIdApi               string = "GetInstalledAppsByAppStoreIdApi"
@@ -20,4 +26,8 @@ const (
 	DeleteTemplateValuesApi                       string = "DeleteTemplateValuesApi"
 	SearchAppStoreChartByNameApi                  string = "SearchAppStoreChartByNameApi"
 	SearchAppStoreChartByNameApiUrl               string = "/orchestrator/app-store/discover/search"
+	GetInstalledAppDetailsApiUrl                  string = "orchestrator/app-store/installed-app/detail"
+	GetInstalledAppDetailsApi                     string = "GetInstalledAppDetailsApi"
+	CheckAppExistsApiUrl                          string = "/orchestrator/app-store/application/exists"
+	CheckAppExistsApi                             string = "CheckAppExistsApi"
 )
