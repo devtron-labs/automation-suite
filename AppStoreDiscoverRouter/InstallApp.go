@@ -13,6 +13,7 @@ import (
 
 func (suite *AppStoreDiscoverTestSuite) TestInstallApp() {
 	var valuesOverrideInterface interface{}
+	var InstalledAppId int
 	log.Println("=== Getting apache chart repo via DiscoverApp API ===")
 	queryParams := map[string]string{"appStoreName": "apache"}
 	PollForGettingHelmAppData(queryParams, suite.authToken)
@@ -54,12 +55,10 @@ func (suite *AppStoreDiscoverTestSuite) TestInstallApp() {
 		queryParamsForAppStatus["env-id"] = strconv.Itoa(responseAfterInstallingApp.Result.EnvironmentId)
 		PollForAppStatusInAppDetails(queryParamsForAppStatus, suite.authToken)
 		respOfGetApplicationDetailApi := HitGetInstalledAppDetailsApi(queryParamsForAppStatus, suite.authToken)
+		InstalledAppId = respOfGetApplicationDetailApi.Result.InstalledAppId
 		assert.Equal(suite.T(), "Healthy", respOfGetApplicationDetailApi.Result.ResourceTree.Status)
 		assert.Equal(suite.T(), "apache", respOfGetApplicationDetailApi.Result.AppStoreAppName)
 
-		log.Println("Removing the data created via API")
-		respOfDeleteInstallAppApi := HitDeleteInstalledAppApi(strconv.Itoa(responseAfterInstallingApp.Result.InstalledAppId), suite.authToken)
-		assert.Equal(suite.T(), responseAfterInstallingApp.Result.InstalledAppId, respOfDeleteInstallAppApi.Result.InstalledAppId)
 	})
 	suite.Run("A=2=InstallAppWithInvalidTeamId", func() {
 		expectedPayload, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/AppStoreRouter/InstalledAppRequestPayloadWithInvalidTeamId.json")
@@ -94,4 +93,9 @@ func (suite *AppStoreDiscoverTestSuite) TestInstallApp() {
 		log.Println("Validating the InstallAppApi response with already existed name in payload")
 		assert.True(suite.T(), strings.Contains(latestResponse.Errors[0].UserMessage, "app already exists"))
 	})
+
+	log.Println("Removing the data created via API")
+	respOfDeleteInstallAppApi := HitDeleteInstalledAppApi(strconv.Itoa(InstalledAppId), suite.authToken)
+	assert.Equal(suite.T(), InstalledAppId, respOfDeleteInstallAppApi.Result.InstalledAppId)
+
 }

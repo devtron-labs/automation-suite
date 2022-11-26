@@ -21,23 +21,18 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 	createAppMaterialRequestDto := GetAppMaterialRequestDto(createAppApiResponse.Id, 1, false)
 	appMaterialByteValue, _ := json.Marshal(createAppMaterialRequestDto)
 	createAppMaterialResponse := HitCreateAppMaterialApi(appMaterialByteValue, createAppApiResponse.Id, 1, false, suite.authToken)
-
 	log.Println("=== Here we are saving docker build config ===")
 	requestPayloadForSaveAppCiPipeline := GetRequestPayloadForSaveAppCiPipeline(createAppApiResponse.Id, config.DockerRegistry, config.DockerRegistry+"/test", config.DockerfilePath, config.DockerfileRepository, config.DockerfileRelativePath, createAppMaterialResponse.Result.Material[0].Id)
 	byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
 	HitSaveAppCiPipeline(byteValueOfSaveAppCiPipeline, suite.authToken)
-
 	log.Println("=== Here we are fetching latestChartReferenceId ===")
 	time.Sleep(2 * time.Second)
 	getChartReferenceResponse := HitGetChartReferenceViaAppId(strconv.Itoa(createAppApiResponse.Id), suite.authToken)
 	latestChartRef := getChartReferenceResponse.Result.LatestChartRef
-
 	log.Println("=== Here we are fetching Template using getAppTemplateAPI ===")
 	getTemplateResponse := HitGetTemplateViaAppIdAndChartRefId(strconv.Itoa(createAppApiResponse.Id), strconv.Itoa(latestChartRef), suite.authToken)
-
 	log.Println("=== Here we are fetching DefaultAppOverride from template response ===")
 	defaultAppOverride := getTemplateResponse.Result.GlobalConfig.DefaultAppOverride
-
 	log.Println("=== Here we are creating payload for SaveTemplate API ===")
 	saveDeploymentTemplate := GetRequestPayloadForSaveDeploymentTemplate(createAppApiResponse.Id, latestChartRef, defaultAppOverride)
 	byteValueOfSaveDeploymentTemplate, _ := json.Marshal(saveDeploymentTemplate)
@@ -45,33 +40,26 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 	jsonWithMicroserviceToleration, _ := sjson.Set(jsonOfSaveDeploymentTemp, "valuesOverride.tolerations.0", map[string]interface{}{"effect": "NoSchedule", "key": "microservice", "operator": "Equal", "value": "true"})
 	finalJson, _ := sjson.Set(jsonWithMicroserviceToleration, "valuesOverride.tolerations.1", map[string]interface{}{"effect": "NoSchedule", "key": "kubernetes.azure.com/scalesetpriority", "operator": "Equal", "value": "spot"})
 	updatedByteValueOfSaveDeploymentTemplate := []byte(finalJson)
-
 	log.Println("=== Here we are hitting SaveTemplate API ===")
 	HitSaveDeploymentTemplateApi(updatedByteValueOfSaveDeploymentTemplate, suite.authToken)
-
 	log.Println("=== Here we are saving Global Configmap ===")
 	requestPayloadForConfigMap := HelperRouter.GetRequestPayloadForSecretOrConfig(0, "-config1", createAppApiResponse.Id, "environment", "kubernetes", false, false, false, false)
 	byteValueOfSaverConfigMap, _ := json.Marshal(requestPayloadForConfigMap)
 	globalConfigMap := HelperRouter.HitSaveGlobalConfigMap(byteValueOfSaverConfigMap, suite.authToken)
 	configId = globalConfigMap.Result.Id
-
 	log.Println("=== Here we are saving Global Secret ===")
 	requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, "-secret1", createAppApiResponse.Id, "environment", "kubernetes", false, false, true, false)
 	byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
 	HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-
 	log.Println("=== Here we are saving workflow with Pre/Post CI ===")
 	workflowResponse := HitCreateWorkflowApiWithFullPayload(createAppApiResponse.Id, suite.authToken).Result
-
 	preStageScript, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/PipeLineConfigRouter/preStageScript.txt")
 	postStageScript, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/PipeLineConfigRouter/postStageScript.txt")
-
 	log.Println("=== Here we are saving CD pipeline ===")
 	payload := GetRequestPayloadForSaveCdPipelineApi(createAppApiResponse.Id, workflowResponse.AppWorkflowId, 1, workflowResponse.CiPipelines[0].Id, workflowResponse.CiPipelines[0].ParentCiPipeline, Automatic, string(preStageScript), string(postStageScript), Automatic)
 	bytePayload, _ := json.Marshal(payload)
 	savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
 	time.Sleep(2 * time.Second)
-
 	log.Println("=== Here we are getting pipeline material ===")
 	pipelineMaterial := HitGetCiPipelineMaterial(workflowResponse.CiPipelines[0].Id, suite.authToken)
 
@@ -79,15 +67,14 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 	suite.Run("A=1=TriggerCiPipelineWithValidPayload", func() {
 		payloadForTriggerCiPipeline := CreatePayloadForTriggerCiPipeline(pipelineMaterial.Result[0].History[0].Commit, workflowResponse.CiPipelines[0].Id, pipelineMaterial.Result[0].Id, true)
 		bytePayloadForTriggerCiPipeline, _ := json.Marshal(payloadForTriggerCiPipeline)
-		time.Sleep(5 * time.Second)
 		triggerCiPipelineResponse := HitTriggerCiPipelineApi(bytePayloadForTriggerCiPipeline, suite.authToken)
 		if triggerCiPipelineResponse.Result.AuthStatus != "allowed for all pipelines" {
-			time.Sleep(2 * time.Second)
+			time.Sleep(5 * time.Second)
 			triggerCiPipelineResponse = HitTriggerCiPipelineApi(bytePayloadForTriggerCiPipeline, suite.authToken)
 			assert.Equal(suite.T(), "allowed for all pipelines", triggerCiPipelineResponse.Result.AuthStatus)
 			assert.NotNil(suite.T(), triggerCiPipelineResponse.Result.ApiResponse)
 		}
-		time.Sleep(10 * time.Second)
+		time.Sleep(5 * time.Second)
 		log.Println("=== Here we are getting workflow after triggering ===")
 		workflowStatus := HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
 		if workflowStatus.Result.CiWorkflowStatus[0].CiStatus == "Starting" {
@@ -153,7 +140,7 @@ func PollForGettingCdDeployStatusAfterTrigger(id int, authToken string) bool {
 		deploymentStatus := updatedWorkflowStatus.Result.CdWorkflowStatus[0].DeployStatus
 		time.Sleep(1 * time.Second)
 		count = count + 1
-		if deploymentStatus == "Healthy" || count >= 500 {
+		if deploymentStatus == "Healthy" || count >= 600 {
 			break
 		}
 	}

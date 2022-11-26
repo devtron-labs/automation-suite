@@ -444,9 +444,6 @@ func HitDeleteAppMaterialApi(byteValueOfStruct []byte, authToken string) DeleteR
 func GetRequestPayloadForSaveAppCiPipeline(AppId int, dockerRegistry string, dockerRepository string, dockerfilePath string, dockerfileRepository string, dockerfileRelativePath string, gitMaterialId int) RequestDTOs.SaveAppCiPipelineRequestDTO {
 	CiBuildConfig := GetCiBuildConfig(dockerfilePath, dockerfileRepository, dockerfileRelativePath, gitMaterialId)
 	saveAppCiPipelineRequestDTO := RequestDTOs.SaveAppCiPipelineRequestDTO{}
-
-	//saveAppCiPipelineRequestDTO.BeforeDockerBuild = myslice
-	//saveAppCiPipelineRequestDTO.AfterDockerBuild = myslice
 	saveAppCiPipelineRequestDTO.AppId = AppId
 	saveAppCiPipelineRequestDTO.CiBuildConfig = CiBuildConfig
 	saveAppCiPipelineRequestDTO.DockerRepository = dockerRepository
@@ -633,9 +630,8 @@ func HitGetAppCdPipeline(appId string, authToken string) ResponseDTOs.GetCdPipeR
 
 func HitGetWorkflowStatus(appId int, authToken string) ResponseDTOs.GetWorkflowStatusResponseDTO {
 	id := strconv.Itoa(appId)
-	resp, err := Base.MakeApiCall(GetWorkflowStatusApiUrl+"/"+id, http.MethodGet, "", nil, authToken)
+	resp, err := Base.MakeApiCall(GetWorkflowStatusApiUrl+id, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, GetWorkflowStatusApi)
-
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
 	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), GetWorkflowStatusApi)
 	return pipelineConfigRouter.getWorkflowStatusResponseDTO
