@@ -1,7 +1,7 @@
 package PipelineConfigRouter
 
 import (
-	"automation-suite/AppStoreDeploymentRouter"
+	"automation-suite/AppStoreDiscoverRouter"
 	"automation-suite/AppStoreDiscoverRouter/RequestDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
@@ -54,7 +54,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassGetAppListByTeamIds() {
 		log.Println("=====Helm AppName used in this test Case is====", AppName)
 		installAppRequestDTO.AppName = AppName
 		requestPayload, _ := json.Marshal(installAppRequestDTO)
-		responseAfterInstallingApp := AppStoreDeploymentRouter.HitInstallAppApi(string(requestPayload), suite.authToken)
+		responseAfterInstallingApp := AppStoreDiscoverRouter.HitInstallAppApi(string(requestPayload), suite.authToken)
 		time.Sleep(2 * time.Second)
 		installedAppId := responseAfterInstallingApp.Result.InstalledAppId
 
@@ -71,7 +71,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassGetAppListByTeamIds() {
 		}
 		log.Println("=== Here we are deleting the newly created app after verification ===")
 		log.Println("Removing the data created via API")
-		AppStoreDeploymentRouter.HitDeleteInstalledAppApi(strconv.Itoa(installedAppId), suite.authToken)
+		AppStoreDiscoverRouter.HitDeleteInstalledAppApi(strconv.Itoa(installedAppId), suite.authToken)
 	})
 
 	suite.Run("A=3=GetDevtronAppListByInvalidTeamId", func() {

@@ -1,40 +1,59 @@
 package ApplicationRouter
 
 import (
-	"automation-suite/AppStoreDeploymentRouter"
-	"automation-suite/AppStoreRouter"
-	"automation-suite/AppStoreRouter/RequestDTOs"
+	"automation-suite/AppStoreDiscoverRouter"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
+	"github.com/tidwall/sjson"
 	"log"
+	"sigs.k8s.io/yaml"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func (suite *ApplicationsRouterTestSuite) TestGetList() {
-	log.Println("=== Here We are installing Helm chart from chart-store ===")
-	expectedPayload, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/AppStoreRouter/InstallAppRequestPayload.json")
-	log.Println("Hitting the InstallAppApi with valid payload")
-	installAppRequestDTO := RequestDTOs.InstallAppRequestDTO{}
-	json.Unmarshal(expectedPayload, &installAppRequestDTO)
-
-	AppName := "automation" + strings.ToLower(Base.GetRandomStringOfGivenLength(5))
-	log.Println("=====Helm AppName used in this test Case is====", AppName)
-	installAppRequestDTO.AppName = AppName
-	requestPayload, _ := json.Marshal(installAppRequestDTO)
-	responseAfterInstallingApp := AppStoreDeploymentRouter.HitInstallAppApi(string(requestPayload), suite.authToken)
-	time.Sleep(2 * time.Second)
+	var valuesOverrideInterface interface{}
+	log.Println("=== Getting apache chart repo via DiscoverApp API ===")
+	queryParamsForGettingHelmAppData := map[string]string{"appStoreName": "apache"}
+	AppStoreDiscoverRouter.PollForGettingHelmAppData(queryParamsForGettingHelmAppData, suite.authToken)
+	ActiveDiscoveredApps := AppStoreDiscoverRouter.HitDiscoverAppApi(queryParamsForGettingHelmAppData, suite.authToken)
+	var requiredReferenceId int
+	for _, DiscoveredApp := range ActiveDiscoveredApps.Result {
+		if DiscoveredApp.ChartName == "bitnami" {
+			requiredReferenceId = DiscoveredApp.AppStoreApplicationVersionId
+			break
+		}
+	}
+	log.Println("=== Getting Template values for apache chart===")
+	queryParamsOfApi := map[string]string{"referenceId": strconv.Itoa(requiredReferenceId), "kind": "DEFAULT"}
+	referenceTemplate := AppStoreDiscoverRouter.HitGetTemplateValuesViaReferenceIdApi(queryParamsOfApi, suite.authToken)
+	valuesOverrideYaml := referenceTemplate.Result.Values
+	if err := yaml.Unmarshal([]byte(valuesOverrideYaml), &valuesOverrideInterface); err != nil {
+		panic(err)
+	}
+	Base.ConvertYamlIntoJson(valuesOverrideInterface)
+	valuesOverrideJson, _ := json.Marshal(valuesOverrideInterface)
+	jsonOfSaveDeploymentTemp := string(valuesOverrideJson)
+	jsonWithTypeAsClusterIP, _ := sjson.Set(jsonOfSaveDeploymentTemp, "service.type", "ClusterIP")
+	updatedValuesOverrideJson := []byte(jsonWithTypeAsClusterIP)
+	log.Println("=== converting Json into YAML for Values Override in Install API===")
+	updatedValuesOverrideYaml, _ := yaml.JSONToYAML(updatedValuesOverrideJson)
+	installAppRequestDTO := AppStoreDiscoverRouter.GetRequestDtoForInstallApp(requiredReferenceId, requiredReferenceId, valuesOverrideInterface, string(updatedValuesOverrideYaml))
+	byteValueOfInstallAppRequestPayload, _ := json.Marshal(installAppRequestDTO)
+	jsonOfSaveDeploymentTemp1 := string(byteValueOfInstallAppRequestPayload)
+	jsonWithTypeAsClusterIP1, _ := sjson.Set(jsonOfSaveDeploymentTemp1, "valuesOverride.service.type", "ClusterIP")
+	updatedByteValueOfInstallAppRequestPayload := []byte(jsonWithTypeAsClusterIP1)
+	responseAfterInstallingApp := AppStoreDiscoverRouter.HitInstallAppApi(string(updatedByteValueOfInstallAppRequestPayload), suite.authToken)
 	installedAppId := responseAfterInstallingApp.Result.InstalledAppId
 	environmentId := strconv.Itoa(responseAfterInstallingApp.Result.EnvironmentId)
 
 	log.Println("=== Here we are installing helm App ===")
-	queryParamsOfApi := make(map[string]string)
-	queryParamsOfApi["installed-app-id"] = strconv.Itoa(installedAppId)
-	queryParamsOfApi["env-id"] = environmentId
-	PollForAppStatusInAppDetails(queryParamsOfApi, suite.authToken)
-	installedAppDetails := AppStoreRouter.HitGetInstalledAppDetailsApi(queryParamsOfApi, suite.authToken)
+	queryParamsForGettingHealthStatus := make(map[string]string)
+	queryParamsForGettingHealthStatus["installed-app-id"] = strconv.Itoa(installedAppId)
+	queryParamsForGettingHealthStatus["env-id"] = environmentId
+	AppStoreDiscoverRouter.PollForAppStatusInAppDetails(queryParamsForGettingHealthStatus, suite.authToken)
+	installedAppDetails := AppStoreDiscoverRouter.HitGetInstalledAppDetailsApi(queryParamsForGettingHealthStatus, suite.authToken)
 	assert.Equal(suite.T(), "Healthy", installedAppDetails.Result.ResourceTree.Status)
 
 	suite.Run("A=1=GetListWithCorrectArguments", func() {
@@ -57,20 +76,6 @@ func (suite *ApplicationsRouterTestSuite) TestGetList() {
 	})
 
 	log.Println("Removing the data created via API")
-	respOfDeleteInstallAppApi := AppStoreDeploymentRouter.HitDeleteInstalledAppApi(strconv.Itoa(responseAfterInstallingApp.Result.InstalledAppId), suite.authToken)
+	respOfDeleteInstallAppApi := AppStoreDiscoverRouter.HitDeleteInstalledAppApi(strconv.Itoa(responseAfterInstallingApp.Result.InstalledAppId), suite.authToken)
 	assert.Equal(suite.T(), responseAfterInstallingApp.Result.InstalledAppId, respOfDeleteInstallAppApi.Result.InstalledAppId)
-}
-
-func PollForAppStatusInAppDetails(queryParams map[string]string, authToken string) bool {
-	count := 0
-	for {
-		respOfGetApplicationDetailApi := AppStoreRouter.HitGetInstalledAppDetailsApi(queryParams, authToken)
-		appStatus := respOfGetApplicationDetailApi.Result.ResourceTree.Status
-		time.Sleep(1 * time.Second)
-		count = count + 1
-		if appStatus == "Healthy" || count >= 500 {
-			break
-		}
-	}
-	return true
 }

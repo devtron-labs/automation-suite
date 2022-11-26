@@ -79,6 +79,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 	suite.Run("A=1=TriggerCiPipelineWithValidPayload", func() {
 		payloadForTriggerCiPipeline := CreatePayloadForTriggerCiPipeline(pipelineMaterial.Result[0].History[0].Commit, workflowResponse.CiPipelines[0].Id, pipelineMaterial.Result[0].Id, true)
 		bytePayloadForTriggerCiPipeline, _ := json.Marshal(payloadForTriggerCiPipeline)
+		time.Sleep(5 * time.Second)
 		triggerCiPipelineResponse := HitTriggerCiPipelineApi(bytePayloadForTriggerCiPipeline, suite.authToken)
 		if triggerCiPipelineResponse.Result.AuthStatus != "allowed for all pipelines" {
 			time.Sleep(2 * time.Second)
@@ -110,6 +111,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 		if triggerCiPipelineResponse.Result.AuthStatus != "allowed for all pipelines" {
 			time.Sleep(2 * time.Second)
 			triggerCiPipelineResponse = HitTriggerCiPipelineApi(bytePayloadForTriggerCiPipeline, suite.authToken)
+			time.Sleep(5 * time.Second)
 			assert.Equal(suite.T(), "allowed for all pipelines", triggerCiPipelineResponse.Result.AuthStatus)
 			assert.NotNil(suite.T(), triggerCiPipelineResponse.Result.ApiResponse)
 		}
