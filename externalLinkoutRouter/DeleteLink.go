@@ -1,12 +1,21 @@
 package externalLinkoutRouter
 
-/*func (suite *LinkOutRouterTestSuite) TestClassA2DeleteExternalLink() {
-	suite.Run("A=1=DeleteExternalLinkoutWithValidId", func() {
+import (
+	"automation-suite/testUtils"
+	"encoding/json"
+	"github.com/stretchr/testify/assert"
+	"log"
+	"strings"
+)
+
+func (suite *LinkOutRouterTestSuite) TestClassA2DeleteExternalLink() {
+	suite.Run("A=1=DeleteExternalLinkWithValidId", func() {
 		log.Println("Fetching links before creating new")
 		getAllExternalLinksResponseDto := HitFetchAllLinkApi(suite.authToken)
 		noOfLinks := len(getAllExternalLinksResponseDto.Result)
-		createLinkRequestDto := GetSaveLinkRequestDto(1, nil)
-		byteValueOfCreateLink, _ := json.Marshal(createLinkRequestDto)
+		identifier := "ea-app-" + strings.ToLower(testUtils.GetRandomStringOfGivenLength(5))
+		listOfCreateLinkRequestDto := GetSaveLinkRequestDtoList(1, identifier, 8, true, "appLevel", "https://www.google.co.in", "external-helm-app", 0)
+		byteValueOfCreateLink, _ := json.Marshal(listOfCreateLinkRequestDto)
 		log.Println("Hitting The Save Link API")
 		HitCreateLinkApi(byteValueOfCreateLink, suite.authToken)
 		getAllExternalLinksAgainResponseDto := HitFetchAllLinkApi(suite.authToken)
@@ -21,9 +30,8 @@ package externalLinkoutRouter
 	suite.Run("A=2=DeleteExternalLinkOutWithInValidId", func() {
 		log.Println("Hitting the Delete link API for Removing the data created via automation")
 		DeletedLinkResponseDto := HitDeleteLinkApi(testUtils.GetRandomNumberOf9Digit(), suite.authToken)
-		assert.Equal(suite.T(), 404, DeletedLinkResponseDto.Code)
-		assert.Equal(suite.T(), "pg: no rows in result set", DeletedLinkResponseDto.Errors[0].UserMessage)
+		assert.Equal(suite.T(), 500, DeletedLinkResponseDto.Code)
+		assert.Equal(suite.T(), "external_link failed to delete", DeletedLinkResponseDto.Errors[0].UserMessage)
 
 	})
 }
-*/

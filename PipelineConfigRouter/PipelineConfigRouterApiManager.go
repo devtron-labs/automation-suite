@@ -527,6 +527,7 @@ func GetRequestPayloadForSaveDeploymentTemplate(AppId int, chartRefId int, defau
 	saveDeploymentTemplateRequestDTO.ValuesOverride.Spec.Affinity.Key = "node"
 	saveDeploymentTemplateRequestDTO.ValuesOverride.Spec.Affinity.Values = "devtron"
 	saveDeploymentTemplateRequestDTO.DefaultAppOverride = defaultOverride
+	saveDeploymentTemplateRequestDTO.CurrentViewEditor = "ADVANCED"
 	return saveDeploymentTemplateRequestDTO
 }
 

@@ -114,20 +114,11 @@ func HitFetchAllLinkApi(authToken string) ResponseDTO.GetLinkByIdResponseDto {
 	externalLinkOutRouter := linkRouterStruct.UnmarshalGivenResponseBody(resp.Body(), FetchAllLinkApi)
 	return externalLinkOutRouter.getLinkByIdResponseDto
 }
-func HitFetchLinksByClusterIdApi(queryParams map[string]string, authToken string) ResponseDTO.GetLinkByIdResponseDto {
+func HitFetchLinksByQueryParam(queryParams map[string]string, authToken string) ResponseDTO.GetLinkByIdResponseDto {
 	resp, err := Base.MakeApiCall(SaveExternalLink, http.MethodGet, "", queryParams, authToken)
 	Base.HandleError(err, FetchAllLinkApi)
 	linkRouterStruct := LinkRouterStruct{}
 	externalLinkOutRouter := linkRouterStruct.UnmarshalGivenResponseBody(resp.Body(), FetchAllLinkApi)
-	return externalLinkOutRouter.getLinkByIdResponseDto
-}
-
-func HitGetLinkByIdApi(id string, authToken string) ResponseDTO.GetLinkByIdResponseDto {
-	resp, err := Base.MakeApiCall(SaveExternalLink+"/"+id, http.MethodGet, "", nil, authToken)
-	Base.HandleError(err, GetLinkByIdApi)
-
-	linkRouterStruct := LinkRouterStruct{}
-	externalLinkOutRouter := linkRouterStruct.UnmarshalGivenResponseBody(resp.Body(), GetLinkByIdApi)
 	return externalLinkOutRouter.getLinkByIdResponseDto
 }
 

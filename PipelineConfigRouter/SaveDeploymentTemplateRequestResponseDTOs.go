@@ -5,6 +5,7 @@ type SaveDeploymentTemplateRequestDTO struct {
 	ChartRefId         int                `json:"chartRefId"`
 	ValuesOverride     DefaultAppOverride `json:"valuesOverride"`
 	DefaultAppOverride DefaultAppOverride `json:"defaultAppOverride"`
+	CurrentViewEditor  string             `json:"currentViewEditor"`
 }
 
 type SaveDeploymentTemplateResponseDTO struct {
