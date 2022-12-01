@@ -1,13 +1,6 @@
 package externalLinkoutRouter
 
-import (
-	"automation-suite/testUtils"
-	"encoding/json"
-	"github.com/stretchr/testify/assert"
-	"log"
-)
-
-func (suite *LinkOutRouterTestSuite) TestClassA5UpdateExternalLink() {
+/*func (suite *LinkOutRouterTestSuite) TestClassA5UpdateExternalLink() {
 	suite.Run("A=1=UpdateTeamWithValidPayload", func() {
 		createLinkRequestDto := GetSaveLinkRequestDto(1, nil)
 		byteValueOfCreateLink, _ := json.Marshal(createLinkRequestDto)
@@ -65,3 +58,4 @@ func (suite *LinkOutRouterTestSuite) TestClassA5UpdateExternalLink() {
 		HitDeleteLinkApi(id, suite.authToken)
 	})
 }
+*/

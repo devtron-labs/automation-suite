@@ -31,15 +31,15 @@ func GetSaveLinkRequestDto(monitoringToolId int, slice []int) []RequestDTO.Creat
 	return createLinkRequestDto2
 }
 
-func GetSaveLinkRequestDtoList(noOfLinkRequired int, monitoringToolId int, IsEditable bool, ParentObjectType string, Url string, ChildObjType string, ClusterId int) []RequestDTO.CreateLinkRequestDto1 {
+func GetSaveLinkRequestDtoList(noOfLinkRequired int, identifiers string, monitoringToolId int, IsEditable bool, ParentObjectType string, Url string, ChildObjType string, ClusterId int) []RequestDTO.CreateLinkRequestDto1 {
 	var listOfCreateLinkRequestDTO []RequestDTO.CreateLinkRequestDto1
 
 	for i := 0; i < noOfLinkRequired; i++ {
 		var createLinkRequestDto RequestDTO.CreateLinkRequestDto1
-		identifiers := GetIdentifierObject("ea-app-"+strings.ToLower(Base.GetRandomStringOfGivenLength(5)), ChildObjType, ClusterId)
+		identifiers := GetIdentifierObject(identifiers, ChildObjType, ClusterId)
 		createLinkRequestDto.MonitoringToolId = monitoringToolId
-		createLinkRequestDto.Name = strconv.Itoa(i+1) + "--automation" + strings.ToLower(Base.GetRandomStringOfGivenLength(5))
-		createLinkRequestDto.Description = strconv.Itoa(i+1) + "This is description for testing purpose only"
+		createLinkRequestDto.Name = "automation" + strconv.Itoa(i+1) + strings.ToLower(Base.GetRandomStringOfGivenLength(5))
+		createLinkRequestDto.Description = "This is description for testing purpose only"
 		createLinkRequestDto.Identifiers = identifiers
 		createLinkRequestDto.IsEditable = IsEditable
 		createLinkRequestDto.Type = ParentObjectType

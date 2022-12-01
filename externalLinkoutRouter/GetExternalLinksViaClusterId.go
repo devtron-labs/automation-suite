@@ -1,14 +1,6 @@
 package externalLinkoutRouter
 
-import (
-	Base "automation-suite/testUtils"
-	"encoding/json"
-	"github.com/stretchr/testify/assert"
-	"log"
-	"strconv"
-)
-
-func (suite *LinkOutRouterTestSuite) TestClassGetExternalLinksViaClusterId() {
+/*func (suite *LinkOutRouterTestSuite) TestClassGetExternalLinksViaClusterId() {
 	clusterId := map[string]string{
 		"clusterId": strconv.Itoa(1),
 	}
@@ -41,3 +33,4 @@ func (suite *LinkOutRouterTestSuite) TestClassGetExternalLinksViaClusterId() {
 		assert.Equal(suite.T(), 0, len(fetchAllLinkResponseDto.Result))
 	})
 }
+*/
