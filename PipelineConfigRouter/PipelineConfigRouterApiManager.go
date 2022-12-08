@@ -276,6 +276,7 @@ type StructPipelineConfigRouter struct {
 	createWorkflowResponseDto          ResponseDTOs.CreateWorkflowResponseDto
 	fetchSuggestedCiPipelineName       FetchSuggestedCiPipelineName
 	fetchAllAppWorkflowResponseDto     FetchAllAppWorkflowResponseDto
+	getAppDeploymentStatusTimelineDto  GetAppDeploymentStatusTimelineDto
 	saveCdPipelineRequestDTO           RequestDTOs.SaveCdPipelineRequestDTO
 	saveCdPipelineResponseDTO          ResponseDTOs.SaveCdPipelineResponseDTO
 	deleteCdPipelineRequestDTO         RequestDTOs.DeleteCdPipelineRequestDTO
@@ -1245,4 +1246,48 @@ func FetchAllAppWorkflow(id int, authToken string) FetchAllAppWorkflowResponseDt
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
 	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), FetchAllAppWorkflowApi)
 	return pipelineConfigRouter.fetchAllAppWorkflowResponseDto
+}
+
+type TimelineStatus string
+
+type GetAppDeploymentStatusTimelineDto struct {
+	Code   int    `json:"code"`
+	Status string `json:"status"`
+	Result struct {
+		DeploymentStartedOn  time.Time `json:"deploymentStartedOn"`
+		DeploymentFinishedOn time.Time `json:"deploymentFinishedOn"`
+		TriggeredBy          string    `json:"triggeredBy"`
+		Timelines            []*struct {
+			Id                           int            `json:"id"`
+			InstalledAppVersionHistoryId int            `json:"InstalledAppVersionHistoryId,omitempty"`
+			CdWorkflowRunnerId           int            `json:"cdWorkflowRunnerId"`
+			Status                       TimelineStatus `json:"status"`
+			StatusDetail                 string         `json:"statusDetail"`
+			StatusTime                   time.Time      `json:"statusTime"`
+			ResourceDetails              []*struct {
+				Id                           int    `json:"id"`
+				InstalledAppVersionHistoryId int    `json:"installedAppVersionHistoryId,omitempty"`
+				CdWorkflowRunnerId           int    `json:"cdWorkflowRunnerId,omitempty"`
+				ResourceName                 string `json:"resourceName"`
+				ResourceKind                 string `json:"resourceKind"`
+				ResourceGroup                string `json:"resourceGroup"`
+				ResourceStatus               string `json:"resourceStatus"`
+				ResourcePhase                string `json:"resourcePhase"`
+				StatusMessage                string `json:"statusMessage"`
+				TimelineStage                string `json:"timelineStage,omitempty"`
+			} `json:"resourceDetails,omitempty"`
+		} `json:"timelines"`
+		StatusLastFetchedAt time.Time `json:"statusLastFetchedAt"`
+		StatusFetchCount    int       `json:"statusFetchCount"`
+	} `json:"result"`
+	Error []Base.Errors `json:"errors"`
+}
+
+func GetAppDeploymentStatusTimeline(appId int, envId int, authToken string) GetAppDeploymentStatusTimelineDto {
+	resp, err := Base.MakeApiCall(GetAppDeploymentStatusTimelineApiUrl+strconv.Itoa(appId)+strconv.Itoa(envId), http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, FetchAllAppWorkflowApi)
+
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), FetchAllAppWorkflowApi)
+	return pipelineConfigRouter.getAppDeploymentStatusTimelineDto
 }
