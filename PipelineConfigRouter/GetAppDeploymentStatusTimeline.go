@@ -4,8 +4,10 @@ import (
 	"automation-suite/HelperRouter"
 	Base "automation-suite/testUtils"
 	"encoding/json"
+	"github.com/stretchr/testify/assert"
 	"log"
 	"strconv"
+	"time"
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestGetAppDeploymentStatusTimeline() {
@@ -67,8 +69,34 @@ func (suite *PipelinesConfigRouterTestSuite) TestGetAppDeploymentStatusTimeline(
 	savePipelineResponse := HitSaveCdPipelineApi(bytePayload, suite.authToken)
 
 	//write the test cases here
-	//test1 -> on successful deployment the timelines count should be >= 2 and second timeline should G
-	//test2 -> on invalid
+	time.Sleep(2 * time.Second)
+	suite.Run("", func() {
+		apiResponse := GetAppDeploymentStatusTimeline(createAppApiResponse.Id, 1, suite.authToken)
+		assert.NotEqual(suite.T(), nil, apiResponse)
+		assert.Equal(suite.T(), 200, apiResponse.Code)
+		assert.Equal(suite.T(), 0, len(apiResponse.Error))
+		assert.NotEqual(suite.T(), nil, apiResponse.Result)
+		isDeploymentStarted := len(apiResponse.Result.Timelines) > 1
+		assert.Equal(suite.T(), true, isDeploymentStarted)
+		assert.Equal(suite.T(), TIMELINE_STATUS_DEPLOYMENT_INITIATED, apiResponse.Result.Timelines[0])
+		assert.Equal(suite.T(), TIMELINE_STATUS_GIT_COMMIT, apiResponse.Result.Timelines[1])
+	})
+	time.Sleep(2 * time.Second)
+	suite.Run("", func() {
+		apiResponse := GetAppDeploymentStatusTimeline(createAppApiResponse.Id, 1, suite.authToken)
+		assert.NotEqual(suite.T(), nil, apiResponse)
+		assert.Equal(suite.T(), 200, apiResponse.Code)
+		assert.Equal(suite.T(), 0, len(apiResponse.Error))
+		assert.NotEqual(suite.T(), nil, apiResponse.Result)
+		isDeploymentStarted := len(apiResponse.Result.Timelines) > 2
+		assert.Equal(suite.T(), true, isDeploymentStarted)
+		assert.Equal(suite.T(), TIMELINE_STATUS_DEPLOYMENT_INITIATED, apiResponse.Result.Timelines[0].Status)
+		assert.Equal(suite.T(), TIMELINE_STATUS_GIT_COMMIT, apiResponse.Result.Timelines[1].Status)
+		kubectlStatus := apiResponse.Result.Timelines[1].Status == TIMELINE_STATUS_KUBECTL_APPLY_STARTED || apiResponse.Result.Timelines[1].Status == TIMELINE_STATUS_KUBECTL_APPLY_SYNCED
+		assert.Equal(suite.T(), true, kubectlStatus)
+	})
+
+	//write tests with invalid git-ops configuration
 	//end of test cases
 
 	//clean created pipelines,materials and app
