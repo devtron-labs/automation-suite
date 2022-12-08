@@ -94,6 +94,10 @@ func (suite *PipelinesConfigRouterTestSuite) TestGetAppDeploymentStatusTimeline(
 		assert.Equal(suite.T(), TIMELINE_STATUS_GIT_COMMIT, apiResponse.Result.Timelines[1].Status)
 		kubectlStatus := apiResponse.Result.Timelines[1].Status == TIMELINE_STATUS_KUBECTL_APPLY_STARTED || apiResponse.Result.Timelines[1].Status == TIMELINE_STATUS_KUBECTL_APPLY_SYNCED
 		assert.Equal(suite.T(), true, kubectlStatus)
+		if apiResponse.Result.Timelines[1].Status == TIMELINE_STATUS_KUBECTL_APPLY_SYNCED {
+			isAtleastOneK8sObjectPresent := len(apiResponse.Result.Timelines[1].ResourceDetails) > 0
+			assert.Equal(suite.T(), true, isAtleastOneK8sObjectPresent)
+		}
 	})
 
 	//write tests with invalid git-ops configuration
