@@ -97,6 +97,14 @@ func (suite *PipelinesConfigRouterTestSuite) TestGetAppDeploymentStatusTimeline(
 		if apiResponse.Result.Timelines[1].Status == TIMELINE_STATUS_KUBECTL_APPLY_SYNCED {
 			isAtleastOneK8sObjectPresent := len(apiResponse.Result.Timelines[1].ResourceDetails) > 0
 			assert.Equal(suite.T(), true, isAtleastOneK8sObjectPresent)
+			for _, resource := range apiResponse.Result.Timelines[1].ResourceDetails {
+				assert.NotNil(suite.T(), resource.Id)
+				assert.NotNil(suite.T(), resource.ResourceStatus)
+				assert.NotNil(suite.T(), resource.ResourceKind)
+				assert.NotNil(suite.T(), resource.ResourceGroup)
+				assert.NotNil(suite.T(), resource.ResourceName)
+				assert.NotNil(suite.T(), resource.ResourcePhase)
+			}
 		}
 	})
 
