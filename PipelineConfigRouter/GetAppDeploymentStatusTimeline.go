@@ -70,7 +70,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestGetAppDeploymentStatusTimeline(
 
 	//write the test cases here
 	time.Sleep(2 * time.Second)
-	suite.Run("", func() {
+	suite.Run("Test Deployment Initiation", func() {
 		apiResponse := GetAppDeploymentStatusTimeline(createAppApiResponse.Id, 1, suite.authToken)
 		assert.NotEqual(suite.T(), nil, apiResponse)
 		assert.Equal(suite.T(), 200, apiResponse.Code)
@@ -82,7 +82,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestGetAppDeploymentStatusTimeline(
 		assert.Equal(suite.T(), TIMELINE_STATUS_GIT_COMMIT, apiResponse.Result.Timelines[1])
 	})
 	time.Sleep(2 * time.Second)
-	suite.Run("", func() {
+	suite.Run("Test Git Commit Success And Kubectl Apply", func() {
 		apiResponse := GetAppDeploymentStatusTimeline(createAppApiResponse.Id, 1, suite.authToken)
 		assert.NotEqual(suite.T(), nil, apiResponse)
 		assert.Equal(suite.T(), 200, apiResponse.Code)
