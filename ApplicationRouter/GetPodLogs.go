@@ -17,7 +17,7 @@ import (
 )
 
 func (suite *ApplicationsRouterTestSuite) TestGetPodLogs() {
-	createAppApiResponse, workflowResponse := Base.CreateNewAppWithCiCd(suite.authToken)
+	createAppApiResponse, workflowResponse := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken)
 	log.Println("=== Here we are getting ResourceTree ===")
 	ResourceTreeApiResponse := HitGetResourceTreeApi(createAppApiResponse.AppName, suite.authToken)
 	container := ResourceTreeApiResponse.Result.PodMetadata[0].Containers[0]
@@ -56,7 +56,7 @@ func (suite *ApplicationsRouterTestSuite) TestGetPodLogs() {
 	})
 
 	// for ci, pre-cd, post-cd logs first need to delete workflow after succeed
-	Base.DeleteAppWithCiCd(suite.authToken)
+	PipelineConfigRouter.DeleteAppWithCiCd(suite.authToken)
 }
 
 func (suite *ApplicationsRouterTestSuite) checkForCiArtifacts(pipelineId string, ciWorkflowId string) {

@@ -12,7 +12,7 @@ import (
 
 func (suite *ApplicationsRouterTestSuite) TestClassGetTerminalSession() {
 
-	createAppApiResponse, workflowResponse := Base.CreateNewAppWithCiCd(suite.authToken)
+	createAppApiResponse, workflowResponse := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken)
 	time.Sleep(2 * time.Second)
 
 	log.Println("=== Here we are getting pipeline material ===")
@@ -51,7 +51,7 @@ func (suite *ApplicationsRouterTestSuite) TestClassGetTerminalSession() {
 		assert.True(suite.T(), strings.Contains(getApplicationApiResponse.Errors[0].InternalMessage, "[{rpc error: code = NotFound desc = error getting application: applications.argoproj.io"))
 	})
 
-	Base.DeleteAppWithCiCd(suite.authToken)
+	PipelineConfigRouter.DeleteAppWithCiCd(suite.authToken)
 }
 
 //todo will add other test cases once Devs will handle the validations

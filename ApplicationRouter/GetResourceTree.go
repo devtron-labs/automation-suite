@@ -12,7 +12,7 @@ import (
 )
 
 func (suite *ApplicationsRouterTestSuite) TestClassGetResourceTree() {
-	createAppApiResponse, workflowResponse := Base.CreateNewAppWithCiCd(suite.authToken)
+	createAppApiResponse, workflowResponse := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken)
 	time.Sleep(2 * time.Second)
 	log.Println("=== Here we are getting pipeline material ===")
 	pipelineMaterial := PipelineConfigRouter.HitGetCiPipelineMaterial(workflowResponse.Result.CiPipelines[0].Id, suite.authToken)
@@ -36,7 +36,7 @@ func (suite *ApplicationsRouterTestSuite) TestClassGetResourceTree() {
 		assert.True(suite.T(), strings.Contains(ResourceTreeApiResponse.Errors[0].InternalMessage, "[{rpc error: code = NotFound desc = error getting application by name: application.argoproj.io"))
 	})
 
-	Base.DeleteAppWithCiCd(suite.authToken)
+	PipelineConfigRouter.DeleteAppWithCiCd(suite.authToken)
 }
 
 func triggerAndVerifyCiPipeline(createAppApiResponse Base.CreateAppRequestDto, pipelineMaterial PipelineConfigRouterResponseDTOs.GetCiPipelineMaterialResponseDTO, CiPipelineID int, suite *ApplicationsRouterTestSuite) string {

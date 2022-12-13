@@ -9,7 +9,7 @@ import (
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
-	createAppApiResponse, workflowResponse := Base.CreateNewAppWithCiCd(suite.authToken)
+	createAppApiResponse, workflowResponse := CreateNewAppWithCiCd(suite.authToken)
 	time.Sleep(2 * time.Second)
 	log.Println("=== Here we are getting pipeline material ===")
 	pipelineMaterial := HitGetCiPipelineMaterial(workflowResponse.Result.CiPipelines[0].Id, suite.authToken)
@@ -71,7 +71,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 		assert.Equal(suite.T(), "[{pg: no rows in result set}]", triggerCiPipelineResponse.Errors[0].InternalMessage)
 	})
 
-	Base.DeleteAppWithCiCd(suite.authToken)
+	DeleteAppWithCiCd(suite.authToken)
 }
 
 func PollForGettingCdDeployStatusAfterTrigger(id int, authToken string) bool {

@@ -1,5 +1,7 @@
 package PipelineConfigRouter
 
+import "automation-suite/PipelineConfigRouter/ResponseDTOs"
+
 const (
 	SaveAppCiPipelineApiUrl                   string = "/orchestrator/app/ci-pipeline"
 	SaveAppCiPipelineApi                      string = "SaveAppCiPipelineApi"
@@ -63,15 +65,15 @@ const (
 	GetAppDeploymentStatusTimelineApi         string = "GetAppDeploymentStatusTimelineApi"
 	GetAppDeploymentStatusTimelineApiUrl      string = "orchestrator/app/deployment-status/timeline/"
 
-	TIMELINE_STATUS_DEPLOYMENT_INITIATED   TimelineStatus = "DEPLOYMENT_INITIATED"
-	TIMELINE_STATUS_GIT_COMMIT             TimelineStatus = "GIT_COMMIT"
-	TIMELINE_STATUS_GIT_COMMIT_FAILED      TimelineStatus = "GIT_COMMIT_FAILED"
-	TIMELINE_STATUS_KUBECTL_APPLY_STARTED  TimelineStatus = "KUBECTL_APPLY_STARTED"
-	TIMELINE_STATUS_KUBECTL_APPLY_SYNCED   TimelineStatus = "KUBECTL_APPLY_SYNCED"
-	TIMELINE_STATUS_APP_HEALTHY            TimelineStatus = "HEALTHY"
-	TIMELINE_STATUS_DEPLOYMENT_FAILED      TimelineStatus = "FAILED"
-	TIMELINE_STATUS_FETCH_TIMED_OUT        TimelineStatus = "TIMED_OUT"
-	TIMELINE_STATUS_UNABLE_TO_FETCH_STATUS TimelineStatus = "UNABLE_TO_FETCH_STATUS"
-	TIMELINE_STATUS_DEPLOYMENT_SUPERSEDED  TimelineStatus = "DEPLOYMENT_SUPERSEDED"
-	TIMELINE_RESOURCE_STAGE_KUBECTL_APPLY  string         = "KUBECTL_APPLY"
+	TIMELINE_STATUS_DEPLOYMENT_INITIATED   ResponseDTOs.TimelineStatus = "DEPLOYMENT_INITIATED"
+	TIMELINE_STATUS_GIT_COMMIT             ResponseDTOs.TimelineStatus = "GIT_COMMIT"
+	TIMELINE_STATUS_GIT_COMMIT_FAILED      ResponseDTOs.TimelineStatus = "GIT_COMMIT_FAILED"
+	TIMELINE_STATUS_KUBECTL_APPLY_STARTED  ResponseDTOs.TimelineStatus = "KUBECTL_APPLY_STARTED"
+	TIMELINE_STATUS_KUBECTL_APPLY_SYNCED   ResponseDTOs.TimelineStatus = "KUBECTL_APPLY_SYNCED"
+	TIMELINE_STATUS_APP_HEALTHY            ResponseDTOs.TimelineStatus = "HEALTHY"
+	TIMELINE_STATUS_DEPLOYMENT_FAILED      ResponseDTOs.TimelineStatus = "FAILED"
+	TIMELINE_STATUS_FETCH_TIMED_OUT        ResponseDTOs.TimelineStatus = "TIMED_OUT"
+	TIMELINE_STATUS_UNABLE_TO_FETCH_STATUS ResponseDTOs.TimelineStatus = "UNABLE_TO_FETCH_STATUS"
+	TIMELINE_STATUS_DEPLOYMENT_SUPERSEDED  ResponseDTOs.TimelineStatus = "DEPLOYMENT_SUPERSEDED"
+	TIMELINE_RESOURCE_STAGE_KUBECTL_APPLY  string                      = "KUBECTL_APPLY"
 )
