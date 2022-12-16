@@ -5,6 +5,7 @@ import (
 	"automation-suite/AppStoreDiscoverRouter/ResponseDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"log"
 	"net/http"
@@ -248,4 +249,8 @@ type AppStoreDiscoverTestSuite struct {
 
 func (suite *AppStoreDiscoverTestSuite) SetupSuite() {
 	suite.authToken = Base.GetAuthToken()
+}
+func (suite *AppStoreDiscoverTestSuite) AfterSuite() {
+	installedAppId, respOfDeleteInstalledAppId := DeleteHelmApp(suite.authToken)
+	assert.Equal(suite.T(), installedAppId, respOfDeleteInstalledAppId)
 }

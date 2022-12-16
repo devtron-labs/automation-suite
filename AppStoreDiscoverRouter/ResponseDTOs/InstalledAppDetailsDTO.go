@@ -13,26 +13,26 @@ type InstalledAppDetailsResponseDTO struct {
 }
 
 type AppDetails struct {
-	InstalledAppId                int          `json:"installedAppId"`
-	AppId                         int          `json:"appId"`
-	AppStoreInstalledAppVersionId int          `json:"appStoreInstalledAppVersionId"`
-	AppStoreChartName             string       `json:"appStoreChartName"`
-	AppStoreChartId               int          `json:"appStoreChartId"`
-	AppStoreAppName               string       `json:"appStoreAppName"`
-	AppStoreAppVersion            string       `json:"appStoreAppVersion"`
-	AppName                       string       `json:"appName"`
-	EnvironmentId                 int          `json:"environmentId"`
-	EnvironmentName               string       `json:"environmentName"`
-	Namespace                     string       `json:"namespace"`
-	LastDeployedTime              time.Time    `json:"lastDeployedTime"`
-	LastDeployedBy                string       `json:"lastDeployedBy"`
-	Deprecated                    bool         `json:"deprecated"`
-	K8SVersion                    string       `json:"k8sVersion"`
-	CiArtifactId                  int          `json:"ciArtifactId"`
-	ClusterId                     int          `json:"clusterId"`
-	DeploymentAppType             string       `json:"deploymentAppType"`
-	InstanceDetail                interface{}  `json:"instanceDetail"`
-	ResourceTree                  ResourceTree `json:"resourceTree"`
+	InstalledAppId                int                    `json:"installedAppId"`
+	AppId                         int                    `json:"appId"`
+	AppStoreInstalledAppVersionId int                    `json:"appStoreInstalledAppVersionId"`
+	AppStoreChartName             string                 `json:"appStoreChartName"`
+	AppStoreChartId               int                    `json:"appStoreChartId"`
+	AppStoreAppName               string                 `json:"appStoreAppName"`
+	AppStoreAppVersion            string                 `json:"appStoreAppVersion"`
+	AppName                       string                 `json:"appName"`
+	EnvironmentId                 int                    `json:"environmentId"`
+	EnvironmentName               string                 `json:"environmentName"`
+	Namespace                     string                 `json:"namespace"`
+	LastDeployedTime              time.Time              `json:"lastDeployedTime"`
+	LastDeployedBy                string                 `json:"lastDeployedBy"`
+	Deprecated                    bool                   `json:"deprecated"`
+	K8SVersion                    string                 `json:"k8sVersion"`
+	CiArtifactId                  int                    `json:"ciArtifactId"`
+	ClusterId                     int                    `json:"clusterId"`
+	DeploymentAppType             string                 `json:"deploymentAppType"`
+	InstanceDetail                interface{}            `json:"instanceDetail"`
+	ResourceTree                  map[string]interface{} `json:"resourceTree"`
 }
 
 type ResourceTree struct {

@@ -1,16 +1,13 @@
 package ApplicationRouter
 
 import (
-	"automation-suite/HelperRouter"
 	"automation-suite/PipelineConfigRouter"
 	Base "automation-suite/testUtils"
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/argoproj/argo-workflows/v3/pkg/client/clientset/versioned"
 	v1alpha12 "github.com/argoproj/argo-workflows/v3/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	"github.com/stretchr/testify/assert"
-	"github.com/tidwall/sjson"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"log"
@@ -20,67 +17,15 @@ import (
 )
 
 func (suite *ApplicationsRouterTestSuite) TestGetPodLogs() {
-	config, _ := PipelineConfigRouter.GetEnvironmentConfigPipelineConfigRouter()
-	var configId int
-	log.Println("=== Here we are creating a App ===")
-	createAppApiResponse := Base.CreateApp(suite.authToken).Result
-	appName := createAppApiResponse.AppName
-	log.Println("=== App Name is :====", appName)
-	log.Println("=== Here we are creating App Material ===")
-	appId := createAppApiResponse.Id
-	createAppMaterialRequestDto := PipelineConfigRouter.GetAppMaterialRequestDto(appId, 1, false)
-	appMaterialByteValue, _ := json.Marshal(createAppMaterialRequestDto)
-	createAppMaterialResponse := PipelineConfigRouter.HitCreateAppMaterialApi(appMaterialByteValue, appId, 1, false, suite.authToken)
-	log.Println("=== Here we are saving docker build config ===")
-	requestPayloadForSaveAppCiPipeline := PipelineConfigRouter.GetRequestPayloadForSaveAppCiPipeline(appId, config.DockerRegistry, config.DockerRegistry+"/test", config.DockerfilePath, config.DockerfileRepository, config.DockerfileRelativePath, createAppMaterialResponse.Result.Material[0].Id)
-	byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
-	PipelineConfigRouter.HitSaveAppCiPipeline(byteValueOfSaveAppCiPipeline, suite.authToken)
-	log.Println("=== Here we are fetching latestChartReferenceId ===")
-	time.Sleep(2 * time.Second)
-	appIdString := strconv.Itoa(appId)
-	getChartReferenceResponse := PipelineConfigRouter.HitGetChartReferenceViaAppId(appIdString, suite.authToken)
-	latestChartRef := getChartReferenceResponse.Result.LatestChartRef
-	log.Println("=== Here we are fetching Template using getAppTemplateAPI ===")
-	getTemplateResponse := PipelineConfigRouter.HitGetTemplateViaAppIdAndChartRefId(appIdString, strconv.Itoa(latestChartRef), suite.authToken)
-	log.Println("=== Here we are fetching DefaultAppOverride from template response ===")
-	defaultAppOverride := getTemplateResponse.Result.GlobalConfig.DefaultAppOverride
-	log.Println("=== Here we are creating payload for SaveTemplate API ===")
-	saveDeploymentTemplate := PipelineConfigRouter.GetRequestPayloadForSaveDeploymentTemplate(appId, latestChartRef, defaultAppOverride)
-	byteValueOfSaveDeploymentTemplate, _ := json.Marshal(saveDeploymentTemplate)
-	jsonOfSaveDeploymentTemp := string(byteValueOfSaveDeploymentTemplate)
-	jsonWithMicroserviceToleration, _ := sjson.Set(jsonOfSaveDeploymentTemp, "valuesOverride.tolerations.0", map[string]interface{}{"effect": "NoSchedule", "key": "microservice", "operator": "Equal", "value": "true"})
-	finalJson, _ := sjson.Set(jsonWithMicroserviceToleration, "valuesOverride.tolerations.1", map[string]interface{}{"effect": "NoSchedule", "key": "kubernetes.azure.com/scalesetpriority", "operator": "Equal", "value": "spot"})
-	updatedByteValueOfSaveDeploymentTemplate := []byte(finalJson)
-	log.Println("=== Here we are hitting SaveTemplate API ===")
-	PipelineConfigRouter.HitSaveDeploymentTemplateApi(updatedByteValueOfSaveDeploymentTemplate, suite.authToken)
-	log.Println("=== Here we are saving Global Configmap ===")
-	requestPayloadForConfigMap := HelperRouter.GetRequestPayloadForSecretOrConfig(0, "-config1", appId, "environment", "kubernetes", false, false, false, false)
-	byteValueOfSaverConfigMap, _ := json.Marshal(requestPayloadForConfigMap)
-	globalConfigMap := HelperRouter.HitSaveGlobalConfigMap(byteValueOfSaverConfigMap, suite.authToken)
-	configId = globalConfigMap.Result.Id
-	log.Println("=== Here we are saving Global Secret ===")
-	requestPayloadForSecret := HelperRouter.GetRequestPayloadForSecretOrConfig(configId, "-secret1", appId, "environment", "kubernetes", false, false, true, false)
-	byteValueOfSecret, _ := json.Marshal(requestPayloadForSecret)
-	HelperRouter.HitSaveGlobalSecretApi(byteValueOfSecret, suite.authToken)
-	log.Println("=== Here we are saving workflow with Pre/Post CI ===")
-	workflowResponse := PipelineConfigRouter.HitCreateWorkflowApiWithFullPayload(appId, suite.authToken).Result
-	preStageScript, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/PipeLineConfigRouter/preStageScript.txt")
-	postStageScript, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/PipeLineConfigRouter/postStageScript.txt")
-	log.Println("=== Here we are saving CD pipeline ===")
-	ciPipelineId := workflowResponse.CiPipelines[0].Id
-	payload := PipelineConfigRouter.GetRequestPayloadForSaveCdPipelineApi(appId, workflowResponse.AppWorkflowId, 1, ciPipelineId, workflowResponse.CiPipelines[0].ParentCiPipeline, "AUTOMATIC", string(preStageScript), string(postStageScript), "AUTOMATIC")
-	bytePayload, _ := json.Marshal(payload)
-	savePipelineResponse := PipelineConfigRouter.HitSaveCdPipelineApi(bytePayload, suite.authToken)
-	time.Sleep(2 * time.Second)
-	log.Println("=== Here we are getting pipeline material ===")
-	pipelineMaterial := PipelineConfigRouter.HitGetCiPipelineMaterial(ciPipelineId, suite.authToken)
-	time.Sleep(5 * time.Second)
-	log.Println("=== Here we are Triggering CI/CD and verifying CI/CD Deploy Status ===")
-	ciWorkflowId := triggerAndVerifyCiPipeline(createAppApiResponse, pipelineMaterial, ciPipelineId, suite)
+	createAppApiResponse, workflowResponse := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken)
 	log.Println("=== Here we are getting ResourceTree ===")
 	ResourceTreeApiResponse := HitGetResourceTreeApi(createAppApiResponse.AppName, suite.authToken)
 	container := ResourceTreeApiResponse.Result.PodMetadata[0].Containers[0]
 	containerName := ResourceTreeApiResponse.Result.PodMetadata[0].Name
+	appIdString := strconv.Itoa(createAppApiResponse.Id)
+	pipelineMaterial := PipelineConfigRouter.HitGetCiPipelineMaterial(workflowResponse.Result.CiPipelines[0].Id, suite.authToken)
+	ciPipelineId := pipelineMaterial.Result[0].Id
+	ciWorkflowId := triggerAndVerifyCiPipeline(createAppApiResponse, pipelineMaterial, ciPipelineId, suite)
 	queryParams := make(map[string]string)
 	queryParams["container"] = container
 	queryParams["follow"] = "true"
@@ -106,23 +51,12 @@ func (suite *ApplicationsRouterTestSuite) TestGetPodLogs() {
 	})
 
 	suite.Run("A=4=CheckForPreCdAndPostCdArtifactsAndLogs", func() {
-		cdPipeLineResponse := PipelineConfigRouter.HitGetAppCdPipeline(strconv.Itoa(appId), suite.authToken)
+		cdPipeLineResponse := PipelineConfigRouter.HitGetAppCdPipeline(appIdString, suite.authToken)
 		suite.checkForPreCdAndPostCdArtifactsAndLogs(appIdString, envIdString, strconv.Itoa(cdPipeLineResponse.Result.Pipelines[0].Id))
 	})
 
 	// for ci, pre-cd, post-cd logs first need to delete workflow after succeed
-
-	log.Println("=== Here we are Deleting the CD pipeline ===")
-	deletePipelinePayload := PipelineConfigRouter.GetPayloadForDeleteCdPipeline(appId, savePipelineResponse.Result.Pipelines[0].Id)
-	deletePipelineByteCode, _ := json.Marshal(deletePipelinePayload)
-	PipelineConfigRouter.HitForceDeleteCdPipelineApi(deletePipelineByteCode, suite.authToken)
-
-	log.Println("=== Here we are Deleting the CI pipeline ===")
-	PipelineConfigRouter.DeleteCiPipeline(appId, ciPipelineId, suite.authToken)
-	log.Println("=== Here we are Deleting CI Workflow ===")
-	PipelineConfigRouter.HitDeleteWorkflowApi(appId, workflowResponse.AppWorkflowId, suite.authToken)
-	log.Println("=== Here we are Deleting the app after all verifications ===")
-	Base.DeleteApp(appId, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
+	//PipelineConfigRouter.DeleteAppWithCiCd(suite.authToken)
 }
 
 func (suite *ApplicationsRouterTestSuite) checkForCiArtifacts(pipelineId string, ciWorkflowId string) {

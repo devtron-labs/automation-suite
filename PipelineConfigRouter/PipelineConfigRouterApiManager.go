@@ -276,6 +276,7 @@ type StructPipelineConfigRouter struct {
 	createWorkflowResponseDto          ResponseDTOs.CreateWorkflowResponseDto
 	fetchSuggestedCiPipelineName       FetchSuggestedCiPipelineName
 	fetchAllAppWorkflowResponseDto     FetchAllAppWorkflowResponseDto
+	getAppDeploymentStatusTimelineDto  ResponseDTOs.GetAppDeploymentStatusTimelineDTO
 	saveCdPipelineRequestDTO           RequestDTOs.SaveCdPipelineRequestDTO
 	saveCdPipelineResponseDTO          ResponseDTOs.SaveCdPipelineResponseDTO
 	deleteCdPipelineRequestDTO         RequestDTOs.DeleteCdPipelineRequestDTO
@@ -1245,4 +1246,13 @@ func FetchAllAppWorkflow(id int, authToken string) FetchAllAppWorkflowResponseDt
 	structPipelineConfigRouter := StructPipelineConfigRouter{}
 	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), FetchAllAppWorkflowApi)
 	return pipelineConfigRouter.fetchAllAppWorkflowResponseDto
+}
+
+func GetAppDeploymentStatusTimeline(appId int, envId int, authToken string) ResponseDTOs.GetAppDeploymentStatusTimelineDTO {
+	resp, err := Base.MakeApiCall(GetAppDeploymentStatusTimelineApiUrl+strconv.Itoa(appId)+strconv.Itoa(envId), http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, FetchAllAppWorkflowApi)
+
+	structPipelineConfigRouter := StructPipelineConfigRouter{}
+	pipelineConfigRouter := structPipelineConfigRouter.UnmarshalGivenResponseBody(resp.Body(), FetchAllAppWorkflowApi)
+	return pipelineConfigRouter.getAppDeploymentStatusTimelineDto
 }

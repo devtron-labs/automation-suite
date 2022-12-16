@@ -6,5 +6,7 @@ import (
 )
 
 func TestAppStoreDiscoverRouterSuite(t *testing.T) {
-	suite.Run(t, new(AppStoreDiscoverTestSuite))
+	appStoreDiscoverTestSuite := new(AppStoreDiscoverTestSuite)
+	suite.Run(t, appStoreDiscoverTestSuite)
+	appStoreDiscoverTestSuite.AfterSuite()
 }

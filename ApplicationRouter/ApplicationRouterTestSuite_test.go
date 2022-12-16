@@ -6,5 +6,7 @@ import (
 )
 
 func TestApplicationRouterSuite(t *testing.T) {
+	applicationsRouterTestSuite := new(ApplicationsRouterTestSuite)
 	suite.Run(t, new(ApplicationsRouterTestSuite))
+	applicationsRouterTestSuite.AfterSuite()
 }
