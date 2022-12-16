@@ -18,7 +18,7 @@ func (suite *ApplicationsRouterTestSuite) TestGetList() {
 	queryParamsForGettingHealthStatus := make(map[string]string)
 	queryParamsForGettingHealthStatus["installed-app-id"] = strconv.Itoa(installedAppId)
 	queryParamsForGettingHealthStatus["env-id"] = environmentId
-	AppStoreDiscoverRouter.PollForAppStatusInAppDetails(queryParamsForGettingHealthStatus, suite.authToken)
+	AppStoreDiscoverRouter.PollForGettingHelmAppData(queryParamsForGettingHealthStatus, suite.authToken)
 	installedAppDetails := AppStoreDiscoverRouter.HitGetInstalledAppDetailsApi(queryParamsForGettingHealthStatus, suite.authToken)
 	assert.Equal(suite.T(), "Healthy", installedAppDetails.Result.ResourceTree["status"])
 

@@ -17,7 +17,7 @@ func (suite *AppStoreDiscoverTestSuite) TestInstallApp() {
 		queryParamsForAppStatus := make(map[string]string)
 		queryParamsForAppStatus["installed-app-id"] = strconv.Itoa(responseAfterInstallingApp.Result.InstalledAppId)
 		queryParamsForAppStatus["env-id"] = strconv.Itoa(responseAfterInstallingApp.Result.EnvironmentId)
-		PollForAppStatusInAppDetails(queryParamsForAppStatus, suite.authToken)
+		PollForGettingHelmAppData(queryParamsForAppStatus, suite.authToken)
 		respOfGetApplicationDetailApi := HitGetInstalledAppDetailsApi(queryParamsForAppStatus, suite.authToken)
 		assert.Equal(suite.T(), "Healthy", respOfGetApplicationDetailApi.Result.ResourceTree["status"])
 		assert.Equal(suite.T(), "apache", respOfGetApplicationDetailApi.Result.AppStoreAppName)
