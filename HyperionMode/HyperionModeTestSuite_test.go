@@ -3,7 +3,6 @@ package HyperionMode
 import (
 	"automation-suite/AppLabelsRouter"
 	"automation-suite/AppListingRouter"
-	"automation-suite/AppStoreRouter"
 	"automation-suite/AttributesRouter"
 	"automation-suite/ChartRepositoryRouter"
 	"automation-suite/GitopsConfigRouter"
@@ -33,9 +32,9 @@ func TestHelmAppRouterSuite(t *testing.T) {
 	suite.Run(t, new(HelmAppRouter.HelmAppTestSuite))
 }
 
-func TestAppStoreRouterSuite(t *testing.T) {
-	suite.Run(t, new(AppStoreRouter.AppStoreTestSuite))
-}
+//func TestAppStoreRouterSuite(t *testing.T) {
+//	suite.Run(t, new(AppStoreRouter.AppStoreTestSuite))
+//}
 
 func TestChartRepoRouterSuite(t *testing.T) {
 	suite.Run(t, new(ChartRepositoryRouter.ChartRepoTestSuite))

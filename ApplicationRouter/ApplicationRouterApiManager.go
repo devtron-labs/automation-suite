@@ -2,6 +2,7 @@ package ApplicationRouter
 
 import (
 	"automation-suite/ApplicationRouter/ResponseDTOs"
+	"automation-suite/PipelineConfigRouter"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/suite"
@@ -79,4 +80,7 @@ type ApplicationsRouterTestSuite struct {
 
 func (suite *ApplicationsRouterTestSuite) SetupSuite() {
 	suite.authToken = Base.GetAuthToken()
+}
+func (suite *ApplicationsRouterTestSuite) AfterSuite() {
+	PipelineConfigRouter.DeleteAppWithCiCd(suite.authToken)
 }

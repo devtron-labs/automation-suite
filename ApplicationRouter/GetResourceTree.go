@@ -36,7 +36,7 @@ func (suite *ApplicationsRouterTestSuite) TestClassGetResourceTree() {
 		assert.True(suite.T(), strings.Contains(ResourceTreeApiResponse.Errors[0].InternalMessage, "[{rpc error: code = NotFound desc = error getting application by name: application.argoproj.io"))
 	})
 
-	PipelineConfigRouter.DeleteAppWithCiCd(suite.authToken)
+	//PipelineConfigRouter.DeleteAppWithCiCd(suite.authToken)
 }
 
 func triggerAndVerifyCiPipeline(createAppApiResponse Base.CreateAppRequestDto, pipelineMaterial PipelineConfigRouterResponseDTOs.GetCiPipelineMaterialResponseDTO, CiPipelineID int, suite *ApplicationsRouterTestSuite) string {

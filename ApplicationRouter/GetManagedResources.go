@@ -40,5 +40,5 @@ func (suite *ApplicationsRouterTestSuite) TestClassGetManagedResources() {
 		}
 	})
 
-	PipelineConfigRouter.DeleteAppWithCiCd(suite.authToken)
+	//PipelineConfigRouter.DeleteAppWithCiCd(suite.authToken)
 }

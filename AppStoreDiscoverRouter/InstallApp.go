@@ -2,52 +2,16 @@ package AppStoreDiscoverRouter
 
 import (
 	Base "automation-suite/testUtils"
-	"encoding/json"
 	"github.com/stretchr/testify/assert"
-	"github.com/tidwall/sjson"
 	"log"
-	"sigs.k8s.io/yaml"
 	"strconv"
 	"strings"
 )
 
 func (suite *AppStoreDiscoverTestSuite) TestInstallApp() {
-	var valuesOverrideInterface interface{}
-	var InstalledAppId int
-	log.Println("=== Getting apache chart repo via DiscoverApp API ===")
-	queryParams := map[string]string{"appStoreName": "apache"}
-	PollForGettingHelmAppData(queryParams, suite.authToken)
-	ActiveDiscoveredApps := HitDiscoverAppApi(queryParams, suite.authToken)
-	var requiredReferenceId int
-	for _, DiscoveredApp := range ActiveDiscoveredApps.Result {
-		if DiscoveredApp.ChartName == "bitnami" {
-			requiredReferenceId = DiscoveredApp.AppStoreApplicationVersionId
-			break
-		}
-	}
-	log.Println("=== Getting Template values for apache chart===")
-	queryParamsOfApi := map[string]string{"referenceId": strconv.Itoa(requiredReferenceId), "kind": "DEFAULT"}
-	referenceTemplate := HitGetTemplateValuesViaReferenceIdApi(queryParamsOfApi, suite.authToken)
-	valuesOverrideYaml := referenceTemplate.Result.Values
-	if err := yaml.Unmarshal([]byte(valuesOverrideYaml), &valuesOverrideInterface); err != nil {
-		panic(err)
-	}
-	Base.ConvertYamlIntoJson(valuesOverrideInterface)
-	valuesOverrideJson, _ := json.Marshal(valuesOverrideInterface)
-	jsonOfSaveDeploymentTemp := string(valuesOverrideJson)
-	jsonWithTypeAsClusterIP, _ := sjson.Set(jsonOfSaveDeploymentTemp, "service.type", "ClusterIP")
-	updatedValuesOverrideJson := []byte(jsonWithTypeAsClusterIP)
-	log.Println("=== converting Json into YAML for Values Override in Install API===")
-	updatedValuesOverrideYaml, _ := yaml.JSONToYAML(updatedValuesOverrideJson)
-
-	var updatedByteValueOfInstallAppRequestPayload []byte
+	responseAfterInstallingApp, updatedByteValueOfInstallAppRequestPayload, _, _ := CreateHelmApp(suite.authToken)
+	//InstalledAppId := responseAfterInstallingApp.Result.InstalledAppId
 	suite.Run("A=1=InstallAppWithValidPayload", func() {
-		installAppRequestDTO := GetRequestDtoForInstallApp(requiredReferenceId, requiredReferenceId, valuesOverrideInterface, string(updatedValuesOverrideYaml))
-		byteValueOfInstallAppRequestPayload, _ := json.Marshal(installAppRequestDTO)
-		jsonOfSaveDeploymentTemp1 := string(byteValueOfInstallAppRequestPayload)
-		jsonWithTypeAsClusterIP1, _ := sjson.Set(jsonOfSaveDeploymentTemp1, "valuesOverride.service.type", "ClusterIP")
-		updatedByteValueOfInstallAppRequestPayload = []byte(jsonWithTypeAsClusterIP1)
-		responseAfterInstallingApp := HitInstallAppApi(string(updatedByteValueOfInstallAppRequestPayload), suite.authToken)
 		log.Println("=== Validating the response of install Helm-chart API ===")
 		assert.NotNil(suite.T(), responseAfterInstallingApp.Result.InstalledAppId)
 		queryParamsForAppStatus := make(map[string]string)
@@ -55,8 +19,7 @@ func (suite *AppStoreDiscoverTestSuite) TestInstallApp() {
 		queryParamsForAppStatus["env-id"] = strconv.Itoa(responseAfterInstallingApp.Result.EnvironmentId)
 		PollForAppStatusInAppDetails(queryParamsForAppStatus, suite.authToken)
 		respOfGetApplicationDetailApi := HitGetInstalledAppDetailsApi(queryParamsForAppStatus, suite.authToken)
-		InstalledAppId = respOfGetApplicationDetailApi.Result.InstalledAppId
-		assert.Equal(suite.T(), "Healthy", respOfGetApplicationDetailApi.Result.ResourceTree.Status)
+		assert.Equal(suite.T(), "Healthy", respOfGetApplicationDetailApi.Result.ResourceTree["status"])
 		assert.Equal(suite.T(), "apache", respOfGetApplicationDetailApi.Result.AppStoreAppName)
 
 	})
@@ -64,7 +27,8 @@ func (suite *AppStoreDiscoverTestSuite) TestInstallApp() {
 		expectedPayload, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/AppStoreRouter/InstalledAppRequestPayloadWithInvalidTeamId.json")
 		log.Println("Hitting the InstallAppApi with InvalidTeamId in Payload")
 		resp := HitInstallAppApi(string(expectedPayload), suite.authToken)
-		assert.Equal(suite.T(), "[{ERROR #23503 insert or update on table \"app\" violates foreign key constraint \"app_team_id_fkey\"}]", resp.Errors[0].InternalMessage)
+		//assert.Equal(suite.T(), "[{ERROR #23503 insert or update on table \"app\" violates foreign key constraint \"app_team_id_fkey\"}]", resp.Errors[0].InternalMessage)
+		assert.Equal(suite.T(), "[{pg: no rows in result set}]", resp.Errors[0].InternalMessage)
 
 	})
 	suite.Run("A=3=InstallAppWithInvalidAppStoreVersion", func() {
@@ -94,8 +58,8 @@ func (suite *AppStoreDiscoverTestSuite) TestInstallApp() {
 		assert.True(suite.T(), strings.Contains(latestResponse.Errors[0].UserMessage, "app already exists"))
 	})
 
-	log.Println("Removing the data created via API")
-	respOfDeleteInstallAppApi := HitDeleteInstalledAppApi(strconv.Itoa(InstalledAppId), suite.authToken)
-	assert.Equal(suite.T(), InstalledAppId, respOfDeleteInstallAppApi.Result.InstalledAppId)
+	//log.Println("Removing the data created via API")
+	//respOfDeleteInstallAppApi := HitDeleteInstalledAppApi(strconv.Itoa(InstalledAppId), suite.authToken)
+	//assert.Equal(suite.T(), InstalledAppId, respOfDeleteInstallAppApi.Result.InstalledAppId)
 
 }

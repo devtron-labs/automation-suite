@@ -56,7 +56,7 @@ func (suite *ApplicationsRouterTestSuite) TestGetPodLogs() {
 	})
 
 	// for ci, pre-cd, post-cd logs first need to delete workflow after succeed
-	PipelineConfigRouter.DeleteAppWithCiCd(suite.authToken)
+	//PipelineConfigRouter.DeleteAppWithCiCd(suite.authToken)
 }
 
 func (suite *ApplicationsRouterTestSuite) checkForCiArtifacts(pipelineId string, ciWorkflowId string) {

@@ -51,7 +51,7 @@ func (suite *ApplicationsRouterTestSuite) TestClassGetTerminalSession() {
 		assert.True(suite.T(), strings.Contains(getApplicationApiResponse.Errors[0].InternalMessage, "[{rpc error: code = NotFound desc = error getting application: applications.argoproj.io"))
 	})
 
-	PipelineConfigRouter.DeleteAppWithCiCd(suite.authToken)
+	//PipelineConfigRouter.DeleteAppWithCiCd(suite.authToken)
 }
 
 //todo will add other test cases once Devs will handle the validations
