@@ -30,4 +30,6 @@ const (
 	GetInstalledAppDetailsApi                     string = "GetInstalledAppDetailsApi"
 	CheckAppExistsApiUrl                          string = "/orchestrator/app-store/application/exists"
 	CheckAppExistsApi                             string = "CheckAppExistsApi"
+	GetAllInstalledAppApi                         string = "GetAllInstalledAppApi"
+	GetAllInstalledAppApiUrl                      string = "/orchestrator/app-store/installed-app"
 )

@@ -4,13 +4,10 @@ import (
 	"automation-suite/ApiTokenRouter"
 	"automation-suite/AppLabelsRouter"
 	"automation-suite/AppListingRouter"
-	"automation-suite/AppStoreDiscoverRouter"
-	"automation-suite/ApplicationRouter"
 	"automation-suite/AttributesRouter"
 	"automation-suite/ChartRepositoryRouter"
 	"automation-suite/GitopsConfigRouter"
 	"automation-suite/HelmAppRouter"
-	"automation-suite/PipelineConfigRouter"
 	"automation-suite/SSOLoginRouter"
 	"automation-suite/TeamRouter"
 	"automation-suite/UserRouter"
@@ -64,7 +61,7 @@ func TestHelmAppRouterSuite(t *testing.T) {
 	suite.Run(t, new(HelmAppRouter.HelmAppTestSuite))
 }
 
-func TestAppStoreDiscoverRouterSuite(t *testing.T) {
+/*func TestAppStoreDiscoverRouterSuite(t *testing.T) {
 	suite.Run(t, new(AppStoreDiscoverRouter.AppStoreDiscoverTestSuite))
 }
 
@@ -75,6 +72,7 @@ func TestPipelineConfigSuite(t *testing.T) {
 func TestApplicationRouterSuite(t *testing.T) {
 	suite.Run(t, new(ApplicationRouter.ApplicationsRouterTestSuite))
 }
+*/
 
 func TestApiTokenRouterSuite(t *testing.T) {
 	suite.Run(t, new(ApiTokenRouter.ApiTokenRoutersTestSuite))

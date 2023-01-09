@@ -296,7 +296,7 @@ type StructPipelineConfigRouter struct {
 
 type EnvironmentConfigPipelineConfigRouter struct {
 	GitHubProjectUrl       string `env:"GITHUB_URL_TO_CLONE_PROJECT" envDefault:"https://github.com/devtron-labs/sample-go-app.git"`
-	DockerRegistry         string `env:"DOCKER_REGISTRY" envDefault:"erdipak"`
+	DockerRegistry         string `env:"DOCKER_REGISTRY" envDefault:"devtron-quay"`
 	DockerfilePath         string `env:"DOCKER_FILE_PATH" envDefault:"./Dockerfile"`
 	DockerfileRepository   string `env:"DOCKER_FILE_REPO" envDefault:"sample-go-app"`
 	DockerfileRelativePath string `env:"DOCKER_FILE_RELATIVE_PATH" envDefault:"Dockerfile"`

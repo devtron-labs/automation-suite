@@ -1,6 +1,7 @@
 package AppListingRouter
 
 import (
+	"automation-suite/AppListingRouter/RequestDTOs"
 	"automation-suite/AppListingRouter/ResponseDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
@@ -11,8 +12,9 @@ import (
 )
 
 type StructAppListingRouter struct {
-	fetchAllStageStatusResponseDto ResponseDTOs.FetchAllStageStatusResponseDTO
-	fetchOtherEnvResponseDto       ResponseDTOs.FetchOtherEnvResponseDTO
+	fetchAllStageStatusResponseDto    ResponseDTOs.FetchAllStageStatusResponseDTO
+	fetchOtherEnvResponseDto          ResponseDTOs.FetchOtherEnvResponseDTO
+	fetchAppsByEnvironmentResponseDTO ResponseDTOs.FetchAppsByEnvironmentResponseDTO
 }
 
 func FetchAllStageStatus(id int, authToken string) ResponseDTOs.FetchAllStageStatusResponseDTO {
@@ -38,12 +40,31 @@ func FetchOtherEnv(id int, authToken string) ResponseDTOs.FetchOtherEnvResponseD
 	apiRouter := structAppListingRouter.UnmarshalGivenResponseBody(resp.Body(), FetchOtherEnvApi)
 	return apiRouter.fetchOtherEnvResponseDto
 }
+
+func GetPayloadForApiFetchAppsByEnvironment() RequestDTOs.FetchAppsByEnvironmentRequestDTO {
+	FetchAppsByEnvironmentRequestDTO := RequestDTOs.FetchAppsByEnvironmentRequestDTO{}
+	FetchAppsByEnvironmentRequestDTO.SortBy = "appNameSort"
+	FetchAppsByEnvironmentRequestDTO.SortOrder = "ASC"
+	FetchAppsByEnvironmentRequestDTO.Size = 20
+	return FetchAppsByEnvironmentRequestDTO
+}
+
+func HitApiFetchAppsByEnvironment(payload []byte, authToken string) ResponseDTOs.FetchAppsByEnvironmentResponseDTO {
+	resp, err := Base.MakeApiCall(AppListingRoutersBaseUrl+FetchAppsByEnvironmentUrl, http.MethodPost, string(payload), nil, authToken)
+	Base.HandleError(err, FetchAppsByEnvironment)
+	structAppListingRouter := StructAppListingRouter{}
+	apiRouter := structAppListingRouter.UnmarshalGivenResponseBody(resp.Body(), FetchAppsByEnvironment)
+	return apiRouter.fetchAppsByEnvironmentResponseDTO
+}
+
 func (structAppListingRouter StructAppListingRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructAppListingRouter {
 	switch apiName {
 	case FetchAllStageStatusApi:
 		json.Unmarshal(response, &structAppListingRouter.fetchAllStageStatusResponseDto)
 	case FetchOtherEnvApi:
 		json.Unmarshal(response, &structAppListingRouter.fetchOtherEnvResponseDto)
+	case FetchAppsByEnvironment:
+		json.Unmarshal(response, &structAppListingRouter.fetchAppsByEnvironmentResponseDTO)
 	}
 	return structAppListingRouter
 }

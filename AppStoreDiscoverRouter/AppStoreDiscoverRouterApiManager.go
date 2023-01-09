@@ -30,6 +30,7 @@ type StructAppStoreDiscoverRouter struct {
 	installedAppDetailsResponseDTO          ResponseDTOs.InstalledAppDetailsResponseDTO
 	checkAppExistsResponseDTO               ResponseDTOs.CheckAppExistsResponseDTO
 	checkAppExistsRequestDTO                RequestDTOs.CheckAppExistsRequestDTO
+	getAllInstalledAppResponseDTO           ResponseDTOs.GetAllInstalledAppResponseDTO
 }
 
 func HitDiscoverAppApi(queryParams map[string]string, authToken string) ResponseDTOs.DiscoverAppApiResponse {
@@ -194,6 +195,14 @@ func getCheckAppExistsApi(AppNames []string) []RequestDTOs.CheckAppExistsRequest
 	return listOfCheckAppExistsRequestDTOs
 }
 
+func HitApiGetAllInstalledApps(authToken string) ResponseDTOs.GetAllInstalledAppResponseDTO {
+	resp, err := Base.MakeApiCall(GetAllInstalledAppApiUrl, http.MethodGet, "", nil, authToken)
+	Base.HandleError(err, GetAllInstalledAppApi)
+	structAppStoreDiscoverRouter := StructAppStoreDiscoverRouter{}
+	appStoreDiscoverRouter := structAppStoreDiscoverRouter.UnmarshalGivenResponseBody(resp.Body(), GetAllInstalledAppApi)
+	return appStoreDiscoverRouter.getAllInstalledAppResponseDTO
+}
+
 func (structAppStoreDiscoverRouter StructAppStoreDiscoverRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructAppStoreDiscoverRouter {
 	switch apiName {
 	case DiscoverAppApi:
@@ -224,6 +233,8 @@ func (structAppStoreDiscoverRouter StructAppStoreDiscoverRouter) UnmarshalGivenR
 		json.Unmarshal(response, &structAppStoreDiscoverRouter.installedAppDetailsResponseDTO)
 	case CheckAppExistsApi:
 		json.Unmarshal(response, &structAppStoreDiscoverRouter.checkAppExistsResponseDTO)
+	case GetAllInstalledAppApi:
+		json.Unmarshal(response, &structAppStoreDiscoverRouter.getAllInstalledAppResponseDTO)
 	}
 	return structAppStoreDiscoverRouter
 }
