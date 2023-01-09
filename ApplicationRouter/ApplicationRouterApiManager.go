@@ -33,13 +33,14 @@ func HitGetManagedResourcesApi(appName string, authToken string) ResponseDTOs.Ma
 	return applicationRepoRouter.managedResourcesResponseDTO
 }
 
-func HitGetListApi(queryParams map[string]string, authToken string) ResponseDTOs.ListResponseDTO {
+//we are no longer using this API from UI
+/*func HitGetListApi(queryParams map[string]string, authToken string) ResponseDTOs.ListResponseDTO {
 	resp, err := Base.MakeApiCall(ApplicationsRouterBaseUrl, http.MethodGet, "", queryParams, authToken)
 	Base.HandleError(err, GetListApi)
 	structAppLabelsRouter := StructApplicationRouter{}
 	applicationRepoRouter := structAppLabelsRouter.UnmarshalGivenResponseBody(resp.Body(), GetListApi)
 	return applicationRepoRouter.listResponseDTO
-}
+}*/
 
 func HitGetTerminalSessionApi(AppId string, EnvId string, NameSpace string, PodName string, AppName string, authToken string) ResponseDTOs.TerminalSessionResponseDTO {
 	resp, err := Base.MakeApiCall(GetTerminalSessionApiUrl+AppId+"/"+EnvId+"/"+NameSpace+"/"+PodName+"/sh/"+AppName, http.MethodGet, "", nil, authToken)
