@@ -4,6 +4,7 @@ import (
 	"automation-suite/ApiTokenRouter"
 	"automation-suite/AppLabelsRouter"
 	"automation-suite/AppListingRouter"
+	"automation-suite/AppStoreDiscoverRouter"
 	"automation-suite/AttributesRouter"
 	"automation-suite/ChartRepositoryRouter"
 	"automation-suite/GitopsConfigRouter"
@@ -61,10 +62,11 @@ func TestHelmAppRouterSuite(t *testing.T) {
 	suite.Run(t, new(HelmAppRouter.HelmAppTestSuite))
 }
 
-/*func TestAppStoreDiscoverRouterSuite(t *testing.T) {
+func TestAppStoreDiscoverRouterSuite(t *testing.T) {
 	suite.Run(t, new(AppStoreDiscoverRouter.AppStoreDiscoverTestSuite))
 }
 
+/*
 func TestPipelineConfigSuite(t *testing.T) {
 	suite.Run(t, new(PipelineConfigRouter.PipelinesConfigRouterTestSuite))
 }
