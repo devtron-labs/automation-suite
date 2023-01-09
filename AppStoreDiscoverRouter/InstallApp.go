@@ -17,7 +17,7 @@ func (suite *AppStoreDiscoverTestSuite) TestInstallApp() {
 		queryParamsForAppStatus := make(map[string]string)
 		queryParamsForAppStatus["installed-app-id"] = strconv.Itoa(responseAfterInstallingApp.Result.InstalledAppId)
 		queryParamsForAppStatus["env-id"] = strconv.Itoa(responseAfterInstallingApp.Result.EnvironmentId)
-		PollForGettingHelmAppData(queryParamsForAppStatus, suite.authToken)
+		PollForAppStatusInAppDetails(queryParamsForAppStatus, suite.authToken)
 		respOfGetApplicationDetailApi := HitGetInstalledAppDetailsApi(queryParamsForAppStatus, suite.authToken)
 		assert.Equal(suite.T(), "Healthy", respOfGetApplicationDetailApi.Result.ResourceTree["status"])
 		assert.Equal(suite.T(), "apache", respOfGetApplicationDetailApi.Result.AppStoreAppName)
@@ -27,9 +27,7 @@ func (suite *AppStoreDiscoverTestSuite) TestInstallApp() {
 		expectedPayload, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/AppStoreRouter/InstalledAppRequestPayloadWithInvalidTeamId.json")
 		log.Println("Hitting the InstallAppApi with InvalidTeamId in Payload")
 		resp := HitInstallAppApi(string(expectedPayload), suite.authToken)
-		//assert.Equal(suite.T(), "[{ERROR #23503 insert or update on table \"app\" violates foreign key constraint \"app_team_id_fkey\"}]", resp.Errors[0].InternalMessage)
-		assert.Equal(suite.T(), "[{pg: no rows in result set}]", resp.Errors[0].InternalMessage)
-
+		assert.Equal(suite.T(), "[{ERROR #23503 insert or update on table \"app\" violates foreign key constraint \"app_team_id_fkey\"}]", resp.Errors[0].InternalMessage)
 	})
 	suite.Run("A=3=InstallAppWithInvalidAppStoreVersion", func() {
 		expectedPayload, _ := Base.GetByteArrayOfGivenJsonFile("../testdata/AppStoreRouter/InstalledAppRequestPayloadWithInvalidAppStoreVersion.json")

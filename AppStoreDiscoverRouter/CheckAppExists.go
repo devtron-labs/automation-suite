@@ -17,7 +17,7 @@ func (suite *AppStoreDiscoverTestSuite) TestCheckAppExists() {
 	queryParamsOfApi := make(map[string]string)
 	queryParamsOfApi["installed-app-id"] = strconv.Itoa(installedAppId)
 	queryParamsOfApi["env-id"] = environmentId
-	PollForGettingHelmAppData(queryParamsOfApi, suite.authToken)
+	PollForAppStatusInAppDetails(queryParamsOfApi, suite.authToken)
 	installedAppDetails := HitGetInstalledAppDetailsApi(queryParamsOfApi, suite.authToken)
 	assert.Equal(suite.T(), "Healthy", installedAppDetails.Result.ResourceTree["status"].(string))
 
