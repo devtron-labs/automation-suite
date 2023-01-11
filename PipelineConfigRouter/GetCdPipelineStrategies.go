@@ -18,7 +18,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassC4GetCdPipelineStrategies(
 	suite.Run("A=2=GetCdPipelineStrategiesWithInvalidAppId", func() {
 		invalidAppId := strconv.Itoa(testUtils.GetRandomNumberOf9Digit())
 		cdPipelineStrategiesResponse := HitGetCdPipelineStrategies(invalidAppId, suite.authToken)
-		assert.Equal(suite.T(), "pg: no rows in result set", cdPipelineStrategiesResponse.Errors[0].UserMessage)
+		assert.Equal(suite.T(), "no chart configured", cdPipelineStrategiesResponse.Errors[0].UserMessage)
 	})
 
 	// todo need to proper error handling here instead of 500

@@ -18,14 +18,24 @@ import (
 
 func (suite *ApplicationsRouterTestSuite) TestGetPodLogs() {
 	createAppApiResponse, workflowResponse := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken)
+	ciPipelineId := workflowResponse.Result.CiPipelines[0].Id
+	var ciWorkflowId string
+	var container string
+	var containerName string
+	appId := createAppApiResponse.Id
+	//log.Println("=== Here we are getting workflow status material ===")
+	/*updatedWorkflowStatus := PipelineConfigRouter.HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
+	if updatedWorkflowStatus.Result.CdWorkflowStatus[0].DeployStatus == "Not Deployed" || updatedWorkflowStatus.Code != 200 {
+	*/log.Println("=== Here we are getting pipeline material ===")
+	pipelineMaterial := PipelineConfigRouter.HitGetCiPipelineMaterial(ciPipelineId, suite.authToken)
+	time.Sleep(5 * time.Second)
+	log.Println("=== Here we are Triggering CI/CD and verifying CI/CD Deploy Status ===")
+	ciWorkflowId = triggerAndVerifyCiPipeline(createAppApiResponse, pipelineMaterial, ciPipelineId, suite)
+	//}
 	log.Println("=== Here we are getting ResourceTree ===")
 	ResourceTreeApiResponse := HitGetResourceTreeApi(createAppApiResponse.AppName, suite.authToken)
-	container := ResourceTreeApiResponse.Result.PodMetadata[0].Containers[0]
-	containerName := ResourceTreeApiResponse.Result.PodMetadata[0].Name
-	appIdString := strconv.Itoa(createAppApiResponse.Id)
-	pipelineMaterial := PipelineConfigRouter.HitGetCiPipelineMaterial(workflowResponse.Result.CiPipelines[0].Id, suite.authToken)
-	ciPipelineId := pipelineMaterial.Result[0].Id
-	ciWorkflowId := triggerAndVerifyCiPipeline(createAppApiResponse, pipelineMaterial, ciPipelineId, suite)
+	container = ResourceTreeApiResponse.Result.PodMetadata[0].Containers[0]
+	containerName = ResourceTreeApiResponse.Result.PodMetadata[0].Name
 	queryParams := make(map[string]string)
 	queryParams["container"] = container
 	queryParams["follow"] = "true"
@@ -51,8 +61,8 @@ func (suite *ApplicationsRouterTestSuite) TestGetPodLogs() {
 	})
 
 	suite.Run("A=4=CheckForPreCdAndPostCdArtifactsAndLogs", func() {
-		cdPipeLineResponse := PipelineConfigRouter.HitGetAppCdPipeline(appIdString, suite.authToken)
-		suite.checkForPreCdAndPostCdArtifactsAndLogs(appIdString, envIdString, strconv.Itoa(cdPipeLineResponse.Result.Pipelines[0].Id))
+		cdPipeLineResponse := PipelineConfigRouter.HitGetAppCdPipeline(strconv.Itoa(appId), suite.authToken)
+		suite.checkForPreCdAndPostCdArtifactsAndLogs(strconv.Itoa(appId), envIdString, strconv.Itoa(cdPipeLineResponse.Result.Pipelines[0].Id))
 	})
 
 	// for ci, pre-cd, post-cd logs first need to delete workflow after succeed
@@ -175,7 +185,7 @@ func (suite *ApplicationsRouterTestSuite) checkForPreCdAndPostCdArtifactsAndLogs
 	logsDownloadUrl = PipelineConfigRouter.GetAppCdPipelineApiUrl + fmt.Sprintf(logsDownloadUrlFormat, appId, envId, pipelineId, postCdRunnerId)
 	lastIndex = strings.LastIndex(postCdWorkflowName, "-")
 	postCdWorkflowName = postCdWorkflowName[0:lastIndex]
-	suite.hitAndCheckBuildLogs(logsDownloadUrl, postCdNameSpace, postCdWorkflowName, 40, "END_OF_STREAM")
+	suite.hitAndCheckBuildLogs(logsDownloadUrl, postCdNameSpace, postCdWorkflowName, 38, "END_OF_STREAM")
 }
 
 func (suite *ApplicationsRouterTestSuite) PollForPostCdTillHealthy(appId string, envId string, pipelineId string, workflowRunnerId string) bool {

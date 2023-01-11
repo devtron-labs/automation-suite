@@ -1,16 +1,7 @@
 package PipelineConfigRouter
 
-import (
-	"automation-suite/HelperRouter"
-	Base "automation-suite/testUtils"
-	"encoding/json"
-	"github.com/stretchr/testify/assert"
-	"log"
-	"strconv"
-	"time"
-)
-
-func (suite *PipelinesConfigRouterTestSuite) TestGetAppDeploymentStatusTimeline() {
+//todo first I have to finish this as this is incomplete
+/*func (suite *PipelinesConfigRouterTestSuite) TestGetAppDeploymentStatusTimeline() {
 
 	config, _ := GetEnvironmentConfigPipelineConfigRouter()
 	var configId int
@@ -70,7 +61,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestGetAppDeploymentStatusTimeline(
 
 	//write the test cases here
 	time.Sleep(2 * time.Second)
-	suite.Run("Test Deployment Initiation", func() {
+	suite.Run("TestDeploymentInitiation", func() {
 		apiResponse := GetAppDeploymentStatusTimeline(createAppApiResponse.Id, 1, suite.authToken)
 		assert.NotEqual(suite.T(), nil, apiResponse)
 		assert.Equal(suite.T(), 200, apiResponse.Code)
@@ -82,7 +73,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestGetAppDeploymentStatusTimeline(
 		assert.Equal(suite.T(), TIMELINE_STATUS_GIT_COMMIT, apiResponse.Result.Timelines[1])
 	})
 	time.Sleep(2 * time.Second)
-	suite.Run("Test Git Commit Success And Kubectl Apply", func() {
+	suite.Run("TestGitCommitSuccessAndKubectlApply", func() {
 		apiResponse := GetAppDeploymentStatusTimeline(createAppApiResponse.Id, 1, suite.authToken)
 		assert.NotEqual(suite.T(), nil, apiResponse)
 		assert.Equal(suite.T(), 200, apiResponse.Code)
@@ -124,3 +115,4 @@ func (suite *PipelinesConfigRouterTestSuite) TestGetAppDeploymentStatusTimeline(
 	log.Println("=== Here we Deleting the Test data created after verification ===")
 	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 }
+*/

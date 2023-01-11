@@ -14,8 +14,12 @@ func (suite *ApplicationsRouterTestSuite) TestClassGetManagedResources() {
 	pipelineMaterial := PipelineConfigRouter.HitGetCiPipelineMaterial(workflowResponse.Result.CiPipelines[0].Id, suite.authToken)
 
 	appName := createAppApiResponse.AppName
-	log.Println("=== Here we are Triggering CI/CD and verifying CI/CD Deploy Status ===")
-	triggerAndVerifyCiPipeline(createAppApiResponse, pipelineMaterial, workflowResponse.Result.CiPipelines[0].Id, suite)
+	log.Println("=== Here we are getting workflow status material ===")
+	updatedWorkflowStatus := PipelineConfigRouter.HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
+	if updatedWorkflowStatus.Result.CdWorkflowStatus[0].DeployStatus == "Not Deployed" || updatedWorkflowStatus.Code != 200 {
+		log.Println("=== Here we are Triggering CI/CD and verifying CI/CD Deploy Status ===")
+		triggerAndVerifyCiPipeline(createAppApiResponse, pipelineMaterial, workflowResponse.Result.CiPipelines[0].Id, suite)
+	}
 
 	suite.Run("A=1=GetManagedResourcesWithInvalidAppName", func() {
 		randomAppName := Base.GetRandomStringOfGivenLength(8)

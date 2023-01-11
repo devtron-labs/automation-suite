@@ -11,19 +11,28 @@ import (
 )
 
 func (suite *ApplicationsRouterTestSuite) TestClassGetTerminalSession() {
-
+	var container string
 	createAppApiResponse, workflowResponse := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken)
 	time.Sleep(2 * time.Second)
 
 	log.Println("=== Here we are getting pipeline material ===")
 	pipelineMaterial := PipelineConfigRouter.HitGetCiPipelineMaterial(workflowResponse.Result.CiPipelines[0].Id, suite.authToken)
 
-	log.Println("=== Here we are Triggering CI/CD and verifying CI/CD Deploy Status ===")
-	triggerAndVerifyCiPipeline(createAppApiResponse, pipelineMaterial, workflowResponse.Result.CiPipelines[0].Id, suite)
+	log.Println("=== Here we are getting workflow status material ===")
+	updatedWorkflowStatus := PipelineConfigRouter.HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
 
-	log.Println("=== Here we are getting ResourceTree ===")
-	ResourceTreeApiResponse := HitGetResourceTreeApi(createAppApiResponse.AppName, suite.authToken)
-	container := ResourceTreeApiResponse.Result.PodMetadata[0].Containers[0]
+	if updatedWorkflowStatus.Result.CdWorkflowStatus[0].DeployStatus == "Not Deployed" || updatedWorkflowStatus.Code != 200 {
+		log.Println("=== Here we are Triggering CI/CD and verifying CI/CD Deploy Status ===")
+		triggerAndVerifyCiPipeline(createAppApiResponse, pipelineMaterial, workflowResponse.Result.CiPipelines[0].Id, suite)
+
+		log.Println("=== Here we are getting ResourceTree ===")
+		ResourceTreeApiResponse := HitGetResourceTreeApi(createAppApiResponse.AppName, suite.authToken)
+		container = ResourceTreeApiResponse.Result.PodMetadata[0].Containers[0]
+	} else {
+		log.Println("=== Here we are getting ResourceTree ===")
+		ResourceTreeApiResponse := HitGetResourceTreeApi(createAppApiResponse.AppName, suite.authToken)
+		container = ResourceTreeApiResponse.Result.PodMetadata[0].Containers[0]
+	}
 
 	suite.Run("A=1=GetTerminalSessionWithValidArgs", func() {
 		TerminalSessionApiResponse := HitGetTerminalSessionApi(strconv.Itoa(createAppApiResponse.Id), "1", "devtron-demo", container, createAppApiResponse.AppName, suite.authToken)
