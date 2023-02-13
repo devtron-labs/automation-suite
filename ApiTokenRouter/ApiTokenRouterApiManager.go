@@ -24,7 +24,7 @@ func HitCreateApiTokenApi(payload string, authToken string) ResponseDTOs.CreateA
 	return apiTokenRepoRouter.createApiTokenResponseDTO
 }
 
-func getPayLoadForCreateApiToken() RequestDTOs.CreateApiTokenRequestDTO {
+func GetPayLoadForCreateApiToken() RequestDTOs.CreateApiTokenRequestDTO {
 	createApiTokenRequestDTO := RequestDTOs.CreateApiTokenRequestDTO{}
 	createApiTokenRequestDTO.ExpireAtInMs = getFutureTimestamp(7)
 	createApiTokenRequestDTO.Name = "Token" + Base.GetRandomStringOfGivenLength(5)

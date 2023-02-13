@@ -15,7 +15,7 @@ func (suite *ApiTokenRoutersTestSuite) TestUpdateApiToken() {
 		timeStampBeforeUpdating := time.Now().Unix()
 		time.Sleep(5 * time.Second)
 		var tokenId int
-		createApiTokenRequestDTO := getPayLoadForCreateApiToken()
+		createApiTokenRequestDTO := GetPayLoadForCreateApiToken()
 		payloadForCreateApiTokenRequest, _ := json.Marshal(createApiTokenRequestDTO)
 		responseOfCreateApiToken := HitCreateApiTokenApi(string(payloadForCreateApiTokenRequest), suite.authToken)
 		assert.Equal(suite.T(), "API-TOKEN:"+createApiTokenRequestDTO.Name, responseOfCreateApiToken.Result.UserIdentifier)
