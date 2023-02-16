@@ -9,7 +9,6 @@ import (
 )
 
 func (suite *AppsListingRouterTestSuite) TestFetchAppsByEnvironment() {
-
 	suite.Run("A=1=FetchAppsByEnvironmentWithDefaultFilter", func() {
 		log.Println("Here we are creating request payload")
 		Envs := []int{}
@@ -175,6 +174,5 @@ func (suite *AppsListingRouterTestSuite) TestFetchAppsByEnvironment() {
 		appsList = HitApiFetchAppsByEnvironment(payloadForApiFetchAppsByEnvironment, suite.authToken)
 		assert.Equal(suite.T(), expectedAppName, appsList.Result.AppContainers[0].Environments[0].AppName)
 	})
-
 	PipelineConfigRouter.DeleteAppWithCiCd(suite.authToken)
 }
