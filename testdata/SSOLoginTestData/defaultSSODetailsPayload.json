@@ -1,0 +1,21 @@
+{
+  "id": 2,
+  "name": "google",
+  "url": "https://staging.devtron.info/orchestrator",
+  "config": {
+    "id": "google",
+    "label": "Google",
+    "type": "oidc",
+    "name": "Google",
+    "config": {
+      "issuer": "https://accounts.google.com",
+      "clientID": "767341395723-lqeu03bu78agpospctjt81t28egjc706.apps.googleusercontent.com",
+      "clientSecret": "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",
+      "redirectURI": "https://staging.devtron.info/orchestrator/api/dex/callback",
+      "hostedDomains": [
+        "devtron.ai"
+      ]
+    }
+  },
+  "active": false
+}
