@@ -10,7 +10,8 @@ import (
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassGetCiPipelineMin() {
-	config, _ := GetEnvironmentConfigPipelineConfigRouter()
+	envConf := Base.ReadBaseEnvConfig()
+	config := Base.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 	log.Println("=== Here we are creating a App ===")
 	createAppApiResponse := Base.CreateApp(suite.authToken).Result
 	appId := createAppApiResponse.Id

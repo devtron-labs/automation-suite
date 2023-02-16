@@ -26,25 +26,6 @@ func (structDockerRegRouter StructDockerRegRouter) UnmarshalGivenResponseBody(re
 	return structDockerRegRouter
 }
 
-/*
-type DockerRegistry struct {
-	PluginId     string `env:"PLUGIN_ID" envDefault:""`
-	RegistryType string `env:"REGISTRY_TYPE" envDefault:""`
-	RegistryUrl  string `env:"REGISTRY_URL" envDefault:""`
-	Username     string `env:"DOCKER_USERNAME" envDefault:""`
-	Password     string `env:"PASSWORD" envDefault:""`
-}*/
-/*
-func GetDockerRegistry() (*DockerRegistry, error) {
-	cfg := &DockerRegistry{}
-	err := env.Parse(cfg)
-	if err != nil {
-		return nil, errors.New("could not get config from ChartRepoRouterConfig")
-	}
-	return cfg, err
-}
-*/
-
 func GetDockerRegistryRequestDto(isDefault bool) RequestDTOs.SaveDockerRegistryRequestDTO {
 	var saveDockerRegistryRequestDto RequestDTOs.SaveDockerRegistryRequestDTO
 	ipsConfig := GetIpsConfig(0)

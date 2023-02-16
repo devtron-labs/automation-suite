@@ -24,7 +24,8 @@ func CreateNewAppWithCiCd(authToken string) (testUtils.CreateAppRequestDto, dtos
 	if createAppApiResponsePtr != nil && workflowResponsePtr != nil {
 		return *createAppApiResponsePtr, *workflowResponsePtr
 	}
-	config, _ := GetEnvironmentConfigPipelineConfigRouter()
+	envConf := testUtils.ReadBaseEnvConfig()
+	file := testUtils.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 	var configId int
 	log.Println("=== Here we are creating a App ===")
 	createAppApiResponse := testUtils.CreateApp(authToken).Result
@@ -36,7 +37,7 @@ func CreateNewAppWithCiCd(authToken string) (testUtils.CreateAppRequestDto, dtos
 	createAppMaterialResponse := HitCreateAppMaterialApi(appMaterialByteValue, createAppApiResponse.Id, 1, false, authToken)
 
 	log.Println("=== Here we are saving docker build config ===")
-	requestPayloadForSaveAppCiPipeline := GetRequestPayloadForSaveAppCiPipeline(createAppApiResponse.Id, config.DockerRegistry, "test", config.DockerfilePath, config.DockerfileRepository, config.DockerfileRelativePath, createAppMaterialResponse.Result.Material[0].Id)
+	requestPayloadForSaveAppCiPipeline := GetRequestPayloadForSaveAppCiPipeline(createAppApiResponse.Id, file.DockerRegistry, "test", file.DockerfilePath, file.DockerfileRepository, file.DockerfileRelativePath, createAppMaterialResponse.Result.Material[0].Id)
 	byteValueOfSaveAppCiPipeline, _ := json.Marshal(requestPayloadForSaveAppCiPipeline)
 	HitSaveAppCiPipeline(byteValueOfSaveAppCiPipeline, authToken)
 

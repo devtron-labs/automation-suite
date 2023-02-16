@@ -8,7 +8,7 @@ require (
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/lib/pq v1.10.4
 	github.com/r3labs/sse/v2 v2.8.1
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	github.com/tidwall/sjson v1.2.5
 	k8s.io/apimachinery v0.24.3
 	k8s.io/client-go v0.24.3

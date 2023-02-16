@@ -4,11 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/caarlos0/env"
-	"github.com/go-resty/resty/v2"
-	"github.com/r3labs/sse/v2"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -18,6 +13,12 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/caarlos0/env"
+	"github.com/go-resty/resty/v2"
+	"github.com/r3labs/sse/v2"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const createSessionApiUrl string = "/orchestrator/api/v1/session"
@@ -67,23 +68,28 @@ type DeleteResponseDto struct {
 }
 
 type BaseClassEnvironmentConfig struct {
-	BaseServerUrl      string `json:"BASE_SERVER_URL"`
-	LogInUserName      string `json:"LOGIN_USERNAME"`
-	LogInUserPwd       string `json:"LOGIN_PASSWORD"`
-	SSOClientSecret    string `json:"CLIENT_SECRET"`
-	Provider           string `json:"PROVIDER"`
-	GitUsername        string `json:"GIT_USERNAME"`
-	Host               string `json:"HOST"`
-	GitToken           string `json:"GIT_TOKEN"`
-	GitHubOrgId        string `json:"GITHUB_ORG_ID"`
-	PluginId           string `json:"PLUGIN_ID"`
-	RegistryType       string `json:"REGISTRY_TYPE"`
-	RegistryUrl        string `json:"REGISTRY_URL"`
-	DockerUsername     string `json:"DOCKER_USERNAME"`
-	Password           string `json:"PASSWORD"`
-	ClusterBearerToken string `json:"CLUSTER_BEARER_TOKEN"`
-	ClusterServerUrl   string `json:"CLUSTER_SERVER_URL"`
-	BearerToken        string `json:"BEARER_TOKEN"`
+	BaseServerUrl          string `json:"BASE_SERVER_URL"`
+	LogInUserName          string `json:"LOGIN_USERNAME"`
+	LogInUserPwd           string `json:"LOGIN_PASSWORD"`
+	SSOClientSecret        string `json:"CLIENT_SECRET"`
+	Provider               string `json:"PROVIDER"`
+	GitUsername            string `json:"GIT_USERNAME"`
+	Host                   string `json:"HOST"`
+	GitToken               string `json:"GIT_TOKEN"`
+	GitHubOrgId            string `json:"GITHUB_ORG_ID"`
+	PluginId               string `json:"PLUGIN_ID"`
+	RegistryType           string `json:"REGISTRY_TYPE"`
+	RegistryUrl            string `json:"REGISTRY_URL"`
+	DockerUsername         string `json:"DOCKER_USERNAME"`
+	Password               string `json:"PASSWORD"`
+	ClusterBearerToken     string `json:"CLUSTER_BEARER_TOKEN"`
+	ClusterServerUrl       string `json:"CLUSTER_SERVER_URL"`
+	BearerToken            string `json:"BEARER_TOKEN"`
+	GitHubProjectUrl       string `json:"GITHUB_URL_TO_CLONE_PROJECT"`
+	DockerRegistry         string `json:"DOCKER_REGISTRY" `
+	DockerfilePath         string `json:"DOCKER_FILE_PATH" `
+	DockerfileRepository   string `json:"DOCKER_FILE_REPO" `
+	DockerfileRelativePath string `json:"DOCKER_FILE_RELATIVE_PATH"`
 }
 
 func getRestyClient() *resty.Client {

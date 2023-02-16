@@ -11,7 +11,8 @@ import (
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassB7SaveCdPipeline() {
-	config, _ := GetEnvironmentConfigPipelineConfigRouter()
+	envConf := Base.ReadBaseEnvConfig()
+	config := Base.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 	var configId int
 	log.Println("=== Here we are creating a App ===")
 	createAppApiResponse := Base.CreateApp(suite.authToken).Result

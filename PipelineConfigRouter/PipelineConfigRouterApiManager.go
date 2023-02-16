@@ -10,8 +10,6 @@ import (
 
 	Base "automation-suite/testUtils"
 	"encoding/json"
-	"errors"
-	"github.com/caarlos0/env"
 	"github.com/stretchr/testify/suite"
 	"log"
 	"net/http"
@@ -294,9 +292,9 @@ type StructPipelineConfigRouter struct {
 	getCiPipelineViaIdResponseDTO      ResponseDTOs.GetCiPipelineViaIdResponseDTO
 }
 
-type EnvironmentConfigPipelineConfigRouter struct {
+/*type EnvironmentConfigPipelineConfigRouter struct {
 	GitHubProjectUrl       string `env:"GITHUB_URL_TO_CLONE_PROJECT" envDefault:"https://github.com/devtron-labs/sample-go-app.git"`
-	DockerRegistry         string `env:"DOCKER_REGISTRY" envDefault:"devtron-quay"`
+	DockerRegistry         string `env:"DOCKER_REGISTRY" envDefault:"devtron-quay-dpk"`
 	DockerfilePath         string `env:"DOCKER_FILE_PATH" envDefault:"./Dockerfile"`
 	DockerfileRepository   string `env:"DOCKER_FILE_REPO" envDefault:"sample-go-app"`
 	DockerfileRelativePath string `env:"DOCKER_FILE_RELATIVE_PATH" envDefault:"Dockerfile"`
@@ -309,7 +307,7 @@ func GetEnvironmentConfigPipelineConfigRouter() (*EnvironmentConfigPipelineConfi
 		return nil, errors.New("could not get config from environment")
 	}
 	return cfg, err
-}
+}*/
 
 func GetAppRequestDto(appName string, teamId int, templateId int) CreateAppRequestDto {
 	var createAppRequestDto CreateAppRequestDto
@@ -359,9 +357,11 @@ func HitCreateAppApi(payload []byte, appName string, teamId int, templateId int,
 	return pipelineConfigRouter.createAppResponseDto
 }
 func GetAppMaterialRequestDto(appId int, gitProviderId int, fetchSubmodules bool) CreateAppMaterialRequestDto {
-	pipelineConfig, _ := GetEnvironmentConfigPipelineConfigRouter()
+	//pipelineConfig, _ := GetEnvironmentConfigPipelineConfigRouter()
+	envConf := Base.ReadBaseEnvConfig()
+	file := Base.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 	var slice AppMaterials
-	slice.Url = pipelineConfig.GitHubProjectUrl
+	slice.Url = file.GitHubProjectUrl
 	slice.GitProviderId = gitProviderId
 	slice.FetchSubmodules = fetchSubmodules
 	slice.CheckoutPath = "./"
