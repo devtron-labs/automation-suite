@@ -118,6 +118,31 @@ func DeleteHelmApp() {
 
 }
 
+func getExpectedStatusCode(action string, apiName string) int {
+	isValid := false
+	switch action {
+	case "manager":
+		isValid = (apiName == GLOBALCONFIGURATIONS) ||
+			(apiName == CREATEAPP) || (apiName == APPLISTFETCH) ||
+			(apiName == PIPELINECREATE) || (apiName == PIPELINEFETCH) ||
+			(apiName == TRIGGERPIPELINE) || (apiName == APPDETAILS) ||
+			(apiName == ENVIRONMENTOVERRIDES) || (apiName == DELETE)
+	case "admin":
+		isValid = (apiName == CREATEAPP) || (apiName == APPLISTFETCH) || (apiName == PIPELINECREATE) || (apiName == PIPELINEFETCH) || (apiName == TRIGGERPIPELINE) || (apiName == APPDETAILS) || (apiName == ENVIRONMENTOVERRIDES)
+
+	case "view":
+		isValid = (apiName == APPLISTFETCH) || (apiName == PIPELINEFETCH) || (apiName == APPDETAILS)
+	case "trigger":
+		isValid = (apiName == APPLISTFETCH) || (apiName == PIPELINECREATE) || (apiName == PIPELINEFETCH) || (apiName == TRIGGERPIPELINE) || (apiName == APPDETAILS)
+
+	}
+	if isValid {
+		return 200
+	}
+	return 403
+
+}
+
 type RbacFlowTestSuite struct {
 	suite.Suite
 	authToken string

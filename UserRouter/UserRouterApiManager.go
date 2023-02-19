@@ -188,7 +188,19 @@ func CreateRoleGroupPayload(caseName string) RequestDTOs.RoleGroup {
 
 		roleFilter = CreateRoleFilterWithChartGroupsOnly()
 		listOfRoleFilter = append(listOfRoleFilter, roleFilter)
+
 	}
+
+	roleGroup.Name = Base.GetRandomStringOfGivenLength(10)
+	roleGroup.Description = "This is the sample Description for Testing Purpose via Automation only"
+	roleGroup.RoleFilters = listOfRoleFilter
+	return roleGroup
+}
+func CreateRoleGroupPayloadDynamicForDevtronApp(team, env, app, action string) RequestDTOs.RoleGroup {
+	var roleGroup RequestDTOs.RoleGroup
+	var listOfRoleFilter []ResponseDTOs.RoleFilter
+	roleFilter := CreateRoleFilterWithDevtronAppsOnlyDynamic(team, env, app, action)
+	listOfRoleFilter = append(listOfRoleFilter, roleFilter)
 
 	roleGroup.Name = Base.GetRandomStringOfGivenLength(10)
 	roleGroup.Description = "This is the sample Description for Testing Purpose via Automation only"
@@ -199,6 +211,11 @@ func CreateRoleGroupPayload(caseName string) RequestDTOs.RoleGroup {
 func CreateRoleFilterWithDevtronAppsOnly() ResponseDTOs.RoleFilter {
 	var roleFilter ResponseDTOs.RoleFilter
 	roleFilter = CreateRoleFilter("", "devtron-demo", "", "view", "")
+	return roleFilter
+}
+func CreateRoleFilterWithDevtronAppsOnlyDynamic(team, env, app, action string) ResponseDTOs.RoleFilter {
+	var roleFilter ResponseDTOs.RoleFilter
+	roleFilter = CreateRoleFilter(app, team, env, action, "")
 	return roleFilter
 }
 

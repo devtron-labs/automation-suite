@@ -1,9 +1,14 @@
 package RbacFlows
 
 import (
+	"automation-suite/ApiTokenRouter"
+	"automation-suite/ApiTokenRouter/ResponseDTOs"
 	AppListingRouter "automation-suite/AppListingRouter"
 	"automation-suite/PipelineConfigRouter"
 	"automation-suite/RbacFlows/RequestDTOs"
+	"automation-suite/UserRouter"
+	abcd "automation-suite/UserRouter/RequestDTOs"
+	response "automation-suite/UserRouter/ResponseDTOs"
 	"automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
@@ -12,6 +17,111 @@ import (
 	"strings"
 	"time"
 )
+
+func (suite *RbacFlowTestSuite) CreateSpecificPermissionGroup(project, env, app, action string) response.CreateRoleGroupResponseDto {
+	responseOfCreateProject := CreateProject([]byte(project), suite.authToken)
+	assert.Equal(suite.T(), 200, responseOfCreateProject.Code)
+	assert.Equal(suite.T(), project, responseOfCreateProject.Result.Name)
+
+	environments := strings.Split(env, ",")
+
+	for _, environment := range environments {
+		responseOfCreateEnvironment := CreateEnv([]byte(environment), suite.authToken)
+		assert.Equal(suite.T(), 200, responseOfCreateEnvironment.Code)
+		assert.Equal(suite.T(), environment, responseOfCreateEnvironment.Result.Environment)
+	}
+	applications := strings.Split(app, ",")
+
+	for _, application := range applications {
+		responseOfCreateDevtronApp := CreateDevtronApp(application, suite.authToken)
+		assert.Equal(suite.T(), 200, responseOfCreateDevtronApp.Code)
+		assert.Equal(suite.T(), application, responseOfCreateDevtronApp.Result.AppName)
+		assert.Equal(suite.T(), responseOfCreateProject.Result.Id, responseOfCreateDevtronApp.Result.TeamId)
+	}
+	createRoleGroupPayload := UserRouter.CreateRoleGroupPayloadDynamicForDevtronApp(project, env, app, action)
+
+	byteValueOfStruct, _ := json.Marshal(createRoleGroupPayload)
+
+	log.Println("Hitting Create Role Group API")
+	createRoleGroupResponseBody := UserRouter.HitCreateRoleGroupApi(byteValueOfStruct, suite.authToken)
+	assert.Equal(suite.T(), createRoleGroupPayload.Name, createRoleGroupResponseBody.Result.Name)
+	//assert.Equal(suite.T(), createRoleGroupPayload.Description, createRoleGroupResponseBody.Result.Description)
+	//rolefilters
+
+	log.Println("Verifying the response of Create Role Group API using getRoleGroupById API")
+	getRoleGroupByIdResponse := UserRouter.HitGetRoleGroupByIdApi(strconv.Itoa(createRoleGroupResponseBody.Result.Id), suite.authToken)
+	assert.Equal(suite.T(), len(getRoleGroupByIdResponse.Result.RoleFilters), len(createRoleGroupResponseBody.Result.RoleFilters))
+	assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].Team, createRoleGroupResponseBody.Result.RoleFilters[0].Team)
+	assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].Action, createRoleGroupResponseBody.Result.RoleFilters[0].Action)
+
+	return createRoleGroupResponseBody
+
+}
+
+func (suite *RbacFlowTestSuite) CreateTokenForSpecificPermissionGroup(createRoleGroupResponseBody response.CreateRoleGroupResponseDto, superAdmin bool) string {
+
+	createApiTokenRequestDTO := ApiTokenRouter.GetPayLoadForCreateApiToken()
+	payloadForCreateApiTokenRequest, _ := json.Marshal(createApiTokenRequestDTO)
+	responseOfCreateApiToken := ApiTokenRouter.HitCreateApiTokenApi(string(payloadForCreateApiTokenRequest), suite.authToken)
+	assert.Equal(suite.T(), "API-TOKEN:"+createApiTokenRequestDTO.Name, responseOfCreateApiToken.Result.UserIdentifier)
+
+	//log.Println("=== Here We Deleting the Token After Verification")
+	//responseOfDeleteApi := HitDeleteApiToken(strconv.Itoa(tokenId), suite.authToken)
+	//assert.True(suite.T(), responseOfDeleteApi.Result.Success)
+
+	createUserDto, roleGroupId := UserRouter.CreateUserRequestPayload(UserRouter.GroupsAndRoleFilter, suite.authToken)
+
+	//createUserDto.RoleFilters= createRoleGroupResponseBody.Result.RoleFilters
+	byteValueOfStruct, _ := json.Marshal(createUserDto)
+	log.Println("Hitting the Create User API")
+	responseOfCreateUserApi := UserRouter.HitCreateUserApi(byteValueOfStruct, suite.authToken)
+	assert.Equal(suite.T(), false, responseOfCreateUserApi.Result[0].SuperAdmin)
+	assert.Equal(suite.T(), createUserDto.EmailId, responseOfCreateUserApi.Result[0].EmailId)
+	assert.Equal(suite.T(), createUserDto.Groups[0], responseOfCreateUserApi.Result[0].Groups[0])
+	assert.Equal(suite.T(), createRoleGroupResponseBody.Result.RoleFilters[0].Action, responseOfCreateUserApi.Result[0].RoleFilters[0].Action)
+	assert.Equal(suite.T(), createRoleGroupResponseBody.Result.RoleFilters[0].Team, responseOfCreateUserApi.Result[0].RoleFilters[0].Team)
+
+	log.Println("Getting the payload for updating the user")
+	updateUserDto, resultToken, roleGroupId := CreateUserPayloadForDynamicToken(responseOfCreateApiToken, suite.authToken, superAdmin)
+	//updateUserDto.RoleFilters = createRoleGroupResponseBody.Result.RoleFilters
+	updateUserDto.RoleFilters = createRoleGroupResponseBody.Result.RoleFilters
+	byteValueOfStruct, _ = json.Marshal(updateUserDto)
+
+	log.Println("Hitting the Update User API")
+	responseOfUpdateUserApi := UserRouter.HitUpdateUserApi(byteValueOfStruct, suite.authToken)
+	assert.Equal(suite.T(), false, responseOfUpdateUserApi.Result.SuperAdmin)
+	assert.Equal(suite.T(), updateUserDto.EmailId, responseOfCreateApiToken.Result.UserIdentifier)
+	assert.Equal(suite.T(), updateUserDto.Groups[0], responseOfUpdateUserApi.Result.Groups[0])
+	assert.Equal(suite.T(), updateUserDto.RoleFilters[0].Action, responseOfUpdateUserApi.Result.RoleFilters[0].Action)
+	assert.Equal(suite.T(), updateUserDto.RoleFilters[0].Team, responseOfUpdateUserApi.Result.RoleFilters[0].Team)
+
+	log.Println("Hitting the get user by id for verifying the functionality of UpdateUserApi")
+	responseOfGetUserById := UserRouter.HitGetUserByIdApi(strconv.Itoa(responseOfCreateUserApi.Result[0].Id), suite.authToken)
+	assert.Equal(suite.T(), false, responseOfGetUserById.Result.SuperAdmin)
+	assert.Equal(suite.T(), responseOfUpdateUserApi.Result.EmailId, responseOfGetUserById.Result.EmailId)
+	assert.Equal(suite.T(), responseOfUpdateUserApi.Result.Groups, responseOfGetUserById.Result.Groups)
+	assert.Equal(suite.T(), responseOfUpdateUserApi.Result.RoleFilters, responseOfGetUserById.Result.RoleFilters)
+
+	log.Println("Deleting the Test data Created via Automation")
+	UserRouter.HitDeleteUserApi(strconv.Itoa(responseOfCreateUserApi.Result[0].Id), suite.authToken)
+	UserRouter.HitDeleteRoleGroupByIdApi(strconv.Itoa(roleGroupId), suite.authToken)
+	//})
+
+	return resultToken
+
+}
+
+func CreateUserPayloadForDynamicToken(responseOfCreateApiToken ResponseDTOs.CreateApiTokenResponseDTO, authToken string, superAdmin bool) (abcd.UserInfo, string, int) {
+	updateUserDto, roleGroupId := UserRouter.CreateUserRequestPayload(UserRouter.GroupsAndRoleFilter, authToken)
+
+	resultToken := responseOfCreateApiToken.Result.Token
+	updateUserDto.EmailId = responseOfCreateApiToken.Result.UserIdentifier
+	updateUserDto.Id = int32(responseOfCreateApiToken.Result.UserId)
+	if superAdmin {
+		updateUserDto.SuperAdmin = true
+	}
+	return updateUserDto, resultToken, roleGroupId
+}
 
 func (suite *RbacFlowTestSuite) TestRbacFlowsForDevtronApps() {
 	token_spec_proj_env_app_view_devtron := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IkFQSS1UT0tFTjpzcGVjLXByb2pfZW52X2FwcC12aWV3LWRldnRyb24iLCJpc3MiOiJhcGlUb2tlbklzc3VlciJ9.4s3KnwlSZELxxWoLxnniUOtaAmR5fD7KpMJGAw6g3hE"
@@ -102,6 +212,111 @@ func (suite *RbacFlowTestSuite) TestRbacFlowsForDevtronApps() {
 		{"specific_proj_env_app_build_deploy_devtron", specific_proj_env_app_build_deploy_devtron, 200, 1, "test-app-1", "test-project-1", "test-env-1"},
 		{"specific_proj_env_app_admin_devtron_only", specific_proj_env_app_admin_devtron_only, 200, 1, "test-app-1", "test-project-1", "test-env-1"},
 	}
+
+	var allRoles = []string{"admin", "manager", "view", "trigger"}
+
+	suite.Run("A=0=HitApiToCreateApp", func() {
+		for _, role := range allRoles {
+
+			createRoleGroupResponseBody := suite.CreateSpecificPermissionGroup(PROJECT, ENV, APP, role)
+			apiToken := suite.CreateTokenForSpecificPermissionGroup(createRoleGroupResponseBody, false)
+
+			log.Println("Test Case for User ===>", apiToken)
+			appName := "app" + strings.ToLower(testUtils.GetRandomStringOfGivenLength(5))
+			createAppRequestDto := PipelineConfigRouter.GetAppRequestDto(appName, 1, 0)
+			byteValueOfCreateApp, _ := json.Marshal(createAppRequestDto)
+			createAppResponseDto := PipelineConfigRouter.HitCreateAppApi(byteValueOfCreateApp, appName, 1, 0, apiToken)
+			assert.Equal(suite.T(), getExpectedStatusCode(role, CREATEAPP), createAppResponseDto.Code)
+			if getExpectedStatusCode(role, CREATEAPP) == 403 {
+
+				createRoleGroupResponseBody := suite.CreateSpecificPermissionGroup(PROJECT, ENV, APP, ACTION)
+				superAdminToken := suite.CreateTokenForSpecificPermissionGroup(createRoleGroupResponseBody, true)
+				createAppResponseDto = PipelineConfigRouter.HitCreateAppApi(byteValueOfCreateApp, appName, 1, 0, superAdminToken)
+			}
+		}
+	})
+
+	suite.Run("A=1=HitApiGetAppsList", func() {
+
+		for _, role := range allRoles {
+
+			createRoleGroupResponseBody := suite.CreateSpecificPermissionGroup(PROJECT, ENV, APP, role)
+			apiToken := suite.CreateTokenForSpecificPermissionGroup(createRoleGroupResponseBody, false)
+			PayloadForApiFetchAppsByEnvironment := AppListingRouter.GetPayloadForApiFetchAppsByEnvironment()
+			bytePayloadForTriggerCiPipeline, _ := json.Marshal(PayloadForApiFetchAppsByEnvironment)
+
+			log.Println("Test Case for User ===>", apiToken)
+			allAppsByEnvironment := AppListingRouter.HitApiFetchAppsByEnvironment(bytePayloadForTriggerCiPipeline, apiToken)
+			assert.Equal(suite.T(), getExpectedStatusCode(role, APPLISTFETCH), allAppsByEnvironment.Code)
+			//to check	assert.Equal(suite.T(), len(strings.Split(APP,",")), allAppsByEnvironment.Result.AppCount)
+			assert.Equal(suite.T(), APP, allAppsByEnvironment.Result.AppContainers[0].AppName)
+			assert.Equal(suite.T(), ENV, allAppsByEnvironment.Result.AppContainers[0].Environments[0].EnvironmentName)
+			assert.Equal(suite.T(), PROJECT, allAppsByEnvironment.Result.AppContainers[0].Environments[0].TeamName)
+		}
+	})
+
+	suite.Run("A=2=HitApiToGetCdPipelineStrategies", func() {
+
+		createAppApiResponse, _ := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken)
+		time.Sleep(2 * time.Second)
+		log.Println("=== Here we are getting pipeline material ===")
+		appId := strconv.Itoa(createAppApiResponse.Id)
+		for _, role := range allRoles {
+			createRoleGroupResponseBody := suite.CreateSpecificPermissionGroup(PROJECT, ENV, APP, role)
+			apiToken := suite.CreateTokenForSpecificPermissionGroup(createRoleGroupResponseBody, false)
+			log.Println("Test Case for User ===>", apiToken)
+			cdPipelineStrategiesResponse := PipelineConfigRouter.HitGetCdPipelineStrategies(appId, apiToken)
+			assert.Equal(suite.T(), getExpectedStatusCode(role, PIPELINEFETCH), cdPipelineStrategiesResponse.Code)
+		}
+	})
+	suite.Run("A=3=HitApiToTriggerCiPipeline", func() {
+		_, workflowResponse := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken)
+		time.Sleep(2 * time.Second)
+		log.Println("=== Here we are getting pipeline material ===")
+		pipelineMaterial := PipelineConfigRouter.HitGetCiPipelineMaterial(workflowResponse.Result.CiPipelines[0].Id, suite.authToken)
+		payloadForTriggerCiPipeline := PipelineConfigRouter.CreatePayloadForTriggerCiPipeline(pipelineMaterial.Result[0].History[0].Commit, workflowResponse.Result.CiPipelines[0].Id, pipelineMaterial.Result[0].Id, true)
+		bytePayloadForTriggerCiPipeline, _ := json.Marshal(payloadForTriggerCiPipeline)
+
+		for _, role := range allRoles {
+			createRoleGroupResponseBody := suite.CreateSpecificPermissionGroup(PROJECT, ENV, APP, role)
+			apiToken := suite.CreateTokenForSpecificPermissionGroup(createRoleGroupResponseBody, false)
+			log.Println("Test Case for User ===>", apiToken)
+			triggerCiPipelineResponse := PipelineConfigRouter.HitTriggerCiPipelineApi(bytePayloadForTriggerCiPipeline, apiToken)
+			assert.Equal(suite.T(), getExpectedStatusCode(role, PIPELINECREATE), triggerCiPipelineResponse.Code)
+			if getExpectedStatusCode(role, PIPELINECREATE) == 403 {
+				createRoleGroupResponseBody := suite.CreateSpecificPermissionGroup(PROJECT, ENV, APP, ACTION)
+				superAdminToken := suite.CreateTokenForSpecificPermissionGroup(createRoleGroupResponseBody, true)
+				triggerCiPipelineResponse = PipelineConfigRouter.HitTriggerCiPipelineApi(bytePayloadForTriggerCiPipeline, superAdminToken)
+			}
+		}
+
+		PipelineConfigRouter.DeleteAppWithCiCd(suite.authToken)
+	})
+	suite.Run("A=4=HitApiToTriggerCiPipelines", func() {
+
+		CiPipelineId := 7
+		pipelineMaterial := PipelineConfigRouter.HitGetCiPipelineMaterial(CiPipelineId, suite.authToken)
+		payloadForTriggerCiPipeline := PipelineConfigRouter.CreatePayloadForTriggerCiPipeline(pipelineMaterial.Result[0].History[0].Commit, CiPipelineId, pipelineMaterial.Result[0].Id, true)
+		bytePayloadForTriggerCiPipeline, _ := json.Marshal(payloadForTriggerCiPipeline)
+		for _, role := range allRoles {
+			createRoleGroupResponseBody := suite.CreateSpecificPermissionGroup(PROJECT, ENV, APP, role)
+			apiToken := suite.CreateTokenForSpecificPermissionGroup(createRoleGroupResponseBody, false)
+			log.Println("Test Case for User ===>", apiToken)
+			triggerCiPipelineResponse := PipelineConfigRouter.HitTriggerCiPipelineApi(bytePayloadForTriggerCiPipeline, apiToken)
+			assert.Equal(suite.T(), getExpectedStatusCode(role, PIPELINECREATE), triggerCiPipelineResponse.Code)
+		}
+	})
+	suite.Run("A=5=HitApiGetAppsListWithSuperAdminUsersAccess", func() {
+
+		createRoleGroupResponseBody := suite.CreateSpecificPermissionGroup(PROJECT, ENV, APP, ACTION)
+		superAdminToken := suite.CreateTokenForSpecificPermissionGroup(createRoleGroupResponseBody, true)
+		//superAdminToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IkFQSS1UT0tFTjpzdXBlci1hZG1pbi10b2tlbiIsImlzcyI6ImFwaVRva2VuSXNzdWVyIiwiZXhwIjoxNjc5MzE5MjcxfQ.STZ4ptJkaCNral6vHMIA0zL_p8kC3NlcKX69unEfiwg"
+		PayloadForApiFetchAppsByEnvironment := AppListingRouter.GetPayloadForApiFetchAppsByEnvironment()
+		bytePayloadForTriggerCiPipeline, _ := json.Marshal(PayloadForApiFetchAppsByEnvironment)
+		allAppsViaArgoAdminToken := AppListingRouter.HitApiFetchAppsByEnvironment(bytePayloadForTriggerCiPipeline, superAdminToken)
+		allAppsViaSuperAdminToken := AppListingRouter.HitApiFetchAppsByEnvironment(bytePayloadForTriggerCiPipeline, suite.authToken)
+		assert.Equal(suite.T(), allAppsViaArgoAdminToken.Result.AppCount, allAppsViaSuperAdminToken.Result.AppCount)
+	})
 
 	suite.Run("A=1=HitApiWithUnauthorisedUsersToGetCdPipelineStrategies", func() {
 		createAppApiResponse, _ := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken)
