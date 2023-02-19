@@ -1,6 +1,8 @@
 package ChartRepositoryRouter
 
 import (
+	"automation-suite/ChartRepositoryRouter/RequestDTOs"
+	"automation-suite/ChartRepositoryRouter/ResponseDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"errors"
@@ -9,79 +11,30 @@ import (
 	"net/http"
 )
 
-type ChartRepoRequestDto struct {
-	Id           int      `json:"id,omitempty" validate:"number"`
-	Name         string   `json:"name,omitempty" validate:"required"`
-	Url          string   `json:"url,omitempty"`
-	UserName     string   `json:"userName,omitempty"`
-	Password     string   `json:"password,omitempty"`
-	SshKey       string   `json:"sshKey,omitempty"`
-	AccessToken  string   `json:"accessToken,omitempty"`
-	AuthMode     AuthMode `json:"authMode,omitempty" validate:"required"`
-	Active       bool     `json:"active"`
-	Default      bool     `json:"default"`
-	UserId       int32    `json:"-"`
-	CustomErrMsg string   `json:"customErrMsg"`
-	ActualErrMsg string   `json:"actualErrMsg"`
-}
-
-type CreateChartRepoResponseDto struct {
-	Code   int                 `json:"code"`
-	Status string              `json:"status"`
-	Result ChartRepoRequestDto `json:"result"`
-	Errors Errors              `json:"errors"`
-}
-
-type GetChartRepoListResponseDto struct {
-	Code   int                   `json:"code"`
-	Status string                `json:"status"`
-	Result []ChartRepoRequestDto `json:"result"`
-}
-
-type DeleteChartRepoResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result string `json:"result"`
-	Errors Errors `json:"errors"`
-}
-type Errors []struct {
-	Code            string `json:"code"`
-	InternalMessage string `json:"internalMessage"`
-	UserMessage     string `json:"userMessage"`
-}
-
-type TriggerChartSyncManualRespDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result struct {
-		Status string `json:"status"`
-	} `json:"result"`
-}
-
 type StructChartRepoRouter struct {
-	getChartRepoListResponseDto   GetChartRepoListResponseDto
-	createChartRepoResponseDto    CreateChartRepoResponseDto
-	deleteChartRepoResponseDto    DeleteChartRepoResponseDto
-	triggerChartSyncManualRespDto TriggerChartSyncManualRespDto
+	getChartRepoListResponseDto   ResponseDTOs.GetChartRepoListResponseDTO
+	createChartRepoResponseDto    ResponseDTOs.CreateChartRepoResponseDTO
+	deleteChartRepoResponseDto    ResponseDTOs.DeleteChartRepoResponseDTO
+	triggerChartSyncManualRespDto ResponseDTOs.TriggerChartSyncManualRespDTo
 }
 
-func HitCreateChartRepoApi(payload string, authToken string) CreateChartRepoResponseDto {
-	resp, err := Base.MakeApiCall(CreateChartRepoApiUrl, http.MethodPost, payload, nil, authToken)
+func HitCreateChartRepoApi(payload []byte, authToken string) ResponseDTOs.CreateChartRepoResponseDTO {
+	resp, err := Base.MakeApiCall(CreateChartRepoApiUrl, http.MethodPost, string(payload), nil, authToken)
 	Base.HandleError(err, CreateChartRepo)
 	structChartRepoRouter := StructChartRepoRouter{}
 	chartRepoRouter := structChartRepoRouter.UnmarshalGivenResponseBody(resp.Body(), CreateChartRepo)
 	return chartRepoRouter.createChartRepoResponseDto
 }
 
-func HitUpdateChartRepoApi(payload string, authToken string) CreateChartRepoResponseDto {
-	resp, err := Base.MakeApiCall(UpdateChartRepoUrl, http.MethodPost, payload, nil, authToken)
+func HitUpdateChartRepoApi(payload []byte, authToken string) ResponseDTOs.CreateChartRepoResponseDTO {
+	resp, err := Base.MakeApiCall(UpdateChartRepoUrl, http.MethodPost, string(payload), nil, authToken)
 	Base.HandleError(err, UpdateChartRepo)
 	structChartRepoRouter := StructChartRepoRouter{}
 	chartRepoRouter := structChartRepoRouter.UnmarshalGivenResponseBody(resp.Body(), CreateChartRepo)
 	return chartRepoRouter.createChartRepoResponseDto
 }
 
-func HitGetChartRepoList(authToken string) GetChartRepoListResponseDto {
+func HitGetChartRepoList(authToken string) ResponseDTOs.GetChartRepoListResponseDTO {
 	resp, err := Base.MakeApiCall(GetChartRepoListApiUrl, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, GetChartRepoListApi)
 	structChartRepoRouter := StructChartRepoRouter{}
@@ -89,7 +42,7 @@ func HitGetChartRepoList(authToken string) GetChartRepoListResponseDto {
 	return chartRepoRouter.getChartRepoListResponseDto
 }
 
-func HitGetChartRepoViaId(authToken string, id string) CreateChartRepoResponseDto {
+func HitGetChartRepoViaId(authToken string, id string) ResponseDTOs.CreateChartRepoResponseDTO {
 	resp, err := Base.MakeApiCall(DeleteChartRepoApiUrl+id, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, GetChartRepoById)
 	structChartRepoRouter := StructChartRepoRouter{}
@@ -97,15 +50,15 @@ func HitGetChartRepoViaId(authToken string, id string) CreateChartRepoResponseDt
 	return chartRepoRouter.createChartRepoResponseDto
 }
 
-func HitDeleteChartRepo(payload string, authToken string) DeleteChartRepoResponseDto {
-	resp, err := Base.MakeApiCall(DeleteChartRepoApiUrl, http.MethodDelete, payload, nil, authToken)
+func HitDeleteChartRepo(payload []byte, authToken string) ResponseDTOs.DeleteChartRepoResponseDTO {
+	resp, err := Base.MakeApiCall(DeleteChartRepoApiUrl, http.MethodDelete, string(payload), nil, authToken)
 	Base.HandleError(err, DeleteChartRepoApi)
 	structChartRepoRouter := StructChartRepoRouter{}
 	chartRepoRouter := structChartRepoRouter.UnmarshalGivenResponseBody(resp.Body(), DeleteChartRepoApi)
 	return chartRepoRouter.deleteChartRepoResponseDto
 }
 
-func HitValidateChartRepo(payload string, authToken string) CreateChartRepoResponseDto {
+func HitValidateChartRepo(payload string, authToken string) ResponseDTOs.CreateChartRepoResponseDTO {
 	resp, err := Base.MakeApiCall(ValidateChartRepoApiUrl, http.MethodPost, payload, nil, authToken)
 	Base.HandleError(err, ValidateChartRepoApi)
 	structChartRepoRouter := StructChartRepoRouter{}
@@ -113,7 +66,7 @@ func HitValidateChartRepo(payload string, authToken string) CreateChartRepoRespo
 	return chartRepoRouter.createChartRepoResponseDto
 }
 
-func HitTriggerChartSyncManualApi(authToken string) TriggerChartSyncManualRespDto {
+func HitTriggerChartSyncManualApi(authToken string) ResponseDTOs.TriggerChartSyncManualRespDTo {
 	resp, err := Base.MakeApiCall(TriggerChartSyncManualApiUrl, http.MethodPost, "", nil, authToken)
 	Base.HandleError(err, TriggerChartSyncManualApi)
 	structChartRepoRouter := StructChartRepoRouter{}
@@ -135,8 +88,8 @@ func (structChartRepoRouter StructChartRepoRouter) UnmarshalGivenResponseBody(re
 	return structChartRepoRouter
 }
 
-func createChartRepoRequestPayload(authenticateType AuthMode, repoId int, RepoName string, repoUrl string, AccessToken string, Active bool) ChartRepoRequestDto {
-	chartRepoRequestDto := ChartRepoRequestDto{}
+func CreateChartRepoRequestPayload(authenticateType string, repoId int, RepoName string, repoUrl string, AccessToken string, Active bool) RequestDTOs.ChartRepoRequestDTO {
+	chartRepoRequestDto := RequestDTOs.ChartRepoRequestDTO{}
 	switch authenticateType {
 
 	case AUTH_MODE_ANONYMOUS:

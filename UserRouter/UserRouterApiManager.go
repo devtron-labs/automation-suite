@@ -1,144 +1,25 @@
 package UserRouter
 
 import (
+	"automation-suite/UserRouter/RequestDTOs"
+	"automation-suite/UserRouter/ResponseDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 )
 
-type UserRole struct {
-	Id      int32  `json:"id" validate:"number"`
-	EmailId string `json:"email_id" validate:"email"`
-	Role    string `json:"role"`
-}
-
-type UserInfo struct {
-	Id          int32        `json:"id" validate:"number"`
-	EmailId     string       `json:"email_id" validate:"required"`
-	Roles       []string     `json:"roles,omitempty"`
-	AccessToken string       `json:"access_token,omitempty"`
-	Exist       bool         `json:"-"`
-	UserId      int32        `json:"-"` // created or modified user id
-	RoleFilters []RoleFilter `json:"roleFilters"`
-	Status      string       `json:"status,omitempty"`
-	Groups      []string     `json:"groups"`
-	SuperAdmin  bool         `json:"superAdmin,notnull"`
-}
-
-type RoleGroup struct {
-	Id          int32        `json:"id" validate:"number"`
-	Name        string       `json:"name,omitempty"`
-	Description string       `json:"description,omitempty"`
-	RoleFilters []RoleFilter `json:"roleFilters"`
-	Status      string       `json:"status,omitempty"`
-	UserId      int32        `json:"-"` // created or modified user id
-}
-
-type RoleFilter struct {
-	Entity      string `json:"entity"`
-	Team        string `json:"team"`
-	EntityName  string `json:"entityName"`
-	Environment string `json:"environment"`
-	Action      string `json:"action"`
-	AccessType  string `json:"accessType"`
-}
-
-type Role struct {
-	Id   int    `json:"id" validate:"number"`
-	Role string `json:"role" validate:"required"`
-}
-
-type RoleData struct {
-	Id          int    `json:"id" validate:"number"`
-	Role        string `json:"role" validate:"required"`
-	Entity      string `json:"entity"`
-	Team        string `json:"team"`
-	EntityName  string `json:"entityName"`
-	Environment string `json:"environment"`
-	Action      string `json:"action"`
-	AccessType  string `json:"accessType"`
-}
-
-type CreateUserResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Errors []struct {
-		Code            string `json:"code"`
-		InternalMessage string `json:"internalMessage"`
-		UserMessage     string `json:"userMessage"`
-	} `json:"errors"`
-	Result []struct {
-		Id          int          `json:"id"`
-		EmailId     string       `json:"email_id"`
-		RoleFilters []RoleFilter `json:"roleFilters"`
-		Groups      []string     `json:"groups"`
-		SuperAdmin  bool         `json:"superAdmin"`
-	} `json:"result"`
-}
-
-type DeleteUserResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result bool   `json:"result"`
-	Errors []struct {
-		Code            string `json:"code"`
-		InternalMessage string `json:"internalMessage"`
-		UserMessage     string `json:"userMessage"`
-	} `json:"errors"`
-}
-
-type CreateRoleGroupResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Errors []struct {
-		Code            string `json:"code"`
-		InternalMessage string `json:"internalMessage"`
-		UserMessage     string `json:"userMessage"`
-	} `json:"errors"`
-	Result struct {
-		Id          int    `json:"id"`
-		Name        string `json:"name"`
-		Description string `json:"description"`
-		RoleFilters []struct {
-			Entity      string `json:"entity"`
-			Team        string `json:"team"`
-			EntityName  string `json:"entityName"`
-			Environment string `json:"environment"`
-			Action      string `json:"action"`
-			AccessType  string `json:"accessType"`
-		} `json:"roleFilters"`
-	} `json:"result"`
-}
-
-type GetUserByIdResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Errors []struct {
-		Code            string `json:"code"`
-		InternalMessage string `json:"internalMessage"`
-		UserMessage     string `json:"userMessage"`
-	} `json:"errors"`
-	Result struct {
-		Id          int          `json:"id"`
-		EmailId     string       `json:"email_id"`
-		RoleFilters []RoleFilter `json:"roleFilters"`
-		Groups      []string     `json:"groups"`
-		SuperAdmin  bool         `json:"superAdmin"`
-	} `json:"result"`
-}
-
 type StructUserRouter struct {
-	userRole                   UserRole
-	userInfo                   UserInfo
-	roleGroup                  RoleGroup
-	roleFilter                 RoleFilter
-	role                       Role
-	roleData                   RoleData
-	createUserResponseDto      CreateUserResponseDto
-	deleteUserResponseDto      DeleteUserResponseDto
-	createRoleGroupResponseDto CreateRoleGroupResponseDto
-	getUserByIdResponseDto     GetUserByIdResponseDto
+	userRole                   RequestDTOs.UserRole
+	userInfo                   RequestDTOs.UserInfo
+	roleGroup                  RequestDTOs.RoleGroup
+	roleFilter                 ResponseDTOs.RoleFilter
+	role                       RequestDTOs.Role
+	roleData                   RequestDTOs.RoleData
+	createUserResponseDto      ResponseDTOs.CreateUserResponseDTO
+	deleteUserResponseDto      ResponseDTOs.DeleteUserResponseDTO
+	createRoleGroupResponseDto ResponseDTOs.CreateRoleGroupResponseDto
+	getUserByIdResponseDto     ResponseDTOs.GetUserByIdResponseDTO
 }
 
 func (structUserRouter StructUserRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructUserRouter {
@@ -155,7 +36,7 @@ func (structUserRouter StructUserRouter) UnmarshalGivenResponseBody(response []b
 	return structUserRouter
 }
 
-func HitGetAllUserApi(authToken string) CreateUserResponseDto {
+func HitGetAllUserApi(authToken string) ResponseDTOs.CreateUserResponseDTO {
 	resp, err := Base.MakeApiCall(CreatUserApiUrl, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, "GetAllUser")
 
@@ -164,7 +45,7 @@ func HitGetAllUserApi(authToken string) CreateUserResponseDto {
 	return userRouter.createUserResponseDto
 }
 
-func HitGetUserByIdApi(id string, authToken string) GetUserByIdResponseDto {
+func HitGetUserByIdApi(id string, authToken string) ResponseDTOs.GetUserByIdResponseDTO {
 	resp, err := Base.MakeApiCall(GetUserByIdApiUrl+id, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, "GetUserById")
 
@@ -173,7 +54,7 @@ func HitGetUserByIdApi(id string, authToken string) GetUserByIdResponseDto {
 	return userRouter.getUserByIdResponseDto
 }
 
-func HitCreateUserApi(payload []byte, authToken string) CreateUserResponseDto {
+func HitCreateUserApi(payload []byte, authToken string) ResponseDTOs.CreateUserResponseDTO {
 	resp, err := Base.MakeApiCall(CreateUserApiUrl, http.MethodPost, string(payload), nil, authToken)
 	Base.HandleError(err, "CreateUser")
 
@@ -182,7 +63,7 @@ func HitCreateUserApi(payload []byte, authToken string) CreateUserResponseDto {
 	return userRouter.createUserResponseDto
 }
 
-func HitUpdateUserApi(payload []byte, authToken string) GetUserByIdResponseDto {
+func HitUpdateUserApi(payload []byte, authToken string) ResponseDTOs.GetUserByIdResponseDTO {
 	resp, err := Base.MakeApiCall(UpdateUserApiUrl, http.MethodPut, string(payload), nil, authToken)
 	Base.HandleError(err, "UpdateUser")
 
@@ -191,7 +72,7 @@ func HitUpdateUserApi(payload []byte, authToken string) GetUserByIdResponseDto {
 	return userRouter.getUserByIdResponseDto
 }
 
-func HitDeleteUserApi(id string, authToken string) DeleteUserResponseDto {
+func HitDeleteUserApi(id string, authToken string) ResponseDTOs.DeleteUserResponseDTO {
 	resp, err := Base.MakeApiCall(DeleteUserApiUrl+id, http.MethodDelete, "", nil, authToken)
 	Base.HandleError(err, "DeleteUser")
 
@@ -200,7 +81,7 @@ func HitDeleteUserApi(id string, authToken string) DeleteUserResponseDto {
 	return userRouter.deleteUserResponseDto
 }
 
-func HitCreateRoleGroupApi(payload []byte, authToken string) CreateRoleGroupResponseDto {
+func HitCreateRoleGroupApi(payload []byte, authToken string) ResponseDTOs.CreateRoleGroupResponseDto {
 	resp, err := Base.MakeApiCall(CreateRoleGroupApiUrl, http.MethodPost, string(payload), nil, authToken)
 	Base.HandleError(err, "CreateRoleGroup")
 
@@ -209,7 +90,7 @@ func HitCreateRoleGroupApi(payload []byte, authToken string) CreateRoleGroupResp
 	return userRouter.createRoleGroupResponseDto
 }
 
-func HitGetRoleGroupByIdApi(id string, authToken string) CreateRoleGroupResponseDto {
+func HitGetRoleGroupByIdApi(id string, authToken string) ResponseDTOs.CreateRoleGroupResponseDto {
 	resp, err := Base.MakeApiCall(GetRoleGroupByIdApiUrl+id, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, "GetRoleGroupById")
 
@@ -218,7 +99,7 @@ func HitGetRoleGroupByIdApi(id string, authToken string) CreateRoleGroupResponse
 	return userRouter.createRoleGroupResponseDto
 }
 
-func HitDeleteRoleGroupByIdApi(id string, authToken string) DeleteUserResponseDto {
+func HitDeleteRoleGroupByIdApi(id string, authToken string) ResponseDTOs.DeleteUserResponseDTO {
 	resp, err := Base.MakeApiCall(DeleteRoleGroupByIdApiUrl+id, http.MethodDelete, "", nil, authToken)
 	Base.HandleError(err, "DeleteRoleGroupById")
 
@@ -227,12 +108,12 @@ func HitDeleteRoleGroupByIdApi(id string, authToken string) DeleteUserResponseDt
 	return userRouter.deleteUserResponseDto
 }
 
-func CreateUserRequestPayload(caseName string, authToken string) (UserInfo, int) {
-	var userInfo UserInfo
-	var createRoleGroupApiResponse CreateRoleGroupResponseDto
+func CreateUserRequestPayload(caseName string, authToken string) (RequestDTOs.UserInfo, int) {
+	var userInfo RequestDTOs.UserInfo
+	var createRoleGroupApiResponse ResponseDTOs.CreateRoleGroupResponseDto
 	switch caseName {
 	case GroupsAndRoleFilter:
-		var listOfRoleFilter []RoleFilter
+		var listOfRoleFilter []ResponseDTOs.RoleFilter
 		var listOfGroups []string
 
 		roleFilter := CreateRoleFilter("", "unassigned", "", "manager", "")
@@ -254,11 +135,11 @@ func CreateUserRequestPayload(caseName string, authToken string) (UserInfo, int)
 		userName := Base.GetRandomStringOfGivenLength(10)
 		userInfo.EmailId = userName + "@yopmail.com"
 		userInfo.SuperAdmin = true
-		userInfo.RoleFilters = []RoleFilter{}
+		userInfo.RoleFilters = []ResponseDTOs.RoleFilter{}
 		userInfo.Groups = []string{}
 
 	case RoleFilterOnly:
-		var listOfRoleFilter []RoleFilter
+		var listOfRoleFilter []ResponseDTOs.RoleFilter
 		roleFilter := CreateRoleFilter("", "unassigned", "", "manager", "")
 		listOfRoleFilter = append(listOfRoleFilter, roleFilter)
 		userName := Base.GetRandomStringOfGivenLength(10)
@@ -278,15 +159,15 @@ func CreateUserRequestPayload(caseName string, authToken string) (UserInfo, int)
 		userName := Base.GetRandomStringOfGivenLength(10)
 		userInfo.EmailId = userName + "@yopmail.com"
 		userInfo.SuperAdmin = false
-		userInfo.RoleFilters = []RoleFilter{}
+		userInfo.RoleFilters = []ResponseDTOs.RoleFilter{}
 		userInfo.Groups = listOfGroups
 	}
 	return userInfo, createRoleGroupApiResponse.Result.Id
 }
 
-func CreateRoleGroupPayload(caseName string) RoleGroup {
-	var roleGroup RoleGroup
-	var listOfRoleFilter []RoleFilter
+func CreateRoleGroupPayload(caseName string) RequestDTOs.RoleGroup {
+	var roleGroup RequestDTOs.RoleGroup
+	var listOfRoleFilter []ResponseDTOs.RoleFilter
 
 	switch caseName {
 	case WithHelmAppsOnly:
@@ -307,6 +188,7 @@ func CreateRoleGroupPayload(caseName string) RoleGroup {
 
 		roleFilter = CreateRoleFilterWithChartGroupsOnly()
 		listOfRoleFilter = append(listOfRoleFilter, roleFilter)
+
 	}
 
 	roleGroup.Name = Base.GetRandomStringOfGivenLength(10)
@@ -314,28 +196,44 @@ func CreateRoleGroupPayload(caseName string) RoleGroup {
 	roleGroup.RoleFilters = listOfRoleFilter
 	return roleGroup
 }
+func CreateRoleGroupPayloadDynamicForDevtronApp(team, env, app, action string) RequestDTOs.RoleGroup {
+	var roleGroup RequestDTOs.RoleGroup
+	var listOfRoleFilter []ResponseDTOs.RoleFilter
+	roleFilter := CreateRoleFilterWithDevtronAppsOnlyDynamic(team, env, app, action)
+	listOfRoleFilter = append(listOfRoleFilter, roleFilter)
 
-func CreateRoleFilterWithDevtronAppsOnly() RoleFilter {
-	var roleFilter RoleFilter
+	roleGroup.Name = Base.GetRandomStringOfGivenLength(10)
+	roleGroup.Description = "This is the sample Description for Testing Purpose via Automation only"
+	roleGroup.RoleFilters = listOfRoleFilter
+	return roleGroup
+}
+
+func CreateRoleFilterWithDevtronAppsOnly() ResponseDTOs.RoleFilter {
+	var roleFilter ResponseDTOs.RoleFilter
 	roleFilter = CreateRoleFilter("", "devtron-demo", "", "view", "")
 	return roleFilter
 }
+func CreateRoleFilterWithDevtronAppsOnlyDynamic(team, env, app, action string) ResponseDTOs.RoleFilter {
+	var roleFilter ResponseDTOs.RoleFilter
+	roleFilter = CreateRoleFilter(app, team, env, action, "")
+	return roleFilter
+}
 
-func CreateRoleFilterWithHelmAppsOnly() RoleFilter {
-	var roleFilter RoleFilter
+func CreateRoleFilterWithHelmAppsOnly() ResponseDTOs.RoleFilter {
+	var roleFilter ResponseDTOs.RoleFilter
 	roleFilter = CreateRoleFilter("", "unassigned", "default_cluster__*", "edit", "helm-app")
 	return roleFilter
 
 }
 
-func CreateRoleFilterWithChartGroupsOnly() RoleFilter {
-	var roleFilter RoleFilter
+func CreateRoleFilterWithChartGroupsOnly() ResponseDTOs.RoleFilter {
+	var roleFilter ResponseDTOs.RoleFilter
 	roleFilter = CreateRoleFilter("chart-group", "", "*", "admin", "")
 	return roleFilter
 }
 
-func CreateRoleFilter(entity string, teamName string, environment string, action string, accessType string) RoleFilter {
-	var roleFilter RoleFilter
+func CreateRoleFilter(entity string, teamName string, environment string, action string, accessType string) ResponseDTOs.RoleFilter {
+	var roleFilter ResponseDTOs.RoleFilter
 	roleFilter.Entity = entity
 	roleFilter.Team = teamName
 	roleFilter.EntityName = ""

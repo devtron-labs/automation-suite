@@ -1,54 +1,18 @@
 package SSOLoginRouter
 
 import (
+	"automation-suite/SSOLoginRouter/RequestDTOs"
+	"automation-suite/SSOLoginRouter/ResponseDTOs"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 )
 
-type GetListResponseDto struct {
-	Code   int    `json:"code"`
-	Status string `json:"status"`
-	Result []struct {
-		Id     int    `json:"id"`
-		Name   string `json:"name"`
-		Url    string `json:"url"`
-		Active bool   `json:"active"`
-		Label  string `json:"label,omitempty"`
-	} `json:"result"`
-}
-
-type GetSSODetailsResponse struct {
-	Code                       int                         `json:"code"`
-	Status                     string                      `json:"status"`
-	CreateSSODetailsRequestDto *CreateSSODetailsRequestDto `json:"result"`
-}
-
-type CreateSSODetailsRequestDto struct {
-	Id     int    `json:"id"`
-	Name   string `json:"name"`
-	Url    string `json:"url"`
-	Config struct {
-		Id     string `json:"id"`
-		Label  string `json:"label"`
-		Type   string `json:"type"`
-		Name   string `json:"name"`
-		Config struct {
-			Issuer        string   `json:"issuer"`
-			ClientID      string   `json:"clientID"`
-			ClientSecret  string   `json:"clientSecret"`
-			RedirectURI   string   `json:"redirectURI"`
-			HostedDomains []string `json:"hostedDomains"`
-		} `json:"config"`
-	} `json:"config"`
-	Active bool `json:"active"`
-}
-
 type StructSSOLoginRouter struct {
-	getListResponseDto         GetListResponseDto
-	getSSODetailsResponse      GetSSODetailsResponse
-	createSSODetailsRequestDto CreateSSODetailsRequestDto
+	getListResponseDto         ResponseDTOs.GetListResponseDTO
+	getSSODetailsResponse      ResponseDTOs.GetSSODetailsResponseDTO
+	createSSODetailsRequestDto RequestDTOs.CreateSSODetailsRequestDTO
 }
 
 func (structSSOLoginRouter StructSSOLoginRouter) UnmarshalGivenResponseBody(response []byte, apiName string) StructSSOLoginRouter {
@@ -65,7 +29,7 @@ func (structSSOLoginRouter StructSSOLoginRouter) UnmarshalGivenResponseBody(resp
 	return structSSOLoginRouter
 }
 
-func HitGetListApi(authToken string) GetListResponseDto {
+func HitGetListApi(authToken string) ResponseDTOs.GetListResponseDTO {
 	resp, err := Base.MakeApiCall(GetListApiUrl, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, GetListApi)
 
@@ -74,7 +38,7 @@ func HitGetListApi(authToken string) GetListResponseDto {
 	return ssoRouter.getListResponseDto
 }
 
-func HitGetSSODetailsApi(ssoDetailsId string, authToken string) GetSSODetailsResponse {
+func HitGetSSODetailsApi(ssoDetailsId string, authToken string) ResponseDTOs.GetSSODetailsResponseDTO {
 	resp, err := Base.MakeApiCall(GetSSOConfigByNameApiUrl+"/"+ssoDetailsId, http.MethodGet, "", nil, authToken)
 	Base.HandleError(err, GetSsoDetailsApi)
 
@@ -83,7 +47,7 @@ func HitGetSSODetailsApi(ssoDetailsId string, authToken string) GetSSODetailsRes
 	return ssoRouter.getSSODetailsResponse
 }
 
-func HitGetLoginConfigByNameApi(queryParams map[string]string, authToken string) GetSSODetailsResponse {
+func HitGetLoginConfigByNameApi(queryParams map[string]string, authToken string) ResponseDTOs.GetSSODetailsResponseDTO {
 	resp, err := Base.MakeApiCall(GetSSOConfigByNameApiUrl, http.MethodGet, "", queryParams, authToken)
 	Base.HandleError(err, GetSSOConfigByName)
 
@@ -92,7 +56,7 @@ func HitGetLoginConfigByNameApi(queryParams map[string]string, authToken string)
 	return ssoRouter.getSSODetailsResponse
 }
 
-func HitUpdateSSODetailsApi(byteValue []byte, authToken string) GetSSODetailsResponse {
+func HitUpdateSSODetailsApi(byteValue []byte, authToken string) ResponseDTOs.GetSSODetailsResponseDTO {
 	resp, err := Base.MakeApiCall(UpdateSSODetailsApiUrl, http.MethodPut, string(byteValue), nil, authToken)
 	Base.HandleError(err, UpdateSSODetailsApi)
 

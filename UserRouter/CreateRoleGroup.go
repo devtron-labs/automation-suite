@@ -7,77 +7,80 @@ import (
 	"strconv"
 )
 
-func (suite *UserTestSuite) TestCreateRoleGroupForDevtronAppsOnly() {
-	createRoleGroupPayload := CreateRoleGroupPayload("WithDevtronAppsOnly")
-	byteValueOfStruct, _ := json.Marshal(createRoleGroupPayload)
+func (suite *UserTestSuite) TestClassB2CreateRoleGroup() {
 
-	log.Println("Hitting Create Role Group API")
-	createRoleGroupResponseBody := HitCreateRoleGroupApi(byteValueOfStruct, suite.authToken)
-	assert.Equal(suite.T(), createRoleGroupPayload.Name, createRoleGroupResponseBody.Result.Name)
-	assert.Equal(suite.T(), createRoleGroupPayload.Description, createRoleGroupResponseBody.Result.Description)
+	suite.Run("A=1=CreateRoleGroupForDevtronAppsOnly", func() {
+		createRoleGroupPayload := CreateRoleGroupPayload("WithDevtronAppsOnly")
+		byteValueOfStruct, _ := json.Marshal(createRoleGroupPayload)
 
-	log.Println("Verifying the response of Create Role Group API using getRoleGroupById API")
-	getRoleGroupByIdResponse := HitGetRoleGroupByIdApi(strconv.Itoa(createRoleGroupResponseBody.Result.Id), suite.authToken)
-	assert.Equal(suite.T(), len(getRoleGroupByIdResponse.Result.RoleFilters), len(createRoleGroupResponseBody.Result.RoleFilters))
-	assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].Team, createRoleGroupResponseBody.Result.RoleFilters[0].Team)
-	assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].Action, createRoleGroupResponseBody.Result.RoleFilters[0].Action)
+		log.Println("Hitting Create Role Group API")
+		createRoleGroupResponseBody := HitCreateRoleGroupApi(byteValueOfStruct, suite.authToken)
+		assert.Equal(suite.T(), createRoleGroupPayload.Name, createRoleGroupResponseBody.Result.Name)
+		assert.Equal(suite.T(), createRoleGroupPayload.Description, createRoleGroupResponseBody.Result.Description)
 
-	log.Println("Deleting the Test Data created via Automation")
-	HitDeleteRoleGroupByIdApi(strconv.Itoa(createRoleGroupResponseBody.Result.Id), suite.authToken)
-}
+		log.Println("Verifying the response of Create Role Group API using getRoleGroupById API")
+		getRoleGroupByIdResponse := HitGetRoleGroupByIdApi(strconv.Itoa(createRoleGroupResponseBody.Result.Id), suite.authToken)
+		assert.Equal(suite.T(), len(getRoleGroupByIdResponse.Result.RoleFilters), len(createRoleGroupResponseBody.Result.RoleFilters))
+		assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].Team, createRoleGroupResponseBody.Result.RoleFilters[0].Team)
+		assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].Action, createRoleGroupResponseBody.Result.RoleFilters[0].Action)
 
-func (suite *UserTestSuite) TestCreateRoleGroupForHelmAppsOnly() {
-	createRoleGroupPayload := CreateRoleGroupPayload("WithHelmAppsOnly")
-	byteValueOfStruct, _ := json.Marshal(createRoleGroupPayload)
+		log.Println("Deleting the Test Data created via Automation")
+		HitDeleteRoleGroupByIdApi(strconv.Itoa(createRoleGroupResponseBody.Result.Id), suite.authToken)
+	})
 
-	log.Println("Hitting Create Role Group API")
-	createRoleGroupResponseBody := HitCreateRoleGroupApi(byteValueOfStruct, suite.authToken)
-	assert.Equal(suite.T(), createRoleGroupPayload.Name, createRoleGroupResponseBody.Result.Name)
-	assert.Equal(suite.T(), createRoleGroupPayload.Description, createRoleGroupResponseBody.Result.Description)
+	suite.Run("A=2=CreateRoleGroupForHelmAppsOnly", func() {
+		createRoleGroupPayload := CreateRoleGroupPayload("WithHelmAppsOnly")
+		byteValueOfStruct, _ := json.Marshal(createRoleGroupPayload)
 
-	log.Println("Verifying the response of Create Role Group API using getRoleGroupById API")
-	getRoleGroupByIdResponse := HitGetRoleGroupByIdApi(strconv.Itoa(createRoleGroupResponseBody.Result.Id), suite.authToken)
-	assert.Equal(suite.T(), len(getRoleGroupByIdResponse.Result.RoleFilters), len(createRoleGroupResponseBody.Result.RoleFilters))
-	assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].Team, createRoleGroupResponseBody.Result.RoleFilters[0].Team)
-	assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].Action, createRoleGroupResponseBody.Result.RoleFilters[0].Action)
-	assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].Environment, createRoleGroupResponseBody.Result.RoleFilters[0].Environment)
-	assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].AccessType, createRoleGroupResponseBody.Result.RoleFilters[0].AccessType)
+		log.Println("Hitting Create Role Group API")
+		createRoleGroupResponseBody := HitCreateRoleGroupApi(byteValueOfStruct, suite.authToken)
+		assert.Equal(suite.T(), createRoleGroupPayload.Name, createRoleGroupResponseBody.Result.Name)
+		assert.Equal(suite.T(), createRoleGroupPayload.Description, createRoleGroupResponseBody.Result.Description)
 
-	log.Println("Deleting the Test Data created via Automation")
-	HitDeleteRoleGroupByIdApi(strconv.Itoa(createRoleGroupResponseBody.Result.Id), suite.authToken)
-}
+		log.Println("Verifying the response of Create Role Group API using getRoleGroupById API")
+		getRoleGroupByIdResponse := HitGetRoleGroupByIdApi(strconv.Itoa(createRoleGroupResponseBody.Result.Id), suite.authToken)
+		assert.Equal(suite.T(), len(getRoleGroupByIdResponse.Result.RoleFilters), len(createRoleGroupResponseBody.Result.RoleFilters))
+		assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].Team, createRoleGroupResponseBody.Result.RoleFilters[0].Team)
+		assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].Action, createRoleGroupResponseBody.Result.RoleFilters[0].Action)
+		assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].Environment, createRoleGroupResponseBody.Result.RoleFilters[0].Environment)
+		assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].AccessType, createRoleGroupResponseBody.Result.RoleFilters[0].AccessType)
 
-func (suite *UserTestSuite) TestCreateRoleGroupForChartGroupsOnly() {
-	createRoleGroupPayload := CreateRoleGroupPayload("WithChartGroupsOnly")
-	byteValueOfStruct, _ := json.Marshal(createRoleGroupPayload)
+		log.Println("Deleting the Test Data created via Automation")
+		HitDeleteRoleGroupByIdApi(strconv.Itoa(createRoleGroupResponseBody.Result.Id), suite.authToken)
+	})
 
-	log.Println("Hitting Create Role Group API")
-	createRoleGroupResponseBody := HitCreateRoleGroupApi(byteValueOfStruct, suite.authToken)
-	assert.Equal(suite.T(), createRoleGroupPayload.Name, createRoleGroupResponseBody.Result.Name)
-	assert.Equal(suite.T(), createRoleGroupPayload.Description, createRoleGroupResponseBody.Result.Description)
+	suite.Run("A=3=CreateRoleGroupForChartGroupsOnly", func() {
+		createRoleGroupPayload := CreateRoleGroupPayload("WithChartGroupsOnly")
+		byteValueOfStruct, _ := json.Marshal(createRoleGroupPayload)
 
-	log.Println("Verifying the response of Create Role Group API using getRoleGroupById API")
-	getRoleGroupByIdResponse := HitGetRoleGroupByIdApi(strconv.Itoa(createRoleGroupResponseBody.Result.Id), suite.authToken)
-	assert.Equal(suite.T(), len(getRoleGroupByIdResponse.Result.RoleFilters), len(createRoleGroupResponseBody.Result.RoleFilters))
-	assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].Action, createRoleGroupResponseBody.Result.RoleFilters[0].Action)
-	assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].Entity, createRoleGroupResponseBody.Result.RoleFilters[0].Entity)
-	log.Println("Deleting the Test Data created via Automation")
-	HitDeleteRoleGroupByIdApi(strconv.Itoa(createRoleGroupResponseBody.Result.Id), suite.authToken)
-}
+		log.Println("Hitting Create Role Group API")
+		createRoleGroupResponseBody := HitCreateRoleGroupApi(byteValueOfStruct, suite.authToken)
+		assert.Equal(suite.T(), createRoleGroupPayload.Name, createRoleGroupResponseBody.Result.Name)
+		assert.Equal(suite.T(), createRoleGroupPayload.Description, createRoleGroupResponseBody.Result.Description)
 
-func (suite *UserTestSuite) TestCreateRoleGroupForAllFilters() {
-	createRoleGroupPayload := CreateRoleGroupPayload("WithAllFilter")
-	byteValueOfStruct, _ := json.Marshal(createRoleGroupPayload)
+		log.Println("Verifying the response of Create Role Group API using getRoleGroupById API")
+		getRoleGroupByIdResponse := HitGetRoleGroupByIdApi(strconv.Itoa(createRoleGroupResponseBody.Result.Id), suite.authToken)
+		assert.Equal(suite.T(), len(getRoleGroupByIdResponse.Result.RoleFilters), len(createRoleGroupResponseBody.Result.RoleFilters))
+		assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].Action, createRoleGroupResponseBody.Result.RoleFilters[0].Action)
+		assert.Equal(suite.T(), getRoleGroupByIdResponse.Result.RoleFilters[0].Entity, createRoleGroupResponseBody.Result.RoleFilters[0].Entity)
+		log.Println("Deleting the Test Data created via Automation")
+		HitDeleteRoleGroupByIdApi(strconv.Itoa(createRoleGroupResponseBody.Result.Id), suite.authToken)
+	})
 
-	log.Println("Hitting Create Role Group API")
-	createRoleGroupResponseBody := HitCreateRoleGroupApi(byteValueOfStruct, suite.authToken)
-	assert.Equal(suite.T(), createRoleGroupPayload.Name, createRoleGroupResponseBody.Result.Name)
-	assert.Equal(suite.T(), createRoleGroupPayload.Description, createRoleGroupResponseBody.Result.Description)
+	suite.Run("A=1=CreateRoleGroupForAllFilters", func() {
+		createRoleGroupPayload := CreateRoleGroupPayload("WithAllFilter")
+		byteValueOfStruct, _ := json.Marshal(createRoleGroupPayload)
 
-	log.Println("Verifying the response of Create Role Group API using getRoleGroupById API")
-	getRoleGroupByIdResponse := HitGetRoleGroupByIdApi(strconv.Itoa(createRoleGroupResponseBody.Result.Id), suite.authToken)
-	assert.Equal(suite.T(), len(getRoleGroupByIdResponse.Result.RoleFilters), len(createRoleGroupResponseBody.Result.RoleFilters))
+		log.Println("Hitting Create Role Group API")
+		createRoleGroupResponseBody := HitCreateRoleGroupApi(byteValueOfStruct, suite.authToken)
+		assert.Equal(suite.T(), createRoleGroupPayload.Name, createRoleGroupResponseBody.Result.Name)
+		assert.Equal(suite.T(), createRoleGroupPayload.Description, createRoleGroupResponseBody.Result.Description)
 
-	log.Println("Deleting the Test Data created via Automation")
-	HitDeleteRoleGroupByIdApi(strconv.Itoa(createRoleGroupResponseBody.Result.Id), suite.authToken)
+		log.Println("Verifying the response of Create Role Group API using getRoleGroupById API")
+		getRoleGroupByIdResponse := HitGetRoleGroupByIdApi(strconv.Itoa(createRoleGroupResponseBody.Result.Id), suite.authToken)
+		assert.Equal(suite.T(), len(getRoleGroupByIdResponse.Result.RoleFilters), len(createRoleGroupResponseBody.Result.RoleFilters))
+
+		log.Println("Deleting the Test Data created via Automation")
+		HitDeleteRoleGroupByIdApi(strconv.Itoa(createRoleGroupResponseBody.Result.Id), suite.authToken)
+	})
 }

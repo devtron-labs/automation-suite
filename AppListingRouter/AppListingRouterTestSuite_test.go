@@ -5,6 +5,6 @@ import (
 	"testing"
 )
 
-func TestSSOLoginRouterSuite(t *testing.T) {
-	suite.Run(t, new(AppListingRouter))
+func TestAppListingRouterSuite(t *testing.T) {
+	suite.Run(t, new(AppsListingRouterTestSuite))
 }
