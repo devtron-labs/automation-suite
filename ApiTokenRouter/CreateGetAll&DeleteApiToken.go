@@ -12,7 +12,7 @@ func (suite *ApiTokenRoutersTestSuite) TestCreateGetAllAndDeleteApiToken() {
 
 	suite.Run("A=1=CreateApiTokenWithValidArgs", func() {
 		var tokenId int
-		createApiTokenRequestDTO := getPayLoadForCreateApiToken()
+		createApiTokenRequestDTO := GetPayLoadForCreateApiToken()
 		payloadForCreateApiTokenRequest, _ := json.Marshal(createApiTokenRequestDTO)
 		responseOfCreateApiToken := HitCreateApiTokenApi(string(payloadForCreateApiTokenRequest), suite.authToken)
 		assert.Equal(suite.T(), "API-TOKEN:"+createApiTokenRequestDTO.Name, responseOfCreateApiToken.Result.UserIdentifier)
@@ -32,7 +32,8 @@ func (suite *ApiTokenRoutersTestSuite) TestCreateGetAllAndDeleteApiToken() {
 
 	suite.Run("A=2=CreateApiTokenWithExistingName", func() {
 		var tokenId int
-		createApiTokenRequestDTO := getPayLoadForCreateApiToken()
+		createApiTokenRequestDTO := GetPayLoadForCreateApiToken()
+
 		payloadForCreateApiTokenRequest, _ := json.Marshal(createApiTokenRequestDTO)
 		responseOfCreateApiToken := HitCreateApiTokenApi(string(payloadForCreateApiTokenRequest), suite.authToken)
 		log.Println("=== Here we are getting All the API token for finding the TokenID ===")
