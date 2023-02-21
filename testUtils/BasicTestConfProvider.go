@@ -147,6 +147,8 @@ func GetAuthToken() string {
 
 const charset = "abcdefghijklmnopqrstuvwxyz" +
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+const charset2 = "abcdefghijklmnopqrstuvwxyz" +
+	"0123456789"
 
 var seededRand *rand.Rand = rand.New(
 	rand.NewSource(time.Now().UnixNano()))
@@ -158,7 +160,13 @@ func GetRandomStringOfGivenLength(length int) string {
 	}
 	return string(b)
 }
-
+func GetRandomStringOfGivenLengthOfLowerCaseAndNumber(length int) string {
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset2[seededRand.Intn(len(charset2))]
+	}
+	return string(b)
+}
 func GetRandomNumberOf9Digit() int {
 	return 100000000 + rand.Intn(999999999-100000000)
 }
@@ -226,8 +234,8 @@ func ReadAnyJsonFile(filename string) BaseClassEnvironmentConfig {
 }
 
 type BaseEnvConfigStruct struct {
-	BaseCredentialsFile  string `env:"BASE_CREDENTIALS_FILE" envDefault:"/base-test/credentials.json"`
-	ClassCredentialsFile string `env:"CLASS_CREDENTIALS_FILE" envDefault:"/class-test/credentials.json"`
+	BaseCredentialsFile  string `env:"BASE_CREDENTIALS_FILE" envDefault:"../testUtils/credentials.json"`
+	ClassCredentialsFile string `env:"CLASS_CREDENTIALS_FILE" envDefault:"../testUtils/credentials.json"`
 }
 
 func ReadBaseEnvConfig() *BaseEnvConfigStruct {

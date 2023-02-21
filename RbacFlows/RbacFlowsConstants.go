@@ -11,7 +11,7 @@ const (
 	ENVIRONMENTOVERRIDES string = "environmentOverrides"
 	DELETE               string = "delete"
 	PROJECT              string = "test"
-	ENV                  string = "env"
-	APP                  string = "app"
+	ENV                  string = "env-3"
+	APP                  string = "app5"
 	ACTION               string = ""
 )
