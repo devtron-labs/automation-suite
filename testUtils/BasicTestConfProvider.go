@@ -234,8 +234,8 @@ func ReadAnyJsonFile(filename string) BaseClassEnvironmentConfig {
 }
 
 type BaseEnvConfigStruct struct {
-	BaseCredentialsFile  string `env:"BASE_CREDENTIALS_FILE" envDefault:"../testUtils/credentials.json"`
-	ClassCredentialsFile string `env:"CLASS_CREDENTIALS_FILE" envDefault:"../testUtils/credentials.json"`
+	BaseCredentialsFile  string `env:"BASE_CREDENTIALS_FILE" envDefault:"/base-test/credentials.json"`
+	ClassCredentialsFile string `env:"CLASS_CREDENTIALS_FILE" envDefault:"/class-test/credentials.json"`
 }
 
 func ReadBaseEnvConfig() *BaseEnvConfigStruct {
