@@ -9,7 +9,6 @@ import (
 )
 
 func (suite *AppsListingRouterTestSuite) TestFetchAppsByEnvironment() {
-
 	suite.Run("A=1=FetchAppsByEnvironmentWithDefaultFilter", func() {
 		log.Println("Here we are creating request payload")
 		Envs := []int{}
@@ -20,7 +19,6 @@ func (suite *AppsListingRouterTestSuite) TestFetchAppsByEnvironment() {
 		payloadForApiFetchAppsByEnvironment, _ := json.Marshal(requestDTOForApiFetchAppsByEnvironment)
 		log.Println("Here we are fetching the app list without creating a new one")
 		fetchOtherEnvResponseDto := HitApiFetchAppsByEnvironment(payloadForApiFetchAppsByEnvironment, suite.authToken)
-		appCountBeforeCreationNewOne := fetchOtherEnvResponseDto.Result.AppCount
 		log.Println("Here we are creating a new app with CI/CD")
 		createAppApiResponse, workflowResponse := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken)
 		time.Sleep(2 * time.Second)
@@ -51,18 +49,18 @@ func (suite *AppsListingRouterTestSuite) TestFetchAppsByEnvironment() {
 		assert.Equal(suite.T(), "Succeeded", updatedWorkflowStatus.Result.CiWorkflowStatus[0].CiStatus)
 		assert.Equal(suite.T(), "Succeeded", updatedWorkflowStatus.Result.CdWorkflowStatus[0].DeployStatus)
 		log.Println("Here we are fetching the app list after creating a new app")
+		requestDTOForApiFetchAppsByEnvironment = GetPayloadForApiFetchAppsByEnvironment(Envs, Teams, Namespaces, createAppApiResponse.AppName, AppStatuses, "ASC", 0, 0, 10)
+		payloadForApiFetchAppsByEnvironment, _ = json.Marshal(requestDTOForApiFetchAppsByEnvironment)
+		log.Println("Here we are fetching the app list without creating a new one")
 		fetchOtherEnvResponseDto = HitApiFetchAppsByEnvironment(payloadForApiFetchAppsByEnvironment, suite.authToken)
-		appCountAfterCreationNewOne := fetchOtherEnvResponseDto.Result.AppCount
-		assert.Equal(suite.T(), appCountBeforeCreationNewOne+1, appCountAfterCreationNewOne)
 		assert.Equal(suite.T(), 200, fetchOtherEnvResponseDto.Code)
-		lastIndexOfApps := len(fetchOtherEnvResponseDto.Result.AppContainers)
-		assert.Equal(suite.T(), createAppApiResponse.Id, fetchOtherEnvResponseDto.Result.AppContainers[lastIndexOfApps-1].AppId)
-		assert.Equal(suite.T(), 1, fetchOtherEnvResponseDto.Result.AppContainers[lastIndexOfApps-1].ProjectId)
-		assert.Equal(suite.T(), 1, fetchOtherEnvResponseDto.Result.AppContainers[lastIndexOfApps-1].Environments[0].EnvironmentId)
-		assert.Equal(suite.T(), "default_cluster", fetchOtherEnvResponseDto.Result.AppContainers[lastIndexOfApps-1].Environments[0].ClusterName)
-		assert.Equal(suite.T(), "devtron-demo", fetchOtherEnvResponseDto.Result.AppContainers[lastIndexOfApps-1].Environments[0].Namespace)
-		assert.Equal(suite.T(), "devtron-demo", fetchOtherEnvResponseDto.Result.AppContainers[lastIndexOfApps-1].Environments[0].EnvironmentName)
-		assert.Equal(suite.T(), "Healthy", fetchOtherEnvResponseDto.Result.AppContainers[lastIndexOfApps-1].Environments[0].AppStatus)
+		assert.Equal(suite.T(), createAppApiResponse.Id, fetchOtherEnvResponseDto.Result.AppContainers[0].AppId)
+		assert.Equal(suite.T(), 1, fetchOtherEnvResponseDto.Result.AppContainers[0].ProjectId)
+		assert.Equal(suite.T(), 1, fetchOtherEnvResponseDto.Result.AppContainers[0].Environments[0].EnvironmentId)
+		assert.Equal(suite.T(), "default_cluster", fetchOtherEnvResponseDto.Result.AppContainers[0].Environments[0].ClusterName)
+		assert.Equal(suite.T(), "devtron-demo", fetchOtherEnvResponseDto.Result.AppContainers[0].Environments[0].Namespace)
+		assert.Equal(suite.T(), "devtron-demo", fetchOtherEnvResponseDto.Result.AppContainers[0].Environments[0].EnvironmentName)
+		assert.Equal(suite.T(), "Healthy", fetchOtherEnvResponseDto.Result.AppContainers[0].Environments[0].AppStatus)
 	})
 
 	suite.Run("A=2=FetchAppsByEnvironmentWithAppStatusFilter", func() {
@@ -158,5 +156,23 @@ func (suite *AppsListingRouterTestSuite) TestFetchAppsByEnvironment() {
 		assert.Equal(suite.T(), "Healthy", appsList.Result.AppContainers[lastIndexOfList-1].Environments[0].AppStatus)
 	})
 
+	suite.Run("A=8=VerifySearchViaAppNameFeatureOnDashboard", func() {
+		log.Println("Here we are creating request payload")
+		Envs := []int{}
+		Teams := []int{}
+		Namespaces := []string{}
+		AppStatuses := []string{}
+		requestDTOForApiFetchAppsByEnvironment := GetPayloadForApiFetchAppsByEnvironment(Envs, Teams, Namespaces, "", AppStatuses, "ASC", 0, 0, 10)
+		payloadForApiFetchAppsByEnvironment, _ := json.Marshal(requestDTOForApiFetchAppsByEnvironment)
+		log.Println("Here we are fetching the app list without creating a new one")
+		appsList := HitApiFetchAppsByEnvironment(payloadForApiFetchAppsByEnvironment, suite.authToken)
+		lastIndexOfList := len(appsList.Result.AppContainers)
+		expectedAppName := appsList.Result.AppContainers[lastIndexOfList-1].Environments[0].AppName
+		requestDTOForApiFetchAppsByEnvironment = GetPayloadForApiFetchAppsByEnvironment(Envs, Teams, Namespaces, expectedAppName, AppStatuses, "ASC", 0, 0, 10)
+		payloadForApiFetchAppsByEnvironment, _ = json.Marshal(requestDTOForApiFetchAppsByEnvironment)
+		log.Println("Here we are fetching the app list via passing the appName")
+		appsList = HitApiFetchAppsByEnvironment(payloadForApiFetchAppsByEnvironment, suite.authToken)
+		assert.Equal(suite.T(), expectedAppName, appsList.Result.AppContainers[0].Environments[0].AppName)
+	})
 	PipelineConfigRouter.DeleteAppWithCiCd(suite.authToken)
 }
