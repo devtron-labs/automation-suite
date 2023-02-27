@@ -7,6 +7,7 @@ import (
 	"automation-suite/PipelineConfigRouter"
 	"automation-suite/TeamRouter"
 	TeamRouterResponseDTOs "automation-suite/TeamRouter/ResponseDTOs"
+	"automation-suite/UserRouter"
 	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/suite"
@@ -135,18 +136,21 @@ func getExpectedStatusCode(action string, apiName string) int {
 	isValid := false
 	switch action {
 	case "manager":
-		isValid = (apiName == GLOBALCONFIGURATIONS) ||
-			(apiName == CREATEAPP) || (apiName == APPLISTFETCH) ||
-			(apiName == PIPELINECREATE) || (apiName == PIPELINEFETCH) ||
-			(apiName == TRIGGERPIPELINE) || (apiName == APPDETAILS) ||
-			(apiName == ENVIRONMENTOVERRIDES) || (apiName == DELETE)
+		isValid = (apiName == UserRouter.GLOBALCONFIGURATIONS) ||
+			(apiName == UserRouter.CREATEAPP) || (apiName == UserRouter.APPLISTFETCH) ||
+			(apiName == UserRouter.PIPELINECREATE) || (apiName == UserRouter.PIPELINEFETCH) ||
+			(apiName == UserRouter.TRIGGERPIPELINE) || (apiName == UserRouter.APPDETAILS) ||
+			(apiName == UserRouter.ENVIRONMENTOVERRIDES) || (apiName == UserRouter.DELETE)
 	case "admin":
-		isValid = (apiName == CREATEAPP) || (apiName == APPLISTFETCH) || (apiName == PIPELINECREATE) || (apiName == PIPELINEFETCH) || (apiName == TRIGGERPIPELINE) || (apiName == APPDETAILS) || (apiName == ENVIRONMENTOVERRIDES)
+		// admin can only create app when given access to all app in specific project
+		// Considering specific app now, so admin cant create app
+
+		isValid = (apiName == UserRouter.APPLISTFETCH) || (apiName == UserRouter.PIPELINECREATE) || (apiName == UserRouter.PIPELINEFETCH) || (apiName == UserRouter.TRIGGERPIPELINE) || (apiName == UserRouter.APPDETAILS) || (apiName == UserRouter.ENVIRONMENTOVERRIDES)
 
 	case "view":
-		isValid = (apiName == APPLISTFETCH) || (apiName == PIPELINEFETCH) || (apiName == APPDETAILS)
+		isValid = (apiName == UserRouter.APPLISTFETCH) || (apiName == UserRouter.PIPELINEFETCH) || (apiName == UserRouter.APPDETAILS)
 	case "trigger":
-		isValid = (apiName == APPLISTFETCH) || (apiName == PIPELINECREATE) || (apiName == PIPELINEFETCH) || (apiName == TRIGGERPIPELINE) || (apiName == APPDETAILS)
+		isValid = (apiName == UserRouter.APPLISTFETCH) || (apiName == UserRouter.PIPELINECREATE) || (apiName == UserRouter.PIPELINEFETCH) || (apiName == UserRouter.TRIGGERPIPELINE) || (apiName == UserRouter.APPDETAILS)
 
 	}
 	if isValid {
@@ -158,7 +162,17 @@ func getExpectedStatusCode(action string, apiName string) int {
 
 type RbacFlowTestSuite struct {
 	suite.Suite
-	authToken string
+	authToken           string
+	RbacDevtronDeletion struct {
+		ProjectPayload []byte
+		EnvPayLoad     []byte
+		DevtronPayload PipelineConfigRouter.CreateAppResponseDto
+		RoleGroupId    int
+	}
+	RbacApiTokenDeletion struct {
+		ApiTokenId int
+		UserId     int
+	}
 }
 
 func (suite *RbacFlowTestSuite) SetupSuite() {

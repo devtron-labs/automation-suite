@@ -20,7 +20,7 @@ var (
 
 const SuccessCode = 200
 
-func CreateNewAppWithCiCd(authToken string) (testUtils.CreateAppRequestDto, dtos.CreateWorkflowResponseDto) {
+func CreateNewAppWithCiCd(authToken string, useCustomInputValues bool) (testUtils.CreateAppRequestDto, dtos.CreateWorkflowResponseDto) {
 	if createAppApiResponsePtr != nil && workflowResponsePtr != nil {
 		return *createAppApiResponsePtr, *workflowResponsePtr
 	}

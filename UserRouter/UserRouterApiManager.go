@@ -112,6 +112,25 @@ func CreateUserRequestPayload(caseName string, authToken string) (RequestDTOs.Us
 	var userInfo RequestDTOs.UserInfo
 	var createRoleGroupApiResponse ResponseDTOs.CreateRoleGroupResponseDto
 	switch caseName {
+	//case GroupsAndRoleFilterDynamic:
+	//	var listOfRoleFilter []ResponseDTOs.RoleFilter
+	//	var listOfGroups []string
+	//
+	//	roleFilter := CreateRoleFilterForDynamicEntityName(ENTITY, PROJECT, ENV, "manager", ACCESS_TYPE, APP)
+	//	listOfRoleFilter = append(listOfRoleFilter, roleFilter)
+	//
+	//	createRoleGroupPayload := CreateRoleGroupPayload(WithDevtronAppsOnlyDynamic)
+	//	byteValueOfStruct, _ := json.Marshal(createRoleGroupPayload)
+	//	createRoleGroupApiResponse = HitCreateRoleGroupApi(byteValueOfStruct, authToken)
+	//	GroupName := createRoleGroupApiResponse.Result.Name
+	//	listOfGroups = append(listOfGroups, GroupName)
+	//
+	//	userName := Base.GetRandomStringOfGivenLength(10)
+	//	userInfo.EmailId = userName + "@yopmail.com"
+	//	userInfo.SuperAdmin = false
+	//	userInfo.RoleFilters = listOfRoleFilter
+	//	userInfo.Groups = listOfGroups
+
 	case GroupsAndRoleFilter:
 		var listOfRoleFilter []ResponseDTOs.RoleFilter
 		var listOfGroups []string
@@ -188,7 +207,9 @@ func CreateRoleGroupPayload(caseName string) RequestDTOs.RoleGroup {
 
 		roleFilter = CreateRoleFilterWithChartGroupsOnly()
 		listOfRoleFilter = append(listOfRoleFilter, roleFilter)
-
+	case WithDevtronAppsOnlyDynamic:
+		roleFilter := CreateRoleFilterWithDevtronAppsOnlyDynamic(ENTITY, PROJECT, ENV, APP, ACTION, ACCESS_TYPE)
+		listOfRoleFilter = append(listOfRoleFilter, roleFilter)
 	}
 
 	roleGroup.Name = Base.GetRandomStringOfGivenLength(10)
@@ -196,10 +217,10 @@ func CreateRoleGroupPayload(caseName string) RequestDTOs.RoleGroup {
 	roleGroup.RoleFilters = listOfRoleFilter
 	return roleGroup
 }
-func CreateRoleGroupPayloadDynamicForDevtronApp(team, env, app, action string) RequestDTOs.RoleGroup {
+func CreateRoleGroupPayloadDynamicForDevtronApp(entity, team, env, app, action, accessType string) RequestDTOs.RoleGroup {
 	var roleGroup RequestDTOs.RoleGroup
 	var listOfRoleFilter []ResponseDTOs.RoleFilter
-	roleFilter := CreateRoleFilterWithDevtronAppsOnlyDynamic(team, env, app, action)
+	roleFilter := CreateRoleFilterWithDevtronAppsOnlyDynamic(entity, team, env, app, action, accessType)
 	listOfRoleFilter = append(listOfRoleFilter, roleFilter)
 
 	roleGroup.Name = Base.GetRandomStringOfGivenLength(10)
@@ -213,9 +234,9 @@ func CreateRoleFilterWithDevtronAppsOnly() ResponseDTOs.RoleFilter {
 	roleFilter = CreateRoleFilter("", "devtron-demo", "", "view", "")
 	return roleFilter
 }
-func CreateRoleFilterWithDevtronAppsOnlyDynamic(team, env, app, action string) ResponseDTOs.RoleFilter {
+func CreateRoleFilterWithDevtronAppsOnlyDynamic(entity, team, env, app, action, accessType string) ResponseDTOs.RoleFilter {
 	var roleFilter ResponseDTOs.RoleFilter
-	roleFilter = CreateRoleFilter(app, team, env, action, "")
+	roleFilter = CreateRoleFilterForDynamicEntityName(entity, team, env, action, accessType, app)
 	return roleFilter
 }
 
@@ -237,6 +258,16 @@ func CreateRoleFilter(entity string, teamName string, environment string, action
 	roleFilter.Entity = entity
 	roleFilter.Team = teamName
 	roleFilter.EntityName = ""
+	roleFilter.Environment = environment
+	roleFilter.Action = action
+	roleFilter.AccessType = accessType
+	return roleFilter
+}
+func CreateRoleFilterForDynamicEntityName(entity string, teamName string, environment string, action string, accessType string, entityName string) ResponseDTOs.RoleFilter {
+	var roleFilter ResponseDTOs.RoleFilter
+	roleFilter.Entity = entity
+	roleFilter.Team = teamName
+	roleFilter.EntityName = entityName
 	roleFilter.Environment = environment
 	roleFilter.Action = action
 	roleFilter.AccessType = accessType

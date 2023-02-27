@@ -9,7 +9,7 @@ import (
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
-	createAppApiResponse, workflowResponse := CreateNewAppWithCiCd(suite.authToken)
+	createAppApiResponse, workflowResponse := CreateNewAppWithCiCd(suite.authToken, false)
 	time.Sleep(2 * time.Second)
 	log.Println("=== Here we are getting pipeline material ===")
 	pipelineMaterial := HitGetCiPipelineMaterial(workflowResponse.Result.CiPipelines[0].Id, suite.authToken)

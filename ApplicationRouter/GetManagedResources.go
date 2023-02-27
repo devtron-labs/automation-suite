@@ -9,7 +9,7 @@ import (
 )
 
 func (suite *ApplicationsRouterTestSuite) TestClassGetManagedResources() {
-	createAppApiResponse, workflowResponse := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken)
+	createAppApiResponse, workflowResponse := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken, false)
 	log.Println("=== Here we are getting pipeline material ===")
 	pipelineMaterial := PipelineConfigRouter.HitGetCiPipelineMaterial(workflowResponse.Result.CiPipelines[0].Id, suite.authToken)
 

@@ -15,7 +15,7 @@ var ciTriggerWorkflowIdPtr *string
 
 func (suite *ApplicationsRouterTestSuite) TestClassGetResourceTree() {
 
-	createAppApiResponse, workflowResponse := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken)
+	createAppApiResponse, workflowResponse := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken, false)
 	time.Sleep(2 * time.Second)
 	log.Println("=== Here we are getting workflow status material ===")
 	updatedWorkflowStatus := PipelineConfigRouter.HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
