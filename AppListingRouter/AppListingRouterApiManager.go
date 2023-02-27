@@ -41,11 +41,17 @@ func FetchOtherEnv(id int, authToken string) ResponseDTOs.FetchOtherEnvResponseD
 	return apiRouter.fetchOtherEnvResponseDto
 }
 
-func GetPayloadForApiFetchAppsByEnvironment() RequestDTOs.FetchAppsByEnvironmentRequestDTO {
+func GetPayloadForApiFetchAppsByEnvironment(Environments []int, Teams []int, Namespaces []string, AppNameSearch string, AppStatuses []string, SortOrder string, Offset int, HOffset int, Size int) RequestDTOs.FetchAppsByEnvironmentRequestDTO {
 	FetchAppsByEnvironmentRequestDTO := RequestDTOs.FetchAppsByEnvironmentRequestDTO{}
+	FetchAppsByEnvironmentRequestDTO.Environments = Environments
+	FetchAppsByEnvironmentRequestDTO.Teams = Teams
+	FetchAppsByEnvironmentRequestDTO.Namespaces = Namespaces
+	FetchAppsByEnvironmentRequestDTO.AppNameSearch = AppNameSearch
+	FetchAppsByEnvironmentRequestDTO.AppStatuses = AppStatuses
 	FetchAppsByEnvironmentRequestDTO.SortBy = "appNameSort"
-	FetchAppsByEnvironmentRequestDTO.SortOrder = "ASC"
-	FetchAppsByEnvironmentRequestDTO.Size = 20
+	FetchAppsByEnvironmentRequestDTO.SortOrder = SortOrder
+	FetchAppsByEnvironmentRequestDTO.Offset = Offset
+	FetchAppsByEnvironmentRequestDTO.Size = Size
 	return FetchAppsByEnvironmentRequestDTO
 }
 

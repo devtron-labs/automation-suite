@@ -10,7 +10,8 @@ import (
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassA4GetCiPipeline() {
-	config, _ := GetEnvironmentConfigPipelineConfigRouter()
+	envConf := testUtils.ReadBaseEnvConfig()
+	config := testUtils.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 	createAppApiResponse := suite.createAppResponseDto.Result
 	materialId := suite.createAppMaterialResponseDto.Result.Material[0].Id
 	appNameForNewCreation := "app" + strings.ToLower(testUtils.GetRandomStringOfGivenLength(6))

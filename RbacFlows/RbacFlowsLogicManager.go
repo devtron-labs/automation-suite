@@ -162,17 +162,7 @@ func getExpectedStatusCode(action string, apiName string) int {
 
 type RbacFlowTestSuite struct {
 	suite.Suite
-	authToken           string
-	RbacDevtronDeletion struct {
-		ProjectPayload []byte
-		EnvPayLoad     []byte
-		DevtronPayload PipelineConfigRouter.CreateAppResponseDto
-		RoleGroupId    int
-	}
-	RbacApiTokenDeletion struct {
-		ApiTokenId int
-		UserId     int
-	}
+	authToken string
 }
 
 func (suite *RbacFlowTestSuite) SetupSuite() {

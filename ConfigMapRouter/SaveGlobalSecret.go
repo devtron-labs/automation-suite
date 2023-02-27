@@ -12,7 +12,8 @@ import (
 )
 
 func (suite *ConfigsMapRouterTestSuite) TestClassA3SaveGlobalSecret() {
-	config, _ := PipelineConfigRouter.GetEnvironmentConfigPipelineConfigRouter()
+	envConf := Base.ReadBaseEnvConfig()
+	config := Base.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 	log.Println("=== Here we are creating a App ===")
 	createAppApiResponse := Base.CreateApp(suite.authToken).Result
 

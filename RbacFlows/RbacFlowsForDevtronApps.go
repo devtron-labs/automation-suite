@@ -3,19 +3,20 @@ package RbacFlows
 import (
 	"automation-suite/ApiTokenRouter"
 	"automation-suite/ApiTokenRouter/ResponseDTOs"
-	AppListingRouter "automation-suite/AppListingRouter"
+	"automation-suite/AppListingRouter"
 	"automation-suite/HelperRouter"
 	"automation-suite/PipelineConfigRouter"
 	dtos "automation-suite/PipelineConfigRouter/ResponseDTOs"
 	"automation-suite/RbacFlows/RequestDTOs"
 	"automation-suite/TeamRouter"
+	"automation-suite/testdata/testUtils"
 	"github.com/tidwall/sjson"
 	"time"
 
 	//"automation-suite/RbacFlows/RequestDTOs"
 	"automation-suite/UserRouter"
 	abcd "automation-suite/UserRouter/RequestDTOs"
-	"automation-suite/testUtils"
+	Base "automation-suite/testUtils"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"log"
@@ -133,8 +134,12 @@ func (suite *RbacFlowTestSuite) TestRbacFlowsForDevtronApps() {
 			log.Println("Test Case for User ===>", apiToken)
 
 			createAppResponseDto := responseOfCreateDevtronApp
-			PayloadForApiFetchAppsByEnvironment := AppListingRouter.GetPayloadForApiFetchAppsByEnvironment()
-			bytePayloadForTriggerCiPipeline, _ := json.Marshal(PayloadForApiFetchAppsByEnvironment)
+			Envs := []int{}
+			Teams := []int{1}
+			Namespaces := []string{}
+			AppStatuses := []string{}
+			requestDTOForApiFetchAppsByEnvironment := AppListingRouter.GetPayloadForApiFetchAppsByEnvironment(Envs, Teams, Namespaces, "", AppStatuses, "ASC", 0, 0, 10)
+			bytePayloadForTriggerCiPipeline, _ := json.Marshal(requestDTOForApiFetchAppsByEnvironment)
 
 			log.Println("Test Case for User ===>", apiToken)
 			allAppsByEnvironment := AppListingRouter.HitApiFetchAppsByEnvironment(bytePayloadForTriggerCiPipeline, apiToken)
@@ -151,7 +156,8 @@ func (suite *RbacFlowTestSuite) TestRbacFlowsForDevtronApps() {
 				createAppApiResponse = *createAppApiResponsePtr
 				workflowResponse = *workflowResponsePtr
 			} else {
-				config, _ := PipelineConfigRouter.GetEnvironmentConfigPipelineConfigRouter()
+				envConf := Base.ReadBaseEnvConfig()
+				config := Base.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 				var configId int
 				log.Println("=== Here we are creating App Material ===")
 				createAppMaterialRequestDto := PipelineConfigRouter.GetAppMaterialRequestDto(createAppApiResponse.Id, 1, false)
@@ -283,8 +289,13 @@ func (suite *RbacFlowTestSuite) TestRbacFlowsForDevtronApps() {
 		//superAdminToken, deleteToken := suite.CreateTokenForSpecificPermissionGroup(createRoleGroupResponseBody, true, "", createRoleGroupPayload)
 		//log.Println(deleteDevtron, deleteToken)
 		superAdminToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IkFQSS1UT0tFTjpzdXBlcmFkbWluIiwiaXNzIjoiYXBpVG9rZW5Jc3N1ZXIiLCJleHAiOjE2ODAxMDA1NTJ9.8TB9v0JppMw5YDhZ05H82DQb2sdjRNWwroHtlnmC4DU"
-		PayloadForApiFetchAppsByEnvironment := AppListingRouter.GetPayloadForApiFetchAppsByEnvironment()
-		bytePayloadForTriggerCiPipeline, _ := json.Marshal(PayloadForApiFetchAppsByEnvironment)
+
+		Envs := []int{}
+		Teams := []int{1}
+		Namespaces := []string{}
+		AppStatuses := []string{}
+		requestDTOForApiFetchAppsByEnvironment := AppListingRouter.GetPayloadForApiFetchAppsByEnvironment(Envs, Teams, Namespaces, "", AppStatuses, "ASC", 0, 0, 10)
+		bytePayloadForTriggerCiPipeline, _ := json.Marshal(requestDTOForApiFetchAppsByEnvironment)
 		allAppsViaArgoAdminToken := AppListingRouter.HitApiFetchAppsByEnvironment(bytePayloadForTriggerCiPipeline, superAdminToken)
 		allAppsViaSuperAdminToken := AppListingRouter.HitApiFetchAppsByEnvironment(bytePayloadForTriggerCiPipeline, suite.authToken)
 		assert.Equal(suite.T(), allAppsViaArgoAdminToken.Result.AppCount, allAppsViaSuperAdminToken.Result.AppCount)

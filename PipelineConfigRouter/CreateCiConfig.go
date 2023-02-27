@@ -9,7 +9,8 @@ import (
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassA3SaveAppCiPipeline() {
-	config, _ := GetEnvironmentConfigPipelineConfigRouter()
+	envConf := Base.ReadBaseEnvConfig()
+	config := Base.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 	log.Println("=== Here we are creating a App ===")
 	createAppApiResponse := Base.CreateApp(suite.authToken).Result
 
@@ -51,7 +52,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA3SaveAppCiPipeline() {
 		saveAppCiPipelineResponse := HitSaveAppCiPipeline(byteValueOfSaveAppCiPipeline, suite.authToken)
 		assert.Equal(suite.T(), saveAppCiPipelineResponse.Errors[0].UserMessage, "pg: no rows in result set")
 	})
-	
+
 	log.Println("=== Here we are Deleting the Test data created after verification ===")
 	Base.DeleteApp(createAppApiResponse.Id, createAppApiResponse.AppName, createAppApiResponse.TeamId, createAppApiResponse.TemplateId, suite.authToken)
 }

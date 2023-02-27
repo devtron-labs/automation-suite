@@ -9,7 +9,7 @@ import (
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
-	createAppApiResponse, workflowResponse := CreateNewAppWithCiCd(suite.authToken, false)
+	createAppApiResponse, workflowResponse := CreateNewAppWithCiCd(suite.authToken)
 	time.Sleep(2 * time.Second)
 	log.Println("=== Here we are getting pipeline material ===")
 	pipelineMaterial := HitGetCiPipelineMaterial(workflowResponse.Result.CiPipelines[0].Id, suite.authToken)
@@ -39,7 +39,7 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassD3TriggerCiPipeline() {
 		assert.True(suite.T(), PollForGettingCdDeployStatusAfterTrigger(createAppApiResponse.Id, suite.authToken))
 		updatedWorkflowStatus := HitGetWorkflowStatus(createAppApiResponse.Id, suite.authToken)
 		assert.Equal(suite.T(), "Succeeded", updatedWorkflowStatus.Result.CiWorkflowStatus[0].CiStatus)
-		assert.Equal(suite.T(), "Healthy", updatedWorkflowStatus.Result.CdWorkflowStatus[0].DeployStatus)
+		assert.Equal(suite.T(), "Succeeded", updatedWorkflowStatus.Result.CdWorkflowStatus[0].DeployStatus)
 	})
 
 	suite.Run("A=2=TriggerCiPipelineWithInvalidateCacheAsFalse", func() {
@@ -81,7 +81,7 @@ func PollForGettingCdDeployStatusAfterTrigger(id int, authToken string) bool {
 		deploymentStatus := updatedWorkflowStatus.Result.CdWorkflowStatus[0].DeployStatus
 		time.Sleep(1 * time.Second)
 		count = count + 1
-		if deploymentStatus == "Healthy" || count >= 600 {
+		if deploymentStatus == "Succeeded" || count >= 600 {
 			break
 		}
 	}

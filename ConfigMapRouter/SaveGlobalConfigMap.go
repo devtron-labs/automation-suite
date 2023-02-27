@@ -14,7 +14,8 @@ import (
 // TestClassA1SaveGlobalConfigMap todo need to take call for some changes once product will final that config file should delete after app deletion or not
 // TestClassA1SaveGlobalConfigMap todo once product will final that we can add config file before deployment template of not
 func (suite *ConfigsMapRouterTestSuite) TestClassA1SaveGlobalConfigMap() {
-	config, _ := PipelineConfigRouter.GetEnvironmentConfigPipelineConfigRouter()
+	envConf := Base.ReadBaseEnvConfig()
+	config := Base.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 	log.Println("=== Here we are creating a App ===")
 	createAppApiResponse := Base.CreateApp(suite.authToken).Result
 

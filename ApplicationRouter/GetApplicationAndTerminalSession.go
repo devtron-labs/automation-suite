@@ -12,7 +12,7 @@ import (
 
 func (suite *ApplicationsRouterTestSuite) TestClassGetTerminalSession() {
 	var container string
-	createAppApiResponse, workflowResponse := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken, false)
+	createAppApiResponse, workflowResponse := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken)
 	time.Sleep(2 * time.Second)
 
 	log.Println("=== Here we are getting pipeline material ===")

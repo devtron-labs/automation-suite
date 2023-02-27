@@ -14,7 +14,8 @@ import (
 // todo need to take a call for data we are not getting config data in GetEnvSecret API
 
 func (suite *ConfigsMapRouterTestSuite) TestClassA4GetEnvironmentSecret() {
-	config, _ := PipelineConfigRouter.GetEnvironmentConfigPipelineConfigRouter()
+	envConf := Base.ReadBaseEnvConfig()
+	config := Base.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 	log.Println("=== Here we are creating a App ===")
 	createAppApiResponse := Base.CreateApp(suite.authToken).Result
 

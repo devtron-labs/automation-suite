@@ -13,6 +13,7 @@ import (
 	"io"
 	"net/http"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"gopkg.in/cenkalti/backoff.v1"
@@ -42,16 +43,18 @@ type Client struct {
 	Retry             time.Time
 	ReconnectStrategy backoff.BackOff
 	disconnectcb      ConnCallback
+	connectedcb       ConnCallback
 	subscribed        map[chan *Event]chan struct{}
 	Headers           map[string]string
 	ReconnectNotify   backoff.Notify
 	ResponseValidator ResponseValidator
 	Connection        *http.Client
 	URL               string
-	EventID           string
+	LastEventID       atomic.Value // []byte
 	maxBufferSize     int
 	mu                sync.Mutex
 	EncodingBase64    bool
+	Connected         bool
 }
 
 // NewClient creates a new client
@@ -99,12 +102,10 @@ func (c *Client) SubscribeWithContext(ctx context.Context, stream string, handle
 
 		for {
 			select {
-			case err := <-errorChan:
+			case err = <-errorChan:
 				return err
 			case msg := <-eventChan:
 				handler(msg)
-			case <-ctx.Done():
-				return ctx.Err()
 			}
 		}
 	}
@@ -163,7 +164,7 @@ func (c *Client) SubscribeChanWithContext(ctx context.Context, stream string, ch
 			select {
 			case <-c.subscribed[ch]:
 				return nil
-			case err := <-errorChan:
+			case err = <-errorChan:
 				return err
 			case msg = <-eventChan:
 			}
@@ -218,18 +219,25 @@ func (c *Client) readLoop(reader *EventStreamReader, outCh chan *Event, erChan c
 			}
 			// run user specified disconnect function
 			if c.disconnectcb != nil {
+				c.Connected = false
 				c.disconnectcb(c)
 			}
 			erChan <- err
 			return
 		}
 
+		if !c.Connected && c.connectedcb != nil {
+			c.Connected = true
+			c.connectedcb(c)
+		}
+
 		// If we get an error, ignore it.
-		if msg, err := c.processEvent(event); err == nil {
+		var msg *Event
+		if msg, err = c.processEvent(event); err == nil {
 			if len(msg.ID) > 0 {
-				c.EventID = string(msg.ID)
+				c.LastEventID.Store(msg.ID)
 			} else {
-				msg.ID = []byte(c.EventID)
+				msg.ID, _ = c.LastEventID.Load().([]byte)
 			}
 
 			// Send downstream if the event has something useful
@@ -275,6 +283,11 @@ func (c *Client) OnDisconnect(fn ConnCallback) {
 	c.disconnectcb = fn
 }
 
+// OnConnect specifies the function to run when the connection is successful
+func (c *Client) OnConnect(fn ConnCallback) {
+	c.connectedcb = fn
+}
+
 func (c *Client) request(ctx context.Context, stream string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", c.URL, nil)
 	if err != nil {
@@ -293,8 +306,9 @@ func (c *Client) request(ctx context.Context, stream string) (*http.Response, er
 	req.Header.Set("Accept", "text/event-stream")
 	req.Header.Set("Connection", "keep-alive")
 
-	if c.EventID != "" {
-		req.Header.Set("Last-Event-ID", c.EventID)
+	lastID, exists := c.LastEventID.Load().([]byte)
+	if exists && lastID != nil {
+		req.Header.Set("Last-Event-ID", string(lastID))
 	}
 
 	// Add user specified headers

@@ -113,25 +113,6 @@ func HitUpdateGitopsConfigApi(payload []byte, authToken string) ResponseDTOs.Upd
 	return gitopsConfigRouter.updateGitopsConfigResponseDto
 }
 
-/*
-type GitopsConfig struct {
-	Provider    string `env:"PROVIDER" envDefault:"GITHUB"`
-	Username    string `env:"GIT_USERNAME" envDefault:"deepak-devtron"`
-	Host        string `env:"HOST" envDefault:"https://github.com/"`
-	Token       string `env:"GIT_TOKEN" envDefault:"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"`
-	GitHubOrgId string `env:"GITHUB_ORG_ID" envDefault:"Deepak-Deepak-Org"`
-	Url         string `env:"URL" envDefault:""`
-}*/
-
-/*func GetGitopsConfig() (*GitopsConfig, error) {
-	cfg := &GitopsConfig{}
-	err := env.Parse(cfg)
-	if err != nil {
-		return nil, errors.New("could not get config from ChartRepoRouterConfig")
-	}
-	return cfg, err
-}*/
-
 type GitOpsRouterTestSuite struct {
 	suite.Suite
 	authToken string

@@ -11,7 +11,8 @@ import (
 func (suite *PipelinesConfigRouterTestSuite) TestClassA9SaveDeploymentTemplate() {
 
 	suite.Run("A=1=SaveDeploymentTemplateWithDefaultAppOverride", func() {
-		config, _ := GetEnvironmentConfigPipelineConfigRouter()
+		envConf := Base.ReadBaseEnvConfig()
+		config := Base.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 
 		log.Println("=== Here we are creating a App ===")
 		createAppApiResponse := Base.CreateApp(suite.authToken).Result
@@ -53,7 +54,8 @@ func (suite *PipelinesConfigRouterTestSuite) TestClassA9SaveDeploymentTemplate()
 	})
 
 	suite.Run("A=2=SaveDeploymentTemplateWithSomeChangesInDefaultOverride", func() {
-		config, _ := GetEnvironmentConfigPipelineConfigRouter()
+		envConf := Base.ReadBaseEnvConfig()
+		config := Base.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 
 		log.Println("=== Here we are creating a App ===")
 		createAppApiResponse := Base.CreateApp(suite.authToken).Result

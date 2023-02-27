@@ -11,7 +11,8 @@ import (
 )
 
 func (suite *PipelinesConfigRouterTestSuite) TestClassA8GetAppTemplate() {
-	config, _ := GetEnvironmentConfigPipelineConfigRouter()
+	envConf := Base.ReadBaseEnvConfig()
+	config := Base.ReadAnyJsonFile(envConf.ClassCredentialsFile)
 	log.Println("=== Here we are creating an App ===")
 	createAppApiResponse := Base.CreateApp(suite.authToken).Result
 	log.Println("=== Here we are printing AppName ===>", createAppApiResponse.AppName)

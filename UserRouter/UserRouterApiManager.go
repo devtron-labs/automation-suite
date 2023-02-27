@@ -112,25 +112,6 @@ func CreateUserRequestPayload(caseName string, authToken string) (RequestDTOs.Us
 	var userInfo RequestDTOs.UserInfo
 	var createRoleGroupApiResponse ResponseDTOs.CreateRoleGroupResponseDto
 	switch caseName {
-	//case GroupsAndRoleFilterDynamic:
-	//	var listOfRoleFilter []ResponseDTOs.RoleFilter
-	//	var listOfGroups []string
-	//
-	//	roleFilter := CreateRoleFilterForDynamicEntityName(ENTITY, PROJECT, ENV, "manager", ACCESS_TYPE, APP)
-	//	listOfRoleFilter = append(listOfRoleFilter, roleFilter)
-	//
-	//	createRoleGroupPayload := CreateRoleGroupPayload(WithDevtronAppsOnlyDynamic)
-	//	byteValueOfStruct, _ := json.Marshal(createRoleGroupPayload)
-	//	createRoleGroupApiResponse = HitCreateRoleGroupApi(byteValueOfStruct, authToken)
-	//	GroupName := createRoleGroupApiResponse.Result.Name
-	//	listOfGroups = append(listOfGroups, GroupName)
-	//
-	//	userName := Base.GetRandomStringOfGivenLength(10)
-	//	userInfo.EmailId = userName + "@yopmail.com"
-	//	userInfo.SuperAdmin = false
-	//	userInfo.RoleFilters = listOfRoleFilter
-	//	userInfo.Groups = listOfGroups
-
 	case GroupsAndRoleFilter:
 		var listOfRoleFilter []ResponseDTOs.RoleFilter
 		var listOfGroups []string

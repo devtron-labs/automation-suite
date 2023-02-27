@@ -17,7 +17,7 @@ import (
 )
 
 func (suite *ApplicationsRouterTestSuite) TestGetPodLogs() {
-	createAppApiResponse, workflowResponse := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken, false)
+	createAppApiResponse, workflowResponse := PipelineConfigRouter.CreateNewAppWithCiCd(suite.authToken)
 	ciPipelineId := workflowResponse.Result.CiPipelines[0].Id
 	var ciWorkflowId string
 	var container string

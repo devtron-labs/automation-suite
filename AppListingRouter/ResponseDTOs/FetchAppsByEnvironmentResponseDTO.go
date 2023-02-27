@@ -27,6 +27,7 @@ type Environments struct {
 	Namespace       string      `json:"namespace"`
 	ClusterName     string      `json:"clusterName"`
 	Status          string      `json:"status"`
+	AppStatus       string      `json:"appStatus"`
 	CdStageStatus   *string     `json:"cdStageStatus"`
 	PreStageStatus  interface{} `json:"preStageStatus"`
 	PostStageStatus interface{} `json:"postStageStatus"`
