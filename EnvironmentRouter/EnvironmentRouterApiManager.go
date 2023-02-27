@@ -37,7 +37,7 @@ func HitDeleteEnvApi(byteValueOfStruct []byte, authToken string) ResponseDTOs.De
 	resp, err := Base.MakeApiCall(EnvRouterBaseUrl, http.MethodDelete, string(byteValueOfStruct), nil, authToken)
 	Base.HandleError(err, CreateEnvApi)
 	environmentsRouterStruct := EnvironmentsRouterStruct{}
-	envRouter := environmentsRouterStruct.UnmarshalGivenResponseBody(resp.Body(), CreateEnvApi)
+	envRouter := environmentsRouterStruct.UnmarshalGivenResponseBody(resp.Body(), DeleteEnvApi)
 	return envRouter.deleteEnvResponseDTO
 }
 

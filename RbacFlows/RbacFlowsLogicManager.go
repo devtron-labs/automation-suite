@@ -140,17 +140,17 @@ func getExpectedStatusCode(action string, apiName string) int {
 			(apiName == UserRouter.CREATEAPP) || (apiName == UserRouter.APPLISTFETCH) ||
 			(apiName == UserRouter.PIPELINECREATE) || (apiName == UserRouter.PIPELINEFETCH) ||
 			(apiName == UserRouter.TRIGGERPIPELINE) || (apiName == UserRouter.APPDETAILS) ||
-			(apiName == UserRouter.ENVIRONMENTOVERRIDES) || (apiName == UserRouter.DELETE)
+			(apiName == UserRouter.ENVIRONMENTOVERRIDES) || (apiName == UserRouter.DELETE) || (apiName == UserRouter.PIPELINEDELETE) || (apiName == UserRouter.CREATEAPPMATERIAL)
 	case "admin":
 		// admin can only create app when given access to all app in specific project
 		// Considering specific app now, so admin cant create app
 
-		isValid = (apiName == UserRouter.APPLISTFETCH) || (apiName == UserRouter.PIPELINECREATE) || (apiName == UserRouter.PIPELINEFETCH) || (apiName == UserRouter.TRIGGERPIPELINE) || (apiName == UserRouter.APPDETAILS) || (apiName == UserRouter.ENVIRONMENTOVERRIDES)
+		isValid = (apiName == UserRouter.APPLISTFETCH) || (apiName == UserRouter.PIPELINECREATE) || (apiName == UserRouter.PIPELINEFETCH) || (apiName == UserRouter.TRIGGERPIPELINE) || (apiName == UserRouter.APPDETAILS) || (apiName == UserRouter.ENVIRONMENTOVERRIDES) || (apiName == UserRouter.PIPELINEDELETE) || (apiName == UserRouter.CREATEAPPMATERIAL)
 
 	case "view":
 		isValid = (apiName == UserRouter.APPLISTFETCH) || (apiName == UserRouter.PIPELINEFETCH) || (apiName == UserRouter.APPDETAILS)
 	case "trigger":
-		isValid = (apiName == UserRouter.APPLISTFETCH) || (apiName == UserRouter.PIPELINECREATE) || (apiName == UserRouter.PIPELINEFETCH) || (apiName == UserRouter.TRIGGERPIPELINE) || (apiName == UserRouter.APPDETAILS)
+		isValid = (apiName == UserRouter.APPLISTFETCH) || (apiName == UserRouter.PIPELINECREATE) || (apiName == UserRouter.PIPELINEFETCH) || (apiName == UserRouter.TRIGGERPIPELINE) || (apiName == UserRouter.APPDETAILS) || (apiName == UserRouter.CREATEAPPMATERIAL)
 
 	}
 	if isValid {

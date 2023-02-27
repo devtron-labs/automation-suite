@@ -6,6 +6,7 @@ type CreateApiTokenResponseDTO struct {
 	Code   int    `json:"code"`
 	Status string `json:"status"`
 	Result struct {
+		Id             int    `json:"id"`
 		Success        bool   `json:"success"`
 		Token          string `json:"token"`
 		UserId         int    `json:"userId"`
